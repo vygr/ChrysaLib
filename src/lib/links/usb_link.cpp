@@ -215,7 +215,8 @@ std::shared_ptr<Msg> USB_Link::receive()
 	if (m_receive_buf.m_dev_id != m_remote_dev_id)
 	{
 		m_remote_dev_id = m_receive_buf.m_dev_id;
-		m_router.peer_link(this, m_remote_dev_id);
+		m_router.sub_link(this);
+		m_router.add_link(this, m_remote_dev_id);
 	}
 	return msg;
 }

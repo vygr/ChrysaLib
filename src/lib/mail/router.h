@@ -81,7 +81,6 @@ public:
 	//registered peer links
 	void add_link(Link *link, Dev_ID &id);
 	void sub_link(Link *link);
-	void peer_link(Link *link, Dev_ID &id);
 	std::vector<Dev_ID> get_peers();
 	//routing management
 	std::shared_ptr<Msg> get_next_msg(Dev_ID dest, std::chrono::milliseconds timeout = std::chrono::milliseconds(0));

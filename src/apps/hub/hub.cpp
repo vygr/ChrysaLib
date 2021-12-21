@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	//for a minute print any changes to service directory
+	//print any changes to service directory
 	auto start = std::chrono::high_resolution_clock::now();
 	auto old_entries = std::vector<std::string>{};
 	for (;;)
@@ -92,10 +92,10 @@ int main(int argc, char *argv[])
 		auto entries = m_router->enquire("");
 		if (entries != old_entries)
 		{
-			old_entries = entries;
 			std::cout << "+-----------+" << std::endl;
 			std::cout << "| Directory |" << std::endl;
 			std::cout << "+-----------+" << std::endl;
+			old_entries = entries;
 			for (auto &e : entries)
 			{
 				auto fields = split_string(e, ",");

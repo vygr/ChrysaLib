@@ -175,14 +175,6 @@ void Router::sub_link(Link *link)
 	if (itr != end(m_links)) m_links.erase(itr);
 }
 
-void Router::peer_link(Link *link, Dev_ID &id)
-{
-	//update link driver entry that can send to given peer
-	std::lock_guard<std::mutex> lock(m_mutex);
-	auto itr = m_links.find(link);
-	if (itr != end(m_links)) itr->second = id;
-}
-
 std::vector<Dev_ID> Router::get_peers()
 {
 	//get a list of all current peer devices
