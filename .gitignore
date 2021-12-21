@@ -1,5 +1,6 @@
-*/.DS_Store
 .vscode
-obj/*.d
-obj/*.o
-main
+*.DS_Store
+*.d
+*.o
+hub
+files
