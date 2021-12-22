@@ -14,7 +14,6 @@ void Directory_Manager::run()
 	//pings out the service directory for this device to the peers now and again.
 	//purge the messages and directory to clean up any ques and entires from
 	//devices and services that vanish unexpectedly.
-	m_running = true;
 	while (m_running)
 	{
 		//wake every so often or if made to do so

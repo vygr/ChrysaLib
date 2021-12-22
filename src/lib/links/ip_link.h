@@ -26,7 +26,11 @@ public:
 		, m_io_context()
 		, m_acceptor(m_io_context)
 	{}
-	void start_thread() override { m_thread = std::thread(&IP_Link_Manager::run, this); }
+	void start_thread() override
+	{
+		m_running = true;
+		m_thread = std::thread(&IP_Link_Manager::run, this);
+	}
 	void stop_thread() override;
 	void join_thread() override { if (m_thread.joinable()) m_thread.join(); }
 	void dial(const std::string &addr);

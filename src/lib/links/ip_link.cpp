@@ -33,7 +33,6 @@ void IP_Link_Manager::run()
 		dial(m_ip_addr);
 	}
 
-	m_running = true;
 	while (m_running)
 	{
 		//got dialing to do ?

@@ -13,7 +13,6 @@ void Kernel_Service::run()
 	auto entry = m_router.declare(m_net_id, "kernel", "Kernel_Service v0.1");
 
 	//event loop
-	m_running = true;
 	while (m_running)
 	{
 		auto msg = mbox->read();

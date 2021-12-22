@@ -67,7 +67,6 @@ void USB_Link_Manager::run()
 {
 	libusb_init(nullptr);
 
-	m_running = true;
 	while (m_running)
 	{
 		//as link come and go we need to add and remove them from the router

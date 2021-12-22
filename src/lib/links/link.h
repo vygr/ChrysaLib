@@ -66,11 +66,11 @@ public:
 	virtual void start_thread() = 0;
 	virtual void stop_thread() { m_running = false; }
 	virtual void join_thread() = 0;
+	bool m_running = false;
 protected:
 	//thread executes this run method
 	virtual void run() = 0;
 	Router &m_router;
-	bool m_running = false;
 };
 
 #endif

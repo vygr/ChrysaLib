@@ -37,13 +37,13 @@ public:
 	std::vector<std::string> enquire(const Dev_ID &dev_id, const std::string &prefix);
 	//directory updating
 	bool update(const std::string &body);
+	bool m_running = false;
 private:
 	void purge();
 	std::mutex m_mutex;
 	Router &m_router;
 	std::map<Dev_ID, Directory> m_directory;
 	Mbox<Directory_Manager*> m_wake_mbox;
-	bool m_running = false;
 };
 
 #endif

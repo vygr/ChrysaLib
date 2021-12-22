@@ -39,6 +39,7 @@ public:
 		, m_directory_manager(*this)
 	{
 		//start directory manager
+		m_directory_manager.m_running = true;
 		m_directory_thread = std::thread(&Directory_Manager::run, &m_directory_manager);
 	}
 	~Router()

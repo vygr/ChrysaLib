@@ -25,7 +25,11 @@ public:
 		m_router.free(m_net_id);
 	}
 	//responce handling
-	void start_thread() { m_thread = std::thread(&Service::run, this); }
+	void start_thread()
+	{
+		m_running = true;
+		m_thread = std::thread(&Service::run, this);
+	}
 	void join_thread() { if (m_thread.joinable()) m_thread.join(); }
 	void stop_thread();
 	const Net_ID &get_id() const { return m_net_id; }

@@ -55,7 +55,11 @@ class USB_Link_Manager : public Link_Manager
 public:
 	USB_Link_Manager(Router &router)
 		: Link_Manager(router) {}
-	void start_thread() override { m_thread = std::thread(&USB_Link_Manager::run, this); }
+	void start_thread() override
+	{
+		m_running = true;
+		m_thread = std::thread(&USB_Link_Manager::run, this);
+	}
 	void join_thread() override { if (m_thread.joinable()) m_thread.join(); }
 private:
 	void run() override;
