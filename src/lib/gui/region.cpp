@@ -1,5 +1,8 @@
 #include "region.h"
 
+#include <algorithm>
+#include <assert.h>
+
 Region *Region::free()
 {
 	//clear region
@@ -41,9 +44,12 @@ Region *Region::clip_rect(const Rect &clip)
 	//clip region to rect
 	assert(clip.m_x1 > clip.m_x);
 	assert(clip.m_y1 > clip.m_y);
-	auto itr = begin(m_region);
-	while (itr != end(m_region))
+	auto itr = m_region.before_begin();
+	for (;;)
 	{
+		auto last_itr = itr;
+		if (++itr == end(m_region)) break;
+
 		auto &rect = *itr;
 		if (rect.m_x >= clip.m_x1
 			|| rect.m_y >= clip.m_y1
@@ -51,7 +57,8 @@ Region *Region::clip_rect(const Rect &clip)
 			|| rect.m_y1 <= clip.m_y)
 		{
 			//rect is outside clip area
-			itr = m_region.erase(itr);
+			m_region.erase_after(last_itr);
+			itr = last_itr;
 		}
 		else
 		{
@@ -60,7 +67,6 @@ Region *Region::clip_rect(const Rect &clip)
 			rect.m_y = std::max(rect.m_y, clip.m_y);
 			rect.m_x1 = std::min(rect.m_x1, clip.m_x1);
 			rect.m_y1 = std::min(rect.m_y1, clip.m_y1);
-			++itr;
 		}
 	}
 	return this;
@@ -70,10 +76,13 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 {
 	assert(clip.m_x1 > clip.m_x);
 	assert(clip.m_y1 > clip.m_y);
-	auto itr = begin(m_region);
 	Rect *new_rect;
-	while (itr != end(m_region))
+	auto itr = m_region.before_begin();
+	for (;;)
 	{
+		auto last_itr = itr;
+		if (++itr == end(m_region)) break;
+
 		auto &rect = *itr;
 		if (rect.m_x >= clip.m_x1
 			|| rect.m_y >= clip.m_y1
@@ -81,7 +90,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 			|| rect.m_y1 <= clip.m_y)
 		{
 			//rect is outside clip area
-			++itr;
 			continue;
 		}
 		//new rect
@@ -100,7 +108,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split1:
@@ -115,7 +122,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split2:
@@ -129,7 +135,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split3:
@@ -143,7 +148,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split4:
@@ -156,7 +160,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split5:
@@ -169,7 +172,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split6:
@@ -182,7 +184,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_split7:
@@ -195,7 +196,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = clip.m_y1;
-		++itr;
 		continue;
 
 	copy_xyx1:
@@ -204,7 +204,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_encl:
@@ -213,7 +212,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_x:
@@ -222,7 +220,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_y:
@@ -231,7 +228,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_xy:
@@ -240,7 +236,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = rect.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_x1:
@@ -249,7 +244,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_xx1:
@@ -258,7 +252,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = rect.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 		continue;
 
 	copy_yx1:
@@ -267,7 +260,6 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 		new_rect->m_y = clip.m_y;
 		new_rect->m_x1 = clip.m_x1;
 		new_rect->m_y1 = rect.m_y1;
-		++itr;
 	}
 	return this;
 }
@@ -276,11 +268,14 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 {
 	assert(rect.m_x1 > rect.m_x);
 	assert(rect.m_y1 > rect.m_y);
-	auto itr = begin(m_region);
 	Rect *new_rect;
 	Rect clip = rect;
-	while (itr != end(m_region))
+	auto itr = m_region.before_begin();
+	for (;;)
 	{
+		auto last_itr = itr;
+		if (++itr == end(m_region)) break;
+
 		auto &rect = *itr;
 		if (rect.m_x >= clip.m_x1
 			|| rect.m_y >= clip.m_y1
@@ -288,8 +283,7 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 			|| rect.m_y1 <= clip.m_y)
 		{
 			//rect is outside clip area
-			++itr;
-			continue;
+				continue;
 		}
 
 		//jump to correct splitting code
@@ -330,7 +324,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split1:
@@ -364,7 +357,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split2:
@@ -397,7 +389,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split3:
@@ -423,7 +414,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split4:
@@ -455,7 +445,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split5:
@@ -480,7 +469,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split6:
@@ -505,7 +493,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_split7:
@@ -523,7 +510,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	cut_xyx1:
@@ -552,13 +538,13 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		//left part
 		rect.m_y = clip.m_y;
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	cut_encl:
 		//region is enclosed
 		dest.m_region.push_front(rect);
-		itr = m_region.erase(itr);
+		m_region.erase_after(last_itr);
+		itr = last_itr;
 		continue;
 
 	cut_x:
@@ -572,7 +558,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = rect.m_y1;
 		//left part
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	cut_y:
@@ -586,7 +571,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = rect.m_y1;
 		//top part
 		rect.m_y1 = clip.m_y;
-		++itr;
 		continue;
 
 	cut_xy:
@@ -608,7 +592,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		//left part
 		rect.m_y = clip.m_y;
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	cut_x1:
@@ -622,7 +605,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = rect.m_y1;
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	cut_xx1:
@@ -643,7 +625,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		new_rect->m_y1 = rect.m_y1;
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	cut_yx1:
@@ -665,7 +646,6 @@ Region *Region::cut_rect(Region &dest, const Rect &rect)
 		//right part
 		rect.m_x = clip.m_x1;
 		rect.m_y = clip.m_y;
-		++itr;
 	}
 	return this;
 }
@@ -674,10 +654,13 @@ Region *Region::remove_rect(const Rect &clip)
 {
 	assert(clip.m_x1 > clip.m_x);
 	assert(clip.m_y1 > clip.m_y);
-	auto itr = begin(m_region);
 	Rect *new_rect;
-	while (itr != end(m_region))
+	auto itr = m_region.before_begin();
+	for (;;)
 	{
+		auto last_itr = itr;
+		if (++itr == end(m_region)) break;
+
 		auto &rect = *itr;
 		if (rect.m_x >= clip.m_x1
 			|| rect.m_y >= clip.m_y1
@@ -685,8 +668,7 @@ Region *Region::remove_rect(const Rect &clip)
 			|| rect.m_y1 <= clip.m_y)
 		{
 			//rect is outside clip area
-			++itr;
-			continue;
+				continue;
 		}
 
 		//jump to correct splitting code
@@ -720,7 +702,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split1:
@@ -747,7 +728,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split2:
@@ -773,7 +753,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split3:
@@ -792,7 +771,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split4:
@@ -817,7 +795,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split5:
@@ -835,7 +812,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split6:
@@ -853,7 +829,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_split7:
@@ -864,7 +839,6 @@ Region *Region::remove_rect(const Rect &clip)
 		//clip.m_y1 inside
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	rem_xyx1:
@@ -886,26 +860,24 @@ Region *Region::remove_rect(const Rect &clip)
 		//left part
 		rect.m_y = clip.m_y;
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	rem_encl:
 		//region is enclosed
-		itr = m_region.erase(itr);
+		m_region.erase_after(last_itr);
+		itr = last_itr;
 		continue;
 
 	rem_x:
 		//clip.m_x inside
 		//left part
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	rem_y:
 		//clip.m_y inside
 		//top part
 		rect.m_y1 = clip.m_y;
-		++itr;
 		continue;
 
 	rem_xy:
@@ -920,14 +892,12 @@ Region *Region::remove_rect(const Rect &clip)
 		//left part
 		rect.m_y = clip.m_y;
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	rem_x1:
 		//clip.m_x1 inside
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	rem_xx1:
@@ -941,7 +911,6 @@ Region *Region::remove_rect(const Rect &clip)
 		new_rect->m_y1 = rect.m_y1;
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	rem_yx1:
@@ -956,7 +925,6 @@ Region *Region::remove_rect(const Rect &clip)
 		//right part
 		rect.m_x = clip.m_x1;
 		rect.m_y = clip.m_y;
-		++itr;
 	}
 	return this;
 }
@@ -965,12 +933,14 @@ Region *Region::paste_rect(const Rect &rect)
 {
 	assert(rect.m_x1 > rect.m_x);
 	assert(rect.m_y1 > rect.m_y);
-	auto itr = begin(m_region);
 	Rect *new_rect;
 	Rect clip = rect;
-	while (itr != end(m_region))
+	auto itr = m_region.before_begin();
+	for (;;)
 	{
-		//not in contact ?
+		auto last_itr = itr;
+		if (++itr == end(m_region)) break;
+
 		auto &rect = *itr;
 		if (rect.m_x >= clip.m_x1
 			|| rect.m_y >= clip.m_y1
@@ -996,7 +966,6 @@ Region *Region::paste_rect(const Rect &rect)
 	paste_yx1y1:
 		//clip.m_y + clip.m_x1 + clip.m_y1 inside
 		clip.m_x1 = rect.m_x;
-		++itr;
 		continue;
 
 	paste_split2:
@@ -1007,7 +976,6 @@ Region *Region::paste_rect(const Rect &rect)
 	paste_xx1y1:
 		//clip.m_x + clip.m_x1 + clip.m_y1 inside
 		clip.m_y1 = rect.m_y;
-		++itr;
 		continue;
 
 	paste_split3:
@@ -1026,7 +994,6 @@ Region *Region::paste_rect(const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	paste_split4:
@@ -1036,7 +1003,6 @@ Region *Region::paste_rect(const Rect &rect)
 	paste_xyy1:
 		//clip.m_x + clip.m_y + clip.m_y1 inside
 		clip.m_x = rect.m_x1;
-		++itr;
 		continue;
 
 	paste_split5:
@@ -1054,7 +1020,6 @@ Region *Region::paste_rect(const Rect &rect)
 		new_rect->m_y1 = clip.m_y;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	paste_split6:
@@ -1072,7 +1037,6 @@ Region *Region::paste_rect(const Rect &rect)
 		new_rect->m_y1 = clip.m_y1;
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	paste_split7:
@@ -1083,32 +1047,29 @@ Region *Region::paste_rect(const Rect &rect)
 		//clip.m_y1 inside
 		//bottom part
 		rect.m_y = clip.m_y1;
-		++itr;
 		continue;
 
 	paste_xyx1:
 		//clip.m_x + clip.m_y + clip.m_x1 inside
 		clip.m_y = rect.m_y1;
-		++itr;
 		continue;
 
 	paste_encl:
 		//region is enclosed
-		itr = m_region.erase(itr);
+		m_region.erase_after(last_itr);
+		itr = last_itr;
 		continue;
 
 	paste_x:
 		//clip.m_x inside
 		//left part
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	paste_y:
 		//clip.m_y inside
 		//top part
 		rect.m_y1 = clip.m_y;
-		++itr;
 		continue;
 
 	paste_xy:
@@ -1123,14 +1084,12 @@ Region *Region::paste_rect(const Rect &rect)
 		//left part
 		rect.m_y = clip.m_y;
 		rect.m_x1 = clip.m_x;
-		++itr;
 		continue;
 
 	paste_x1:
 		//clip.m_x1 inside
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	paste_xx1:
@@ -1144,7 +1103,6 @@ Region *Region::paste_rect(const Rect &rect)
 		new_rect->m_y1 = rect.m_y1;
 		//right part
 		rect.m_x = clip.m_x1;
-		++itr;
 		continue;
 
 	paste_yx1:
@@ -1159,7 +1117,6 @@ Region *Region::paste_rect(const Rect &rect)
 		//right part
 		rect.m_x = clip.m_x1;
 		rect.m_y = clip.m_y;
-		++itr;
 	}
 
 	//create new rect ?

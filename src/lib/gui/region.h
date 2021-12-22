@@ -1,7 +1,7 @@
 #ifndef REGION_H
 #define REGION_H
 
-#include <list>
+#include <forward_list>
 
 //rectangle math
 class Rect
@@ -24,7 +24,7 @@ class Region
 public:
 	Region()
 	{}
-	std::list<Rect> m_region;
+	std::forward_list<Rect> m_region;
 	Rect bounds();
 	Region *free();
 	Region *translate(int rx, int ry);
