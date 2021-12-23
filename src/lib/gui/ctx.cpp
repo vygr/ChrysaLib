@@ -32,8 +32,8 @@ Ctx *Ctx::box(int x, int y, int w, int h)
 		//set clip to this region
 		clip_rect.x = rect.m_x;
 		clip_rect.y = rect.m_y;
-		clip_rect.w = w;
-		clip_rect.h = h;
+		clip_rect.w = rect.m_x1 - rect.m_x;
+		clip_rect.h = rect.m_y1 - rect.m_y;
 		SDL_RenderSetClipRect(m_renderer, &clip_rect);
 		//and draw
 		SDL_RenderDrawRect(m_renderer, &drect);
@@ -61,8 +61,8 @@ Ctx *Ctx::filled_box(int x, int y, int w, int h)
 		//set clip to this region
 		clip_rect.x = rect.m_x;
 		clip_rect.y = rect.m_y;
-		clip_rect.w = w;
-		clip_rect.h = h;
+		clip_rect.w = rect.m_x1 - rect.m_x;
+		clip_rect.h = rect.m_y1 - rect.m_y;
 		SDL_RenderSetClipRect(m_renderer, &clip_rect);
 		//and draw
 		SDL_RenderFillRect(m_renderer, &drect);

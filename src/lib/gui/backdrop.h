@@ -7,9 +7,7 @@
 class Backdrop : public View
 {
 public:
-	Backdrop(int x, int y, int w, int h)
-		: View(x, y, w, h)
-	{}
+	Backdrop(int x, int y, int w, int h);
 	Backdrop *draw(Ctx *ctx);
 };
 
