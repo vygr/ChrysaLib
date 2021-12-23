@@ -26,7 +26,7 @@ Backdrop *Backdrop::draw(Ctx *ctx)
 	auto spaceing = get_prop("spaceing")->get_int();
 	auto style = get_prop("style")->get_str();
 	ctx->set_color(col);
-	ctx->filled_box(m_x, m_y, m_w, m_h);
+	ctx->filled_box(0, 0, m_w, m_h);
 	if (style == "grid")
 	{
 		ctx->set_color(ink_col);

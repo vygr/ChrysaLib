@@ -10,6 +10,17 @@
 
 class Ctx;
 
+//view flags
+enum
+{
+	view_flag_solid = 1 << 0,
+	view_flag_opaque = 1 << 1,
+	view_flag_dirty_all = 1 << 2,
+	view_flag_hiden = 1 << 3,
+	view_flag_at_back = 1 << 4,
+	view_flag_at_front = 1 << 5,
+};
+
 //view class
 //base class for all widgets
 class View : public std::enable_shared_from_this<View>
@@ -33,9 +44,10 @@ public:
 	View *dirty();
 	View *forward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
 	View *backward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
+	View *set_flags(unsigned int flags, unsigned int mask);
 	virtual View *draw(Ctx *ctx) = 0;
 
-	static std::mutex m_mutex;
+	static std::recursive_mutex m_mutex;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
@@ -47,6 +59,7 @@ public:
 	int m_h;
 	int m_ctx_x;
 	int m_ctx_y;
+	unsigned int m_flags = 0; 
 };
 
 #endif

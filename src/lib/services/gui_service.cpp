@@ -17,6 +17,7 @@ void GUI_Service::run()
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
 	m_screen = std::make_shared<Backdrop>(0, 0, 1280, 960);
+	m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
 	auto screen_w = m_screen->m_w;
 	auto screen_h = m_screen->m_h;
 
@@ -87,9 +88,10 @@ void GUI_Service::run()
 
 		if (m_gui_flags)
 		{
-			//resize back buffer and do full redraw
+			//resize back buffer and then do full redraw
 			SDL_DestroyTexture(texture);
 			SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+			m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
 			m_dirty_flag = true;
 			m_gui_flags = 0;
 		}
@@ -119,13 +121,6 @@ void GUI_Service::composit()
 {
 	auto screen_w = m_screen->m_w;
 	auto screen_h = m_screen->m_h;
-	Region region;
-	Ctx ctx;
-	ctx.m_x = 0;
-	ctx.m_y = 0;
-	ctx.m_renderer = m_renderer;
-	ctx.m_region = &region;
-	region.paste_rect(Rect(0, 0, screen_w, screen_h));
 
 	//iterate through views back to front, setting abs cords of views
 	struct abs_cords
@@ -152,11 +147,25 @@ void GUI_Service::composit()
 			return true;
 		});
 
-	m_screen->draw(&ctx);
-	for (auto &view : m_screen->m_children)
-	{
-		view->draw(&ctx);
-	}
+	m_screen->backward_tree(&abs,
+		[&](View *view, void *user)
+		{
+			Region region;
+			region.paste_rect(Rect(
+				view->m_ctx_x, view->m_ctx_y,
+				view->m_ctx_x + view->m_w, view->m_ctx_y + view->m_h));
+			Ctx ctx;
+			ctx.m_x = view->m_ctx_x;
+			ctx.m_y = view->m_ctx_y;
+			ctx.m_renderer = m_renderer;
+			ctx.m_region = &region;
+			view->draw(&ctx);
+			return true;
+		},
+		[&](View *view, void *user)
+		{
+			return true;
+		});
 }
 
 // 	;iterate through views back to front

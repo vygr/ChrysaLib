@@ -2,11 +2,11 @@
 #include "property.h"
 #include <algorithm>
 
-std::mutex View::m_mutex;
+std::recursive_mutex View::m_mutex;
 
 View *View::add_front(std::shared_ptr<View> child)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (!child->m_parent)
 	{
 		child->m_parent = this;
@@ -17,7 +17,7 @@ View *View::add_front(std::shared_ptr<View> child)
 
 View *View::add_back(std::shared_ptr<View> child)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (!child->m_parent)
 	{
 		child->m_parent = this;
@@ -28,7 +28,7 @@ View *View::add_back(std::shared_ptr<View> child)
 
 View *View::sub()
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (m_parent)
 	{
 		auto itr = std::find_if(begin(m_parent->m_children), end(m_parent->m_children), [&] (auto &c)
@@ -46,7 +46,7 @@ View *View::sub()
 
 std::shared_ptr<Property> View::get_prop(const std::string &prop)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto view = this;
 	while (view != nullptr)
 	{
@@ -59,35 +59,35 @@ std::shared_ptr<Property> View::get_prop(const std::string &prop)
 
 View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_properties[prop] = value;
 	return this;
 }
 
 View *View::add_opaque(const Rect &rect)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_opaque.paste_rect(rect);
 	return this;
 }
 
 View *View::sub_opaque(const Rect &rect)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_opaque.remove_rect(rect);
 	return this;
 }
 
 View *View::add_dirty(const Rect &rect)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_dirty.paste_rect(rect);
 	return this;
 }
 
 View *View::sub_dirty(const Rect &rect)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_dirty.remove_rect(rect);
 	return this;
 }
@@ -114,7 +114,7 @@ View *View::forward_tree(void *user, std::function<bool(View *view, void *user)>
 		return view;
 	};
 	//root locking function
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (down(this, user))
 	{
 		std::for_each(begin(m_children), end(m_children), [&] (auto &child)
@@ -142,7 +142,7 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 		return view;
 	};
 	//root locking function
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (down(this, user))
 	{
 		std::for_each(rbegin(m_children), rend(m_children), [&] (auto &child)
@@ -151,5 +151,11 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 		});
 		up(this, user);
 	}
+	return this;
+}
+
+View *View::set_flags(unsigned int flags, unsigned int mask)
+{
+	m_flags = (m_flags & ~mask) | flags;
 	return this;
 }
