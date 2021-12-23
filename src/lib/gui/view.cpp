@@ -1,6 +1,5 @@
 #include "view.h"
 #include "property.h"
-#include <SDL.h>
 #include <algorithm>
 
 std::mutex View::m_mutex;
@@ -65,7 +64,88 @@ View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
 	return this;
 }
 
-View *View::draw(Ctx *ctx)
+View *View::add_opaque(const Rect &rect)
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_opaque.paste_rect(rect);
+	return this;
+}
+
+View *View::sub_opaque(const Rect &rect)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_opaque.remove_rect(rect);
+	return this;
+}
+
+View *View::add_dirty(const Rect &rect)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_dirty.paste_rect(rect);
+	return this;
+}
+
+View *View::sub_dirty(const Rect &rect)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_dirty.remove_rect(rect);
+	return this;
+}
+
+View *View::dirty()
+{
+	add_dirty(Rect(m_x, m_y, m_x + m_w, m_y + m_h));
+	return this;
+}
+
+View *View::forward_tree(void *user, std::function<bool(View *view, void *user)> down, std::function<bool(View *view, void *user)> up)
+{
+	//child function
+	std::function<bool(View *view, void *user)> forward_tree = [&](View *view, void *user) -> View*
+	{
+		if (down(view, user))
+		{
+			std::for_each(begin(view->m_children), end(view->m_children), [&] (auto &child)
+			{
+				forward_tree(child.get(), user);
+			});
+		}
+		return view;
+	};
+	//root locking function
+	std::lock_guard<std::mutex> lock(m_mutex);
+	if (down(this, user))
+	{
+		std::for_each(begin(m_children), end(m_children), [&] (auto &child)
+		{
+			forward_tree(child.get(), user);
+		});
+	}
+	return this;
+}
+
+View *View::backward_tree(void *user, std::function<bool(View *view, void *user)> down, std::function<bool(View *view, void *user)> up)
+{
+	//child function
+	std::function<bool(View *view, void *user)> backward_tree = [&](View *view, void *user) -> View*
+	{
+		if (down(view, user))
+		{
+			std::for_each(rbegin(view->m_children), rend(view->m_children), [&] (auto &child)
+			{
+				backward_tree(child.get(), user);
+			});
+		}
+		return view;
+	};
+	//root locking function
+	std::lock_guard<std::mutex> lock(m_mutex);
+	if (down(this, user))
+	{
+		std::for_each(rbegin(m_children), rend(m_children), [&] (auto &child)
+		{
+			backward_tree(child.get(), user);
+		});
+	}
 	return this;
 }
