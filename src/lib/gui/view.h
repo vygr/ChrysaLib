@@ -45,6 +45,8 @@ public:
 	int m_y;
 	int m_w;
 	int m_h;
+	int m_ctx_x;
+	int m_ctx_y;
 };
 
 #endif

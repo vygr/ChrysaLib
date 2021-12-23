@@ -109,6 +109,7 @@ View *View::forward_tree(void *user, std::function<bool(View *view, void *user)>
 			{
 				forward_tree(child.get(), user);
 			});
+			up(view, user);
 		}
 		return view;
 	};
@@ -120,6 +121,7 @@ View *View::forward_tree(void *user, std::function<bool(View *view, void *user)>
 		{
 			forward_tree(child.get(), user);
 		});
+		up(this, user);
 	}
 	return this;
 }
@@ -135,6 +137,7 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 			{
 				backward_tree(child.get(), user);
 			});
+			up(view, user);
 		}
 		return view;
 	};
@@ -146,6 +149,7 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 		{
 			backward_tree(child.get(), user);
 		});
+		up(this, user);
 	}
 	return this;
 }

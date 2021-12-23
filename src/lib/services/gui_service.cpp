@@ -87,17 +87,18 @@ void GUI_Service::run()
 
 		if (m_gui_flags)
 		{
-			//resize back buffer and redraw in full
-			SDL_DestroyTexture (texture);
-			SDL_CreateTexture (m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
-			SDL_SetRenderTarget (m_renderer, texture);
+			//resize back buffer and do full redraw
+			SDL_DestroyTexture(texture);
+			SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+			m_dirty_flag = true;
 			m_gui_flags = 0;
 		}
 		if (m_dirty_flag)
 		{
-			SDL_SetRenderTarget (m_renderer, 0);
+			SDL_SetRenderTarget(m_renderer, texture);
 			composit();
-			SDL_RenderCopy (m_renderer, texture, 0, 0);
+			SDL_SetRenderTarget(m_renderer, 0);
+			SDL_RenderCopy(m_renderer, texture, 0, 0);
 			SDL_RenderPresent(m_renderer);
 			m_dirty_flag = false;
 		}
@@ -125,6 +126,32 @@ void GUI_Service::composit()
 	ctx.m_renderer = m_renderer;
 	ctx.m_region = &region;
 	region.paste_rect(Rect(0, 0, screen_w, screen_h));
+
+	//iterate through views back to front, setting abs cords of views
+	struct abs_cords
+	{
+		int m_x = 0;
+		int m_y = 0;
+	};
+	abs_cords abs;
+	m_screen->backward_tree(&abs,
+		[&](View *view, void *user)
+		{
+			auto abs = (abs_cords*)user;
+			abs->m_x += view->m_x;
+			abs->m_y += view->m_y;
+			view->m_ctx_x = abs->m_x;
+			view->m_ctx_y = abs->m_y;
+			return true;
+		},
+		[&](View *view, void *user)
+		{
+			auto abs = (abs_cords*)user;
+			abs->m_x -= view->m_x;
+			abs->m_y -= view->m_y;
+			return true;
+		});
+
 	m_screen->draw(&ctx);
 	for (auto &view : m_screen->m_children)
 	{
@@ -204,27 +231,6 @@ void GUI_Service::composit()
 // 	(loop-end)
 
 // 	(vp-free local_size)
-// 	(vp-ret)
-
-// (vp-label 'abs_down_callback)
-// 	(entry 'view :forward_tree_callback '(:r0 :r1))
-
-// 	(assign '((:r0 view_x) (:r0 view_y)) '(:r9 :r10))
-// 	(vp-add-rr :r9 :r7)
-// 	(vp-add-rr :r10 :r8)
-// 	(assign '(:r7 :r8) '((:r0 view_ctx_x) (:r0 view_ctx_y)))
-
-// 	(exit 'view :forward_tree_callback '(:r0 :r1))
-// 	(vp-ret)
-
-// (vp-label 'abs_up_callback)
-// 	(entry 'view :forward_tree_callback '(:r0 :r1))
-
-// 	(assign '((:r0 view_x) (:r0 view_y)) '(:r9 :r10))
-// 	(vp-sub-rr :r9 :r7)
-// 	(vp-sub-rr :r10 :r8)
-
-// 	(exit 'view :forward_tree_callback '(:r0 :r1))
 // 	(vp-ret)
 
 // (vp-label 'visible_down_callback)
