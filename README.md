@@ -8,11 +8,11 @@ A version of ChrysaLisp system concepts written in C++.
 
 ### Mac via Brew
 
-`brew install libusb asio`
+`brew install libusb asio sdl2`
 
 ### Linux via apt-get
 
-`sudo apt-get install libusb-dev libasio-dev`
+`sudo apt-get install libusb-dev libasio-dev libsdl2-dev`
 
 ### Windows via Googling
 

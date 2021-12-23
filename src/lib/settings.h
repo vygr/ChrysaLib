@@ -16,6 +16,7 @@ const unsigned int MAX_MESSAGE_AGE = 5000;
 const unsigned int MAX_PARCEL_AGE = 10000;
 const unsigned int FILE_TRANSFER_TIMEOUT = 10000;
 const unsigned int USB_BULK_TRANSFER_TIMEOUT = 100;
+const unsigned int GUI_FRAME_RATE = 1000/60;
 const unsigned int SELECT_POLLING_RATE = 10;
 const unsigned int LINK_PING_RATE = 1000;
 const unsigned int DIRECTORY_PING_RATE = 5000;

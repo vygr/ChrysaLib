@@ -1,6 +1,6 @@
 #include "../../lib/services/kernel_service.h"
+#include "../../lib/services/gui_service.h"
 #include "../../lib/links/ip_link.h"
-#include "../../lib/gui/region.h"
 #include <iostream>
 #include <sstream>
 
@@ -53,11 +53,13 @@ int main(int argc, char *argv[])
 	//vars
 	std::unique_ptr<Router> m_router;
 	std::unique_ptr<Kernel_Service> m_kernel;
+	std::unique_ptr<GUI_Service> m_gui;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
 	m_router = std::make_unique<Router>();
 	m_kernel = std::make_unique<Kernel_Service>(*m_router);
+	m_gui = std::make_unique<GUI_Service>(*m_router);
 	m_kernel->start_thread();
 	if (!arg_dial.empty())
 	{
@@ -71,43 +73,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	//just some region tests for now
-	Region a, b;
-	a.paste_rect(Rect(0,0,100,100));
-	a.paste_rect(Rect(10,10,110,110));
-	a.copy_rect(b, Rect(5,5,105,105));
-	a.remove_rect(Rect(5,5,105,105));
-	std::cout << "region a" << std::endl;
-	for (auto &rect : a.m_region)
-	{
-		std::cout << "rect: "
-			<< rect.m_x << " "
-			<< rect.m_y << " "
-			<< rect.m_x1 << " "
-			<< rect.m_y1 << std::endl;
-	}
-	std::cout << "region b" << std::endl;
-	for (auto &rect : b.m_region)
-	{
-		std::cout << "rect: "
-			<< rect.m_x << " "
-			<< rect.m_y << " "
-			<< rect.m_x1 << " "
-			<< rect.m_y1 << std::endl;
-	}
-
-	// //loop till timeout
-	// auto start = std::chrono::high_resolution_clock::now();
-	// for (;;)
-	// {
-	// 	//could do somthing here, like monitoring etc
-
-	// 	//are we done ?
-	// 	auto finish = std::chrono::high_resolution_clock::now();
-	// 	std::chrono::duration<double, std::milli> elapsed = finish - start;
-	// 	if (arg_t != 0 && elapsed.count() > arg_t) break;
-	// 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	// }
+	//jump into GUI run method !!!
+	//it has to be the main thread, it's just forced on us !
+	m_gui->m_running = true;
+	m_gui->run();
 
 	//shutdown
 	if (m_ip_link_manager) m_ip_link_manager->stop_thread();

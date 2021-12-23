@@ -32,11 +32,13 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		$(shell sdl2-config --libs) \
 		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
 		-pthread \
+		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0
 endif
 
@@ -46,11 +48,13 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		$(shell sdl2-config --libs) \
 		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
 		-pthread \
+		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0
 endif
 
@@ -60,11 +64,13 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		$(shell sdl2-config --libs) \
 		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
 		-pthread \
+		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0
 endif
 
@@ -72,11 +78,13 @@ $(LIB_OBJ_DIR)/%.o : $(LIB_DIR)/%.cpp
 ifeq ($(OS),Darwin)
 	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
 		-I/usr/local/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags) \
 		-o $@ $<
 endif
 ifeq ($(OS),Linux)
 	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
 		-I/usr/local/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags) \
 		-o $@ $<
 endif
 
@@ -84,11 +92,13 @@ $(APP_OBJ_DIR)/%.o : $(APP_DIR)/%.cpp
 ifeq ($(OS),Darwin)
 	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
 		-I/usr/local/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags) \
 		-o $@ $<
 endif
 ifeq ($(OS),Linux)
 	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
 		-I/usr/local/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags) \
 		-o $@ $<
 endif
 
