@@ -35,6 +35,19 @@ Add the following preprocessor definitions:
 ASIO_STANDALONE;BOOST_ALL_NO_LIB;BOOST_CHRONO_DONT_PROVIDE_HYBRID_ERROR_HANDLING;
 ASIO_WINDOWS;ASIO_MSVC
 
+`sdl2`
+
+Download and install the SDL frameworks from:
+https://www.libsdl.org/download-2.0.php
+
+Get the development versions for both frameworks and unzip them somewhere. Copy
+the .dll files from the lib folders into your ChrysaLib folder.
+
+SDL2.dll
+
+Add the include directory for SDL to your include path, and similarly for the
+lib directory. SDL2.lib and SDL2main.lib should be added as link dependencies.
+
 ## Make
 
 Make with:
