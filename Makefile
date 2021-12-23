@@ -22,11 +22,11 @@ CPPFLAGS := -std=c++14 -D ASIO_STANDALONE
 CXXFLAGS += -MMD
 
 all:	CXXFLAGS += -O3
-all:	hub files gui
+all:	hub_app files_app gui_app
 debug:	CXXFLAGS += -DDEBUG -g -O0
-debug:	hub files gui
+debug:	hub_app files_app gui_app
 
-hub:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/hub/hub.o
+hub_app:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/hub/hub.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -42,7 +42,7 @@ ifeq ($(OS),Linux)
 		-L/usr/local/lib -lusb-1.0
 endif
 
-gui:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/gui/gui.o
+gui_app:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/gui/gui.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -58,7 +58,7 @@ ifeq ($(OS),Linux)
 		-L/usr/local/lib -lusb-1.0
 endif
 
-files:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/files/files.o
+files_app:	$(LIB_OBJ_FILES) $(APP_OBJ_DIR)/files/files.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -103,7 +103,7 @@ ifeq ($(OS),Linux)
 endif
 
 clean:
-	rm -f hub files gui $(shell find . -name "*.o") $(shell find . -name "*.d")
+	rm -f hub_app files_app gui_app $(shell find . -name "*.o") $(shell find . -name "*.d")
 	rm -rf $(OBJ_DIR)/
 
 -include $(LIB_OBJ_FILES:.o=.d)
