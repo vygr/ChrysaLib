@@ -34,14 +34,17 @@ public:
 	{}
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
 	std::shared_ptr<Property> get_prop(const std::string &prop);
+	std::vector<std::shared_ptr<View>> children();
 	View *add_front(std::shared_ptr<View> child);
 	View *add_back(std::shared_ptr<View> child);
 	View *sub();
 	View *add_opaque(const Rect &rect);
 	View *sub_opaque(const Rect &rect);
+	View *clr_opaque();
 	View *add_dirty(const Rect &rect);
-	View *sub_dirty(const Rect &rect);
+	View *trans_dirty(int rx, int ry);
 	View *dirty();
+	View *dirty_all();
 	View *forward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
 	View *backward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
 	View *set_flags(unsigned int flags, unsigned int mask);

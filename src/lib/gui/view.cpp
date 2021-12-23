@@ -1,28 +1,33 @@
 #include "view.h"
 #include "property.h"
 #include <algorithm>
+#include <vector>
 
 std::recursive_mutex View::m_mutex;
+
+std::vector<std::shared_ptr<View>> View::children()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto children = std::vector<std::shared_ptr<View>>{};
+	for (auto &child : m_children) children.push_back(child);
+	return children;
+}
 
 View *View::add_front(std::shared_ptr<View> child)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (!child->m_parent)
-	{
-		child->m_parent = this;
-		m_children.push_back(child);
-	}
+	if (child->m_parent) child->sub();
+	child->m_parent = this;
+	m_children.push_back(child);
 	return this;
 }
 
 View *View::add_back(std::shared_ptr<View> child)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (!child->m_parent)
-	{
-		child->m_parent = this;
-		m_children.push_front(child);
-	}
+	if (child->m_parent) child->sub();
+	child->m_parent = this;
+	m_children.push_front(child);
 	return this;
 }
 
@@ -78,6 +83,13 @@ View *View::sub_opaque(const Rect &rect)
 	return this;
 }
 
+View *View::clr_opaque()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	m_opaque.free();
+	return this;
+}
+
 View *View::add_dirty(const Rect &rect)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -85,16 +97,22 @@ View *View::add_dirty(const Rect &rect)
 	return this;
 }
 
-View *View::sub_dirty(const Rect &rect)
+View *View::trans_dirty(int rx, int ry)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_dirty.remove_rect(rect);
+	m_dirty.translate(rx, ry);
 	return this;
 }
 
 View *View::dirty()
 {
-	add_dirty(Rect(m_x, m_y, m_x + m_w, m_y + m_h));
+	add_dirty(Rect(0, 0, m_w, m_h));
+	return this;
+}
+
+View *View::dirty_all()
+{
+	set_flags(view_flag_dirty_all, view_flag_dirty_all);
 	return this;
 }
 
@@ -156,6 +174,7 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 
 View *View::set_flags(unsigned int flags, unsigned int mask)
 {
-	m_flags = (m_flags & ~mask) | flags;
+	auto dirty_state = m_flags & view_flag_dirty_all;
+	m_flags = (m_flags & ~mask) | flags | dirty_state;
 	return this;
 }
