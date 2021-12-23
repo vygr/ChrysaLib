@@ -17,6 +17,9 @@ void GUI_Service::run()
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
 	m_screen = std::make_shared<Backdrop>(0, 0, 1280, 960);
+	auto color = std::make_shared<Property>();
+	color->set_int(0xff0000ff);
+	m_screen->def_prop("color", color);
 	auto screen_w = m_screen->m_w;
 	auto screen_h = m_screen->m_h;
 

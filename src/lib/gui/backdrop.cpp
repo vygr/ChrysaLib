@@ -3,7 +3,8 @@
 
 Backdrop *Backdrop::draw(Ctx *ctx)
 {
-	ctx->set_color(0xff00ff00);
+	auto col = get_prop("color")->get_int();
+	ctx->set_color(col);
 	ctx->filled_box(m_x, m_y, m_w, m_h);
 	return this;
 }
