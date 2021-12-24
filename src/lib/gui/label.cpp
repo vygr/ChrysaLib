@@ -3,9 +3,9 @@
 
 Label::Label()
 	: View()
+	, m_flow(std::make_shared<Flow>())
+	, m_text(std::make_shared<Text>())
 {
-	m_flow = std::make_shared<Flow>();
-	m_text = std::make_shared<Text>();
 	m_flow->set_flags(0, -1);
 	m_flow->add_child(m_text);
 	add_back(m_flow);
@@ -24,7 +24,7 @@ view_size Label::get_pref_size()
 	auto mw = (int)got_long_prop("min_width");
 	auto mh = (int)got_long_prop("min_height");
 	auto s = m_flow->get_pref_size();
-	return view_size{std::max(s.m_w, mw), std::max(s.m_h, mh)};
+	return view_size{std::max(s.m_w + 2 * border, mw), std::max(s.m_h + 2 * border, mh)};
 }
 
 Label *Label::layout()

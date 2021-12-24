@@ -78,7 +78,7 @@ public:
 	//set destination Net_ID, the delivery address
 	auto set_dest(const Net_ID &id) { m_header.m_dest = id; return this; }
 	//append some string to the body data
-	auto append(const std::string data)
+	auto append(const std::string &data)
 	{
 		m_data->append(data);
 		m_header.m_frag_length = m_header.m_total_length = (unsigned int)m_data->size();

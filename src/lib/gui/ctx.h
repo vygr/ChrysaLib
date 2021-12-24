@@ -20,7 +20,7 @@ public:
 	uint32_t darker(uint32_t col);
 	uint32_t brighter(uint32_t col);
 	SDL_Renderer *m_renderer = nullptr;
-	Region *m_region;
+	Region *m_region = nullptr;
 	int m_x = 0;
 	int m_y = 0;
 };

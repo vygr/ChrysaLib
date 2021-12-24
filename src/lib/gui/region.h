@@ -35,7 +35,7 @@ public:
 	Region *cut_rect(Region &dest, const Rect &clip);
 	Region *remove_region(Region &dest, int rx, int ry);
 	Region *paste_region(Region &dest, int rx, int ry);
-	Region *copy_region(Region &dest, Region &copy, int rx, int ry);
+	Region *copy_region(Region &dest, const Region &copy, int rx, int ry);
 };
 
 #endif

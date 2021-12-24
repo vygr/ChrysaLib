@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 			{
 				if (++i >= argc) goto help;
 				ss_reset(ss, argv[i]);
-				if (opt == "t") ss >> arg_t;
+				ss >> arg_t;
 			}
 			else
 			{

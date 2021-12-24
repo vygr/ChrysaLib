@@ -32,7 +32,7 @@ struct USBDeviceInstance
 class USB_Link : public Link
 {
 public:
-	USB_Link(Router &router, USBDeviceInstance &device)
+	USB_Link(Router &router, const USBDeviceInstance &device)
 		: Link(router)
 		, m_device_instance(device)
 	{

@@ -105,8 +105,8 @@ public:
 	int m_y;
 	int m_w;
 	int m_h;
-	int m_ctx_x;
-	int m_ctx_y;
+	int m_ctx_x = 0;
+	int m_ctx_y = 0;
 	unsigned int m_flags = 0; 
 };
 

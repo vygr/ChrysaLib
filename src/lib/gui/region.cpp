@@ -29,7 +29,7 @@ Rect Region::bounds()
 	if (m_region.empty()) return Rect(0,0,0,0);
 	auto itr = begin(m_region);
 	auto bounds = *itr;
-	std::for_each (std::next(itr), end(m_region), [&] (auto &rect)
+	std::for_each (std::next(itr), end(m_region), [&] (const auto &rect)
 	{
 		bounds.m_x = std::min(bounds.m_x, rect.m_x);
 		bounds.m_y = std::min(bounds.m_y, rect.m_y);
@@ -1152,7 +1152,7 @@ Region *Region::paste_region(Region &dest, int rx, int ry)
 	return this;
 }
 
-Region *Region::copy_region(Region &dest, Region &copy, int rx, int ry)
+Region *Region::copy_region(Region &dest, const Region &copy, int rx, int ry)
 {
 	//copy all rects of region to dest
 	for (auto rect : copy.m_region)

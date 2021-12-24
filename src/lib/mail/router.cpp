@@ -141,7 +141,7 @@ std::shared_ptr<Msg> Router::get_next_msg(Dev_ID dest, std::chrono::milliseconds
 	//get next message bound for the destination device else nullptr
 	auto poll_que = [&]() -> std::shared_ptr<Msg>
 	{
-		auto itr = std::find_if(begin(m_outgoing_msg_que), end(m_outgoing_msg_que), [&] (auto &qi)
+		auto itr = std::find_if(begin(m_outgoing_msg_que), end(m_outgoing_msg_que), [&] (const auto &qi)
 		{
 			if (dest == qi.m_msg->m_header.m_dest.m_device_id) return true;
 			auto &route_struct = m_routes[qi.m_msg->m_header.m_dest.m_device_id];

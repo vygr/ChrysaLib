@@ -20,7 +20,7 @@ protected:
 class IP_Link_Manager : public Link_Manager
 {
 public:
-	IP_Link_Manager(Router &router, std::string ip_addr)
+	IP_Link_Manager(Router &router, const std::string &ip_addr)
 		: Link_Manager(router)
 		, m_ip_addr(ip_addr)
 		, m_io_context()

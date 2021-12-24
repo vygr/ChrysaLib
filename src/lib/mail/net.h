@@ -12,11 +12,11 @@ std::vector<std::string> split_string(std::string str, const std::string &token)
 struct Net_ID
 {
 	Net_ID() {}
-	Net_ID(Dev_ID dev, Mailbox_ID mbox)
+	Net_ID(const Dev_ID &dev, Mailbox_ID mbox)
 		: m_device_id(dev)
 		, m_mailbox_id(mbox)
 	{}
-	Net_ID(Dev_ID dev)
+	Net_ID(const Dev_ID &dev)
 		: m_device_id(dev)
 	{}
 	Net_ID(Mailbox_ID mbox)
