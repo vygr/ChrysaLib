@@ -107,7 +107,7 @@ public:
 	int m_h;
 	int m_ctx_x = 0;
 	int m_ctx_y = 0;
-	unsigned int m_flags = 0; 
+	unsigned int m_flags = view_flag_solid; 
 };
 
 #endif
