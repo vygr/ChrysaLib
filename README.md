@@ -23,9 +23,11 @@ favorite `tar` application.
 
 Go into the new extracted folder via the terminal and type:
 
-`./configure`
-`make all`
-`sudo make install`
+```text
+./configure
+make all
+sudo make install
+```
 
 This should install the library into `/usr/local/lib/` and the headers into
 `/usr/local/include/`.
