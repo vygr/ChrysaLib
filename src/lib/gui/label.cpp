@@ -6,6 +6,8 @@ Label::Label()
 	, m_flow(std::make_shared<Flow>())
 	, m_text(std::make_shared<Text>())
 {
+	def_prop("flow_flags", std::make_shared<Property>(flow_flag_right | flow_flag_align_vcenter));
+	def_prop("border", std::make_shared<Property>(0));
 	m_flow->set_flags(0, -1);
 	m_flow->add_child(m_text);
 	add_back(m_flow);
@@ -41,7 +43,6 @@ Label *Label::draw(Ctx *ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	auto border = (int)get_long_prop("border");
-	ctx->panel(col, true, border, m_w, m_h);
+	ctx->panel(col, true, 0, m_w, m_h);
 	return this;
 }

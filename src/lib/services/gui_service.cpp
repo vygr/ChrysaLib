@@ -2,6 +2,7 @@
 #include "../gui/region.h"
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
+#include "../gui/label.h"
 #include <iostream>
 #include <sstream>
 #include <SDL.h>
@@ -21,9 +22,12 @@ void GUI_Service::run()
 	auto screen_w = m_screen->m_w;
 	auto screen_h = m_screen->m_h;
 
-	auto test = std::make_shared<Backdrop>(107, 107, 256, 256);
+	auto test = std::make_shared<Label>();
 	test->def_prop("color", std::make_shared<Property>(0xffffff00));
 	test->def_prop("ink_color", std::make_shared<Property>(0xffff0000));
+	test->def_prop("text", std::make_shared<Property>("Some Test Text"));
+	auto s = test->get_pref_size();
+	test->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(test);
 
 	//init SDL

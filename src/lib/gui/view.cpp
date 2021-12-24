@@ -100,11 +100,11 @@ int64_t View::got_long_prop(const std::string &prop)
 	else return 0;
 };
 
-const std::string *View::got_string_prop(const std::string &prop)
+const std::string View::got_string_prop(const std::string &prop)
 {
 	auto p = got_prop(prop);
-	if (p) return &p->get_string();
-	else return nullptr;
+	if (p) return p->get_string();
+	else return "";
 };
 
 int64_t View::get_long_prop(const std::string &prop)
@@ -114,11 +114,11 @@ int64_t View::get_long_prop(const std::string &prop)
 	else return 0;
 };
 
-const std::string *View::get_string_prop(const std::string &prop)
+const std::string View::get_string_prop(const std::string &prop)
 {
 	auto p = get_prop(prop);
-	if (p) return &p->get_string();
-	else return nullptr;
+	if (p) return p->get_string();
+	else return "";
 };
 
 View *View::add_opaque(const Rect &rect)
@@ -268,6 +268,6 @@ View *View::change(int x, int y, int w, int h)
 	m_y = y;
 	m_w = w;
 	m_h = h;
-	if (s == view_size{w, h}) return layout();
-	return this;
+	if (s == view_size{w, h}) return this;
+	return layout();
 }

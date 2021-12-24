@@ -19,7 +19,7 @@ Layout *Flow::layout()
 		child_num++;
 
 		//hidden ?
-		if (child->m_flags & view_flag_hiden)
+		if (child->m_flags & view_flag_hidden)
 		{
 			child->change(0,0,0,0);
 			continue;
@@ -84,10 +84,12 @@ view_size Flow::get_pref_size()
 	auto ph = 0;
 	for (auto &child : kids)
 	{
-		if (child->m_flags & view_flag_hiden) continue;
+		if (child->m_flags & view_flag_hidden) continue;
 		auto s = child->get_pref_size();
 		if (flow_flags & (flow_flag_left | flow_flag_right)) pw += s.m_w;
 		if (flow_flags & (flow_flag_up | flow_flag_down)) ph += s.m_h;
+		pw = std::max(pw, s.m_w);
+		ph = std::max(ph, s.m_h);
 	}
 	return view_size{std::max(mw, pw), std::max(mh, ph)};
 }

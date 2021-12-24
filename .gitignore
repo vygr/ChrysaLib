@@ -2,6 +2,4 @@
 *.DS_Store
 *.d
 *.o
-files_app
-gui_app
-hub_app
+*_app

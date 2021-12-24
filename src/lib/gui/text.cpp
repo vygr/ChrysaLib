@@ -6,7 +6,9 @@ view_size Text::get_pref_size()
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto font = get_string_prop("font");
 	auto text = get_string_prop("text");
-	return view_size{(int)(8 * text->size()), 16};
+	auto len = (int)text.size();
+	if (!len) len = 1;
+	return view_size{len * 8, 16};
 }
 
 Text *Text::draw(Ctx *ctx)

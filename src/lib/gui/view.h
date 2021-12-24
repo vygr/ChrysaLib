@@ -18,7 +18,7 @@ enum
 	view_flag_solid = 1 << 0,
 	view_flag_opaque = 1 << 1,
 	view_flag_dirty_all = 1 << 2,
-	view_flag_hiden = 1 << 3,
+	view_flag_hidden = 1 << 3,
 	view_flag_at_back = 1 << 4,
 	view_flag_at_front = 1 << 5,
 };
@@ -63,9 +63,9 @@ public:
 	std::shared_ptr<Property> got_prop(const std::string &prop);
 	std::shared_ptr<Property> get_prop(const std::string &prop);
 	int64_t got_long_prop(const std::string &prop);
-	const std::string *got_string_prop(const std::string &prop);
+	const std::string got_string_prop(const std::string &prop);
 	int64_t get_long_prop(const std::string &prop);
-	const std::string *get_string_prop(const std::string &prop);
+	const std::string get_string_prop(const std::string &prop);
 	//children
 	std::vector<std::shared_ptr<View>> children();
 	View *add_front(std::shared_ptr<View> child);
@@ -77,8 +77,8 @@ public:
 	//visability
 	View *add_opaque(const Rect &rect);
 	View *sub_opaque(const Rect &rect);
-	//dirty areas
 	View *clr_opaque();
+	//dirty areas
 	View *add_dirty(const Rect &rect);
 	View *trans_dirty(int rx, int ry);
 	View *dirty();
