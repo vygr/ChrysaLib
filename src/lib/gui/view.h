@@ -23,7 +23,7 @@ enum
 
 //view class
 //base class for all widgets
-class View : public std::enable_shared_from_this<View>
+class View
 {
 public:
 	View(int x, int y, int w, int h)
