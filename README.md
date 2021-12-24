@@ -12,7 +12,23 @@ A version of ChrysaLisp system concepts written in C++.
 
 ### Linux via apt-get
 
-`sudo apt-get install libusb-dev libasio-dev libsdl2-dev`
+`sudo apt-get install libasio-dev libsdl2-dev`
+
+`libusb`
+
+Go get the latest source tarball download from here https://libusb.info/.
+
+Extract the archive with `Extract Here` from the Ubuntu UI, or with your
+favorite `tar` application.
+
+Go into the new extracted folder via the terminal and type:
+
+`./configure`
+`make all`
+`sudo make install`
+
+This should install the library into `/usr/local/lib` and the headers into
+`/usr/local/include/`.
 
 ### Windows via Googling
 
