@@ -1,6 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+//fixed point shift
+const unsigned int FP_SHIFT = 16;
 //max mailbox id
 const unsigned int MAX_ID = 4294967295;
 //maximum packet size
