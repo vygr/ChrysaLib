@@ -16,8 +16,8 @@ public:
 	Ctx *filled_box(int x, int y, int w, int h);
 	SDL_Renderer *m_renderer = nullptr;
 	Region *m_region;
-	int m_x;
-	int m_y;
+	int m_x = 0;
+	int m_y = 0;
 };
 
 #endif
