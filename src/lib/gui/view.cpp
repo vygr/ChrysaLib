@@ -55,6 +55,14 @@ View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
 	return this;
 }
 
+std::shared_ptr<Property> View::got_prop(const std::string &prop)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto itr = m_properties.find(prop);
+	if (itr != end(m_properties)) return itr->second;
+	return nullptr;
+}
+
 std::shared_ptr<Property> View::get_prop(const std::string &prop)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -67,6 +75,20 @@ std::shared_ptr<Property> View::get_prop(const std::string &prop)
 	}
 	return nullptr;
 }
+
+int64_t View::got_long_prop(const std::string &prop)
+{
+	auto p = got_prop(prop);
+	if (p) return p->get_long();
+	else return 0;
+};
+
+const std::string *View::got_string_prop(const std::string &prop)
+{
+	auto p = got_prop(prop);
+	if (p) return &p->get_string();
+	else return nullptr;
+};
 
 int64_t View::get_long_prop(const std::string &prop)
 {
