@@ -2,8 +2,8 @@
 #include "property.h"
 #include "ctx.h"
 
-Backdrop::Backdrop(int x, int y, int w, int h)
-	: View(x, y, w, h)
+Backdrop::Backdrop()
+	: View()
 {
 	def_prop("color", std::make_shared<Property>(0xff000000));
 	def_prop("ink_color", std::make_shared<Property>(0xffffffff));

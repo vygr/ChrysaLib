@@ -7,7 +7,7 @@
 class Backdrop : public View
 {
 public:
-	Backdrop(int x, int y, int w, int h);
+	Backdrop();
 	Backdrop *draw(Ctx *ctx) override;
 };
 

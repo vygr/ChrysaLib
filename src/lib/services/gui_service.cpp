@@ -17,7 +17,8 @@ void GUI_Service::run()
 	auto mbox = m_router.validate(m_net_id);
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
-	m_screen = std::make_shared<Backdrop>(0, 0, 1280, 960);
+	m_screen = std::make_shared<Backdrop>();
+	m_screen->change(0, 0, 1280, 960);
 	m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
 	auto screen_w = m_screen->m_w;
 	auto screen_h = m_screen->m_h;

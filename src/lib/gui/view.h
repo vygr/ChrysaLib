@@ -45,18 +45,7 @@ struct view_size
 class View
 {
 public:
-	View()
-		: m_x(0)
-		, m_y(0)
-		, m_w(0)
-		, m_h(0)
-	{}
-	View(int x, int y, int w, int h)
-		: m_x(x)
-		, m_y(y)
-		, m_w(w)
-		, m_h(h)
-	{}
+	View() {}
 	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
 	View *set_prop(const std::string &prop, std::shared_ptr<Property>);
@@ -101,10 +90,10 @@ public:
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
 	Region m_dirty;
 	Region m_opaque;
-	int m_x;
-	int m_y;
-	int m_w;
-	int m_h;
+	int m_x = 0;
+	int m_y = 0;
+	int m_w = 0;
+	int m_h = 0;
 	int m_ctx_x = 0;
 	int m_ctx_y = 0;
 	unsigned int m_flags = view_flag_solid; 
