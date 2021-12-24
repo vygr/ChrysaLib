@@ -84,7 +84,34 @@ Ctx *Ctx::filled_box(int x, int y, int w, int h)
 
 Ctx *Ctx::panel(uint32_t col, bool filled, int depth, int w, int h)
 {
-	set_color(col);
-	filled_box(0, 0, w, h);
+	auto dark_col = darker(col);
+	auto bright_col = brighter(col);
+	auto abs_depth = std::abs(depth);
+	if (filled)
+	{
+		//is filled
+		set_color(col);
+		filled_box(abs_depth, abs_depth, w - 2 * abs_depth, h - 2 * abs_depth);
+	}
+	if (depth > 0)
+	{
+		//is out
+		set_color(bright_col);
+		filled_box(0, 0, w, abs_depth);
+		filled_box(0, abs_depth, abs_depth, h - abs_depth);
+		set_color(dark_col);
+		filled_box(abs_depth, h - abs_depth, w - abs_depth, abs_depth);
+		filled_box(w - abs_depth, abs_depth, abs_depth, h - 2 * abs_depth);
+	}
+	else if (depth < 0)
+	{
+		//is in
+		set_color(dark_col);
+		filled_box(0, 0, w - abs_depth, abs_depth);
+		filled_box(0, abs_depth, abs_depth, h - 2 * abs_depth);
+		set_color(bright_col);
+		filled_box(0, h - abs_depth, w, abs_depth);
+		filled_box(w - abs_depth, 0, abs_depth, h - 2 * abs_depth);
+	}
 	return this;
 }
