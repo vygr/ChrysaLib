@@ -2,6 +2,18 @@
 #include "region.h"
 #include <SDL.h>
 
+uint32_t Ctx::darker(uint32_t col)
+{
+	auto alpha = col & 0xff000000;
+	return ((col & 0xfefefe) >> 1) + alpha;
+}
+
+uint32_t Ctx::brighter(uint32_t col)
+{
+	auto alpha = col & 0xff000000;
+	return ((col & 0xfefefe) >> 1) + alpha + 0x808080;
+}
+
 Ctx *Ctx::set_color(uint32_t col)
 {
 	uint8_t a = (col >> 24) & 0xff;
