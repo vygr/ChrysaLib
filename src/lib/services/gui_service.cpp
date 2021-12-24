@@ -22,12 +22,8 @@ void GUI_Service::run()
 	auto screen_h = m_screen->m_h;
 
 	auto test = std::make_shared<Backdrop>(107, 107, 256, 256);
-	auto col = std::make_shared<Property>();
-	auto ink_col = std::make_shared<Property>();
-	col->set_int(0xffffff00);
-	ink_col->set_int(0xffff0000);
-	test->def_prop("color", col);
-	test->def_prop("ink_color", ink_col);
+	test->def_prop("color", std::make_shared<Property>(0xffffff00));
+	test->def_prop("ink_color", std::make_shared<Property>(0xffff0000));
 	m_screen->add_back(test);
 
 	//init SDL

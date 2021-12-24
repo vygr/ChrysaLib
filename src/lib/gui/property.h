@@ -7,14 +7,18 @@
 class Property
 {
 public:
-	Property()
+	Property(int64_t num)
+		: m_long(num)
 	{}
-	int get_int() { return m_int; };
-	Property *set_int(int val) { m_int = val; return this; };
-	std::string &get_str() { return m_str; };
-	Property *set_str(const std::string &val) { m_str = val; return this; };
-	unsigned int m_int;
-	std::string m_str;
+	Property(const std::string &str)
+		: m_string(str)
+	{}
+	int64_t get_long() { return m_long; };
+	const std::string &get_string() { return m_string; };
+	Property *set_long(int val) { m_long = val; return this; };
+	Property *set_string(const std::string &val) { m_string = val; return this; };
+	int64_t m_long;
+	std::string m_string;
 };
 
 #endif

@@ -34,22 +34,31 @@ public:
 		, m_w(w)
 		, m_h(h)
 	{}
+	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
 	std::shared_ptr<Property> get_prop(const std::string &prop);
+	int64_t get_long_prop(const std::string &prop) { return get_prop(prop)->get_long(); };
+	const std::string &get_string_prop(const std::string &prop) { return get_prop(prop)->get_string(); };;
+	//children
 	std::vector<std::shared_ptr<View>> children();
 	View *add_front(std::shared_ptr<View> child);
 	View *add_back(std::shared_ptr<View> child);
 	View *sub();
+	//tree iteration
+	View *forward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
+	View *backward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
+	//visability
 	View *add_opaque(const Rect &rect);
 	View *sub_opaque(const Rect &rect);
+	//dirty areas
 	View *clr_opaque();
 	View *add_dirty(const Rect &rect);
 	View *trans_dirty(int rx, int ry);
 	View *dirty();
 	View *dirty_all();
-	View *forward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
-	View *backward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
+	//flags
 	View *set_flags(unsigned int flags, unsigned int mask);
+	//subclass overides
 	virtual View *draw(Ctx *ctx) = 0;
 
 	static std::recursive_mutex m_mutex;

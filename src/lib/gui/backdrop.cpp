@@ -5,26 +5,18 @@
 Backdrop::Backdrop(int x, int y, int w, int h)
 	: View(x, y, w, h)
 {
-	auto spaceing = std::make_shared<Property>();
-	auto color = std::make_shared<Property>();
-	auto ink_color = std::make_shared<Property>();
-	auto style = std::make_shared<Property>();
-	spaceing->set_int(32);
-	color->set_int(0xff000000);
-	ink_color->set_int(0xffffffff);
-	style->set_str("grid");
-	def_prop("color", color);
-	def_prop("ink_color", ink_color);
-	def_prop("spaceing", spaceing);
-	def_prop("style", style);
+	def_prop("color", std::make_shared<Property>(0xff000000));
+	def_prop("ink_color", std::make_shared<Property>(0xffffffff));
+	def_prop("spaceing", std::make_shared<Property>(32));
+	def_prop("style", std::make_shared<Property>("grid"));
 }
 
 Backdrop *Backdrop::draw(Ctx *ctx)
 {
-	auto col = get_prop("color")->get_int();
-	auto ink_col = get_prop("ink_color")->get_int();
-	auto spaceing = get_prop("spaceing")->get_int();
-	auto style = get_prop("style")->get_str();
+	auto col = get_long_prop("color");
+	auto ink_col = get_long_prop("ink_color");
+	auto spaceing = get_long_prop("spaceing");
+	auto style = get_string_prop("style");
 	ctx->set_color(col);
 	ctx->filled_box(0, 0, m_w, m_h);
 	if (style == "grid")

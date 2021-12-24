@@ -48,6 +48,13 @@ View *View::sub()
 	return this;
 }
 
+View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	m_properties[prop] = value;
+	return this;
+}
+
 std::shared_ptr<Property> View::get_prop(const std::string &prop)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -59,13 +66,6 @@ std::shared_ptr<Property> View::get_prop(const std::string &prop)
 		view = view->m_parent;
 	}
 	return nullptr;
-}
-
-View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
-{
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_properties[prop] = value;
-	return this;
 }
 
 View *View::add_opaque(const Rect &rect)
