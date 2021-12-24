@@ -96,7 +96,7 @@ std::vector<std::string> trim_strings(std::vector<std::string> &strings)
 //////////
 
 //used for link buffer error detection
-uint32_t jenkins_hash(uint8_t *key, size_t len)
+uint32_t jenkins_hash(const uint8_t *key, size_t len)
 {
 	uint32_t hash, i;
 	for(hash = i = 0; i < len; ++i)

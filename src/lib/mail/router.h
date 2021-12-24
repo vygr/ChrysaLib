@@ -78,7 +78,7 @@ public:
 		{ return m_directory_manager.enquire(dev_id, prefix); }
 	auto update_dir(const std::string &body) { return m_directory_manager.update(body); }
 	//service broadcast helper
-	void broadcast(std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id = {{0}, 0});
+	void broadcast(const std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id = {{0}, 0});
 	//registered peer links
 	void add_link(Link *link, const Dev_ID &id);
 	void sub_link(Link *link);

@@ -8,7 +8,7 @@ std::vector<std::shared_ptr<View>> View::children()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto children = std::vector<std::shared_ptr<View>>{};
-	for (auto &child : m_children) children.push_back(child);
+	std::copy(begin(m_children), end(m_children), std::back_inserter(children));
 	return children;
 }
 

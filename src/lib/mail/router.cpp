@@ -190,7 +190,7 @@ std::vector<Dev_ID> Router::get_peers()
 	return peers;
 }
 
-void Router::broadcast(std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id)
+void Router::broadcast(const std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id)
 {
 	//utility to broadcast a message body to a given list of services.
 	//optionally ignore a given service, for example yourself.

@@ -7,7 +7,7 @@
 //utilities
 ///////////
 
-uint32_t jenkins_hash(uint8_t *key, size_t len);
+uint32_t jenkins_hash(const uint8_t *key, size_t len);
 void obfuscate(uint8_t *key, size_t len);
 
 ////////////
