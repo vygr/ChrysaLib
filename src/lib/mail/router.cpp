@@ -160,7 +160,7 @@ std::shared_ptr<Msg> Router::get_next_msg(const Dev_ID &dest, std::chrono::milli
 	return msg;
 }
 
-void Router::add_link(Link *link, Dev_ID &id)
+void Router::add_link(Link *link, const Dev_ID &id)
 {
 	//new link driver entry that can send to given peer
 	std::lock_guard<std::mutex> lock(m_mutex);

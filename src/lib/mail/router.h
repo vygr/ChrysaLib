@@ -80,7 +80,7 @@ public:
 	//service broadcast helper
 	void broadcast(std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id = {{0}, 0});
 	//registered peer links
-	void add_link(Link *link, Dev_ID &id);
+	void add_link(Link *link, const Dev_ID &id);
 	void sub_link(Link *link);
 	std::vector<Dev_ID> get_peers();
 	//routing management
