@@ -136,7 +136,7 @@ void Router::purge()
 	}
 }
 
-std::shared_ptr<Msg> Router::get_next_msg(Dev_ID dest, std::chrono::milliseconds timeout)
+std::shared_ptr<Msg> Router::get_next_msg(const Dev_ID &dest, std::chrono::milliseconds timeout)
 {
 	//get next message bound for the destination device else nullptr
 	auto poll_que = [&]() -> std::shared_ptr<Msg>

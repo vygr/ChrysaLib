@@ -84,7 +84,7 @@ public:
 	void sub_link(Link *link);
 	std::vector<Dev_ID> get_peers();
 	//routing management
-	std::shared_ptr<Msg> get_next_msg(Dev_ID dest, std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
+	std::shared_ptr<Msg> get_next_msg(const Dev_ID &dest, std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
 	bool update_route(const std::string &body);
 	void purge();
 private:
