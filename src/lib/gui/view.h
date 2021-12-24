@@ -25,8 +25,8 @@ enum
 
 struct view_pos
 {
-	int m_x;
-	int m_y;
+	int m_x = 0;
+	int m_y = 0;
 };
 
 struct view_size
@@ -36,8 +36,8 @@ struct view_size
 	{
 		return std::tie(p.m_w, p.m_h) == std::tie(m_w, m_h);
 	}
-	int m_w;
-	int m_h;
+	int m_w = 0;
+	int m_h = 0;
 };
 
 //view class

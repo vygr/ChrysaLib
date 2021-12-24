@@ -19,9 +19,7 @@ void GUI_Service::run()
 
 	m_screen = std::make_shared<Backdrop>();
 	m_screen->change(0, 0, 1280, 960);
-	m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
-	auto screen_w = m_screen->m_w;
-	auto screen_h = m_screen->m_h;
+	m_screen->dirty_all();
 
 	auto test = std::make_shared<Label>();
 	test->def_prop("color", std::make_shared<Property>(0xffffff00));
@@ -35,12 +33,12 @@ void GUI_Service::run()
 	SDL_SetMainReady();
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 	//create window
-	SDL_Window *window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_w, screen_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	//hide host cursor
 	//SDL_ShowCursor(0);
 	//renderer
 	m_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-	SDL_Texture *texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+	SDL_Texture *texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
 	//set blend mode
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
@@ -97,7 +95,7 @@ void GUI_Service::run()
 		{
 			//resize back buffer and then do full redraw
 			SDL_DestroyTexture(texture);
-			SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+			SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
 			m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
 			m_dirty_flag = true;
 			m_gui_flags = 0;
@@ -126,20 +124,12 @@ void GUI_Service::run()
 
 void GUI_Service::composit()
 {
-	auto screen_w = m_screen->m_w;
-	auto screen_h = m_screen->m_h;
-
 	//iterate through views back to front, setting abs cords of views
-	struct abs_cords
-	{
-		int m_x = 0;
-		int m_y = 0;
-	};
-	abs_cords abs;
+	view_pos abs;
 	m_screen->backward_tree(&abs,
 		[&](View *view, void *user)
 		{
-			auto abs = (abs_cords*)user;
+			auto abs = (view_pos*)user;
 			abs->m_x += view->m_x;
 			abs->m_y += view->m_y;
 			view->m_ctx_x = abs->m_x;
@@ -148,7 +138,7 @@ void GUI_Service::composit()
 		},
 		[&](View *view, void *user)
 		{
-			auto abs = (abs_cords*)user;
+			auto abs = (view_pos*)user;
 			abs->m_x -= view->m_x;
 			abs->m_y -= view->m_y;
 			return true;

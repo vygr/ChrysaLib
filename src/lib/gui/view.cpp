@@ -97,28 +97,28 @@ int64_t View::got_long_prop(const std::string &prop)
 {
 	auto p = got_prop(prop);
 	if (p) return p->get_long();
-	else return 0;
+	return 0;
 };
 
 const std::string View::got_string_prop(const std::string &prop)
 {
 	auto p = got_prop(prop);
 	if (p) return p->get_string();
-	else return "";
+	return "";
 };
 
 int64_t View::get_long_prop(const std::string &prop)
 {
 	auto p = get_prop(prop);
 	if (p) return p->get_long();
-	else return 0;
+	return 0;
 };
 
 const std::string View::get_string_prop(const std::string &prop)
 {
 	auto p = get_prop(prop);
 	if (p) return p->get_string();
-	else return "";
+	return "";
 };
 
 View *View::add_opaque(const Rect &rect)
