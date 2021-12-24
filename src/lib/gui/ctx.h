@@ -12,8 +12,8 @@ public:
 	Ctx()
 	{}
 	Ctx *set_color(unsigned int col);
-	Ctx *box(int x, int y, int w, int d);
-	Ctx *filled_box(int x, int y, int w, int d);
+	Ctx *box(int x, int y, int w, int h);
+	Ctx *filled_box(int x, int y, int w, int h);
 	SDL_Renderer *m_renderer = nullptr;
 	Region *m_region;
 	int m_x;

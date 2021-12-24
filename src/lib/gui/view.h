@@ -23,11 +23,34 @@ enum
 	view_flag_at_front = 1 << 5,
 };
 
+struct view_pos
+{
+	int m_x;
+	int m_y;
+};
+
+struct view_size
+{
+	//can be compared !
+	bool operator==(const view_size &p) const
+	{
+		return std::tie(p.m_w, p.m_h) == std::tie(m_w, m_h);
+	}
+	int m_w;
+	int m_h;
+};
+
 //view class
 //base class for all widgets
 class View
 {
 public:
+	View()
+		: m_x(0)
+		, m_y(0)
+		, m_w(0)
+		, m_h(0)
+	{}
 	View(int x, int y, int w, int h)
 		: m_x(x)
 		, m_y(y)
@@ -61,8 +84,14 @@ public:
 	View *dirty_all();
 	//flags
 	View *set_flags(unsigned int flags, unsigned int mask);
+	//info
+    view_pos get_pos();
+    view_size get_size();
 	//subclass overides
-	virtual View *draw(Ctx *ctx) = 0;
+    virtual view_size get_pref_size();
+	virtual View *layout();
+	virtual View *change(int x, int y, int w, int h);
+	virtual View *draw(Ctx *ctx);
 
 	static std::recursive_mutex m_mutex;
 	View *m_parent = nullptr;

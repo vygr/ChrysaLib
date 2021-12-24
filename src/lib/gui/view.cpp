@@ -213,3 +213,44 @@ View *View::set_flags(unsigned int flags, unsigned int mask)
 	m_flags = (m_flags & ~mask) | flags | dirty_state;
 	return this;
 }
+
+View *View::draw(Ctx *ctx)
+{
+	return this;
+}
+
+view_pos View::get_pos()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	return view_pos{m_x, m_y};
+}
+
+view_size View::get_size()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	return view_size{m_w, m_h};
+}
+
+view_size View::get_pref_size()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	return view_size{m_w, m_h};
+}
+
+View *View::layout()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	return this;
+}
+
+View *View::change(int x, int y, int w, int h)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto s = get_size();
+	m_x = x;
+	m_y = y;
+	m_w = w;
+	m_h = h;
+	if (s == view_size{w, h}) return layout();
+	return this;
+}
