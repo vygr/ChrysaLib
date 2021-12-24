@@ -14,8 +14,8 @@ Backdrop::Backdrop(int x, int y, int w, int h)
 Backdrop *Backdrop::draw(Ctx *ctx)
 {
 	//allready locked by GUI thread
-	auto col = get_long_prop("color");
-	auto ink_col = get_long_prop("ink_color");
+	auto col = (uint32_t)get_long_prop("color");
+	auto ink_col = (uint32_t)get_long_prop("ink_color");
 	auto spaceing = get_long_prop("spaceing");
 	auto style = get_string_prop("style");
 	ctx->set_color(col);

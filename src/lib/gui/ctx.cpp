@@ -2,7 +2,7 @@
 #include "region.h"
 #include <SDL.h>
 
-Ctx *Ctx::set_color(unsigned int col)
+Ctx *Ctx::set_color(uint32_t col)
 {
 	uint8_t a = (col >> 24) & 0xff;
 	uint8_t r = (col >> 16) & 0xff;
@@ -70,7 +70,7 @@ Ctx *Ctx::filled_box(int x, int y, int w, int h)
 	return this;
 }
 
-Ctx *Ctx::panel(unsigned int col, bool filled, int depth, int w, int h)
+Ctx *Ctx::panel(uint32_t col, bool filled, int depth, int w, int h)
 {
 	set_color(col);
 	filled_box(0, 0, w, h);
