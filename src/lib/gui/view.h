@@ -7,6 +7,8 @@
 #include <mutex>
 #include <map>
 #include <functional>
+#include <memory>
+#include <vector>
 
 class Ctx;
 
