@@ -1,7 +1,6 @@
 #include "view.h"
 #include "property.h"
 #include <algorithm>
-#include <vector>
 
 std::recursive_mutex View::m_mutex;
 

@@ -6,7 +6,7 @@
 enum
 {
 	ev_type_mouse,
-	v_type_key,
+	ev_type_key,
 	ev_type_action,
 	ev_type_gui,
 	ev_type_wheel,
@@ -14,7 +14,7 @@ enum
 	ev_type_exit
 };
 
-struct Event_ev_msg : public Service::Event
+struct Event_ev_msg
 {
 	unsigned long target_id;
 	unsigned long type;
