@@ -19,7 +19,7 @@ Backdrop *Backdrop::draw(Ctx *ctx)
 	auto style = get_string_prop("style");
 	ctx->set_color(col);
 	ctx->filled_box(0, 0, m_w, m_h);
-	if (style == "grid")
+	if (*style == "grid")
 	{
 		ctx->set_color(ink_col);
 		for (int x = (((m_w >> 1) % spaceing) - spaceing); x < m_w; x += spaceing)
@@ -31,7 +31,7 @@ Backdrop *Backdrop::draw(Ctx *ctx)
 			ctx->filled_box(0, y, m_w, 1);
 		}
 	}
-	else if (style == "axis")
+	else if (*style == "axis")
 	{
 		ctx->set_color(ink_col);
 		ctx->filled_box((m_w >> 1), 0, 1, m_h);
@@ -53,7 +53,7 @@ Backdrop *Backdrop::draw(Ctx *ctx)
 			ctx->filled_box(x, y, spaceing, 1);
 		}
 	}
-	else if (style == "lines")
+	else if (*style == "lines")
 	{
 		ctx->set_color(ink_col);
 		for (int y = (((m_h >> 1) % spaceing) - spaceing); y < m_h; y += spaceing)

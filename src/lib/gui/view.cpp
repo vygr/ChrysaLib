@@ -68,6 +68,20 @@ std::shared_ptr<Property> View::get_prop(const std::string &prop)
 	return nullptr;
 }
 
+int64_t View::get_long_prop(const std::string &prop)
+{
+	auto p = get_prop(prop);
+	if (p) return p->get_long();
+	else return 0;
+};
+
+const std::string *View::get_string_prop(const std::string &prop)
+{
+	auto p = get_prop(prop);
+	if (p) return &p->get_string();
+	else return nullptr;
+};
+
 View *View::add_opaque(const Rect &rect)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);

@@ -37,8 +37,8 @@ public:
 	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
 	std::shared_ptr<Property> get_prop(const std::string &prop);
-	int64_t get_long_prop(const std::string &prop) { return get_prop(prop)->get_long(); };
-	const std::string &get_string_prop(const std::string &prop) { return get_prop(prop)->get_string(); };;
+	int64_t get_long_prop(const std::string &prop);
+	const std::string *get_string_prop(const std::string &prop);
 	//children
 	std::vector<std::shared_ptr<View>> children();
 	View *add_front(std::shared_ptr<View> child);
