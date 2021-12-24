@@ -79,7 +79,7 @@ eg. hub -t 10000 -usb -ip 192.168.0.64 192.168.0.65
 
 ## Usage
 
-So what is it ? How would I use it ? Is this all your going to provide ?
+So what is it ? How would I use it ? Is this all you're going to provide ?
 
 This is the lowest layer of the ChrysaLisp messaging and services system
 implemented in C++. You can use this to create applications and services in C++
