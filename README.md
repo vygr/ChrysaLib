@@ -27,7 +27,7 @@ Go into the new extracted folder via the terminal and type:
 `make all`
 `sudo make install`
 
-This should install the library into `/usr/local/lib` and the headers into
+This should install the library into `/usr/local/lib/` and the headers into
 `/usr/local/include/`.
 
 ### Windows via Googling
