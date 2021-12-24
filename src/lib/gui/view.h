@@ -59,6 +59,7 @@ public:
 	{}
 	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
+	View *set_prop(const std::string &prop, std::shared_ptr<Property>);
 	std::shared_ptr<Property> got_prop(const std::string &prop);
 	std::shared_ptr<Property> get_prop(const std::string &prop);
 	int64_t got_long_prop(const std::string &prop);
