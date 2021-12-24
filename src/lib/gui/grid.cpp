@@ -26,9 +26,9 @@ Grid *Grid::layout()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto kids = children();
-	auto grid_w = get_long_prop("grid_width");
-	auto grid_h = get_long_prop("grid_height");
-	auto num_child = static_cast<unsigned int>(kids.size());
+	auto grid_w = (int)get_long_prop("grid_width");
+	auto grid_h = (int)get_long_prop("grid_height");
+	auto num_child = (int)(kids.size());
 	if (!grid_w) grid_w = ((num_child - 1) / grid_h) + 1;
 	if (!grid_h) grid_h = ((num_child - 1) / grid_w) + 1;
 

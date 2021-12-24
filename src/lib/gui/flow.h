@@ -34,9 +34,7 @@ class Flow : public Layout
 public:
 	Flow()
 		: Layout()
-	{
-		def_prop("flow_flags", std::make_shared<Property>(0));
-	}
+	{}
 	view_size get_pref_size() override;
 	Layout *layout() override;
 };
