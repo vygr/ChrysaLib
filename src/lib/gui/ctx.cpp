@@ -69,3 +69,10 @@ Ctx *Ctx::filled_box(int x, int y, int w, int h)
 	}
 	return this;
 }
+
+Ctx *Ctx::panel(unsigned int col, bool filled, int depth, int w, int h)
+{
+	set_color(col);
+	filled_box(0, 0, w, h);
+	return this;
+}
