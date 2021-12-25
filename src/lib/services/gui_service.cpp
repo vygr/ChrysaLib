@@ -3,6 +3,7 @@
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
 #include "../gui/label.h"
+#include "../gui/window.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
@@ -24,23 +25,25 @@ void GUI_Service::run()
 	m_screen->change(0, 0, 1280, 960);
 	m_screen->dirty_all();
 
-	auto test = std::make_shared<Label>();
-	test->def_prop("color", std::make_shared<Property>(argb_grey12));
-	test->def_prop("ink_color", std::make_shared<Property>(argb_black));
-	test->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	auto s = test->get_pref_size();
-	test->change(107, 107, s.m_w, s.m_h);
-	m_screen->add_back(test);
+	auto window = std::make_shared<Window>();
+	auto label = std::make_shared<Label>();
+	label->def_prop("color", std::make_shared<Property>(argb_grey12));
+	label->def_prop("ink_color", std::make_shared<Property>(argb_black));
+	label->def_prop("text", std::make_shared<Property>("Some Test Text"));
+	window->add_child(label);
+	auto s = window->get_pref_size();
+	window->change(107, 107, s.m_w, s.m_h);
+	m_screen->add_back(window);
 
 	//init SDL
 	SDL_SetMainReady();
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 	//create window
-	SDL_Window *window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Window *sdl_window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	//hide host cursor
 	//SDL_ShowCursor(0);
 	//renderer
-	m_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	m_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	SDL_Texture *texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
 	//set blend mode
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
@@ -118,7 +121,7 @@ void GUI_Service::run()
 	}
 
 	//quit SDL
-	SDL_DestroyWindow(window);
+	SDL_DestroyWindow(sdl_window);
 	SDL_Quit();
 
 	//forget myself

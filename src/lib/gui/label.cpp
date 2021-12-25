@@ -43,6 +43,6 @@ Label *Label::draw(Ctx *ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	ctx->panel(col, true, 0, m_w, m_h);
+	ctx->panel(col, true, 0, 0, 0, m_w, m_h);
 	return this;
 }
