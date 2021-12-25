@@ -4,6 +4,7 @@
 #include "../gui/backdrop.h"
 #include "../gui/label.h"
 #include "../gui/window.h"
+#include "../gui/flow.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
@@ -26,11 +27,14 @@ void GUI_Service::run()
 	m_screen->dirty_all();
 
 	auto window = std::make_shared<Window>();
+	auto flow = std::make_shared<Flow>();
+	flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
+	window->add_child(flow);
 	auto label = std::make_shared<Label>();
 	label->def_prop("color", std::make_shared<Property>(argb_grey12));
 	label->def_prop("ink_color", std::make_shared<Property>(argb_black));
 	label->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	window->add_child(label);
+	flow->add_child(label);
 	auto s = window->get_pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(window);

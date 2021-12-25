@@ -6,7 +6,7 @@ Window::Window()
 	: View()
 {
 	def_prop("color", std::make_shared<Property>(argb_grey12));
-	def_prop("border", std::make_shared<Property>(2));
+	def_prop("border", std::make_shared<Property>(1));
 	def_prop("shadow", std::make_shared<Property>(5));
 }
 
@@ -25,8 +25,8 @@ view_size Window::get_pref_size()
 	auto shadow = (int)get_long_prop("shadow");
 	view_size s;
 	if (m_child) s = m_child->get_pref_size();
-	s.m_w = (s.m_w + 2 * (shadow + border));
-	s.m_h = (s.m_h + 2 * (shadow + border));
+	s.m_w += 2 * (shadow + border);
+	s.m_h += 2 * (shadow + border);
 	return s;
 }
 
@@ -43,7 +43,7 @@ Window *Window::layout()
 	//adjust window transparency details based on color and shadow
 	if ((col >> 24) == 0xff)
 	{
-		if (shadow == 0) set_flags(view_flag_opaque, view_flag_opaque);
+		if (!shadow) set_flags(view_flag_opaque, view_flag_opaque);
 		else clr_opaque()->add_opaque(Rect(border + shadow, border + shadow, w, h));
 	}
 	return this;
@@ -57,12 +57,11 @@ Window *Window::draw(Ctx *ctx)
 	auto shadow = (int)get_long_prop("shadow");
 	ctx->panel(col, true, border, shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
 	col = 0x80000000;
-	while (shadow > 0 && col != 0)
+	while (--shadow >= 0 && col != 0)
 	{
 		ctx->set_color(col);
 		ctx->box(shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
-		col = (0xff000000 & (col >> 1) + (col >> 4));
-		--shadow;
+		col = 0xff000000 & ((col >> 1) + (col >> 4));
 	}
 	return this;
 }
