@@ -3,6 +3,7 @@
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
 #include "../gui/label.h"
+#include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
 #include <SDL.h>
@@ -18,12 +19,14 @@ void GUI_Service::run()
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
 	m_screen = std::make_shared<Backdrop>();
+	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2));
+	m_screen->def_prop("ink_color", std::make_shared<Property>(argb_grey1));
 	m_screen->change(0, 0, 1280, 960);
 	m_screen->dirty_all();
 
 	auto test = std::make_shared<Label>();
-	test->def_prop("color", std::make_shared<Property>(0xffffff00));
-	test->def_prop("ink_color", std::make_shared<Property>(0xffff0000));
+	test->def_prop("color", std::make_shared<Property>(argb_grey12));
+	test->def_prop("ink_color", std::make_shared<Property>(argb_black));
 	test->def_prop("text", std::make_shared<Property>("Some Test Text"));
 	auto s = test->get_pref_size();
 	test->change(107, 107, s.m_w, s.m_h);

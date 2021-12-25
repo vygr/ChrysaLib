@@ -1,12 +1,13 @@
 #include "backdrop.h"
 #include "property.h"
 #include "ctx.h"
+#include "colors.h"
 
 Backdrop::Backdrop()
 	: View()
 {
-	def_prop("color", std::make_shared<Property>(0xff000000));
-	def_prop("ink_color", std::make_shared<Property>(0xffffffff));
+	def_prop("color", std::make_shared<Property>(argb_black));
+	def_prop("ink_color", std::make_shared<Property>(argb_white));
 	def_prop("spaceing", std::make_shared<Property>(32));
 	def_prop("style", std::make_shared<Property>("grid"));
 }
