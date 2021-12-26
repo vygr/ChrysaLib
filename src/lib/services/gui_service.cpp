@@ -36,6 +36,7 @@ void GUI_Service::run()
 	auto min_button = std::make_shared<Button>();
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
+	auto main_widget = std::make_shared<Button>();
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
@@ -44,9 +45,13 @@ void GUI_Service::run()
 	close_button->def_prop("text", std::make_shared<Property>("X"));
 	min_button->def_prop("text", std::make_shared<Property>("-"));
 	max_button->def_prop("text", std::make_shared<Property>("+"));
+	main_widget->def_prop("text", std::make_shared<Property>("main_widget"));
+	main_widget->def_prop("min_width", std::make_shared<Property>(256));
+	main_widget->def_prop("min_height", std::make_shared<Property>(256));
 
 	window->add_child(window_flow);
 	window_flow->add_child(title_flow);
+	window_flow->add_child(main_widget);
 	title_flow->add_child(button_grid);
 	title_flow->add_child(title);
 	button_grid->add_child(min_button);
