@@ -158,26 +158,24 @@ void GUI_Service::composit()
 {
 	//iterate through views back to front, setting abs cords of views
 	view_pos abs;
-	m_screen->backward_tree(&abs,
-		[&](View *view, void *user)
+	m_screen->backward_tree(
+		[&](View *view)
 		{
-			auto abs = (view_pos*)user;
-			abs->m_x += view->m_x;
-			abs->m_y += view->m_y;
-			view->m_ctx_x = abs->m_x;
-			view->m_ctx_y = abs->m_y;
+			abs.m_x += view->m_x;
+			abs.m_y += view->m_y;
+			view->m_ctx_x = abs.m_x;
+			view->m_ctx_y = abs.m_y;
 			return true;
 		},
-		[&](View *view, void *user)
+		[&](View *view)
 		{
-			auto abs = (view_pos*)user;
-			abs->m_x -= view->m_x;
-			abs->m_y -= view->m_y;
+			abs.m_x -= view->m_x;
+			abs.m_y -= view->m_y;
 			return true;
 		});
 
-	m_screen->backward_tree(&abs,
-		[&](View *view, void *user)
+	m_screen->backward_tree(
+		[&](View *view)
 		{
 			Region region;
 			region.paste_rect(Rect(
@@ -191,7 +189,7 @@ void GUI_Service::composit()
 			view->draw(ctx);
 			return true;
 		},
-		[&](View *view, void *user)
+		[&](View *view)
 		{
 			return true;
 		});

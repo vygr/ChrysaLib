@@ -179,59 +179,59 @@ View *View::dirty_all()
 	return set_flags(view_flag_dirty_all, view_flag_dirty_all);
 }
 
-View *View::forward_tree(void *user, std::function<bool(View *view, void *user)> down, std::function<bool(View *view, void *user)> up)
+View *View::forward_tree(std::function<bool(View *view)> down, std::function<bool(View *view)> up)
 {
 	//child function
-	std::function<bool(View *view, void *user)> forward_tree = [&](View *view, void *user) -> View*
+	std::function<bool(View *view)> forward_tree = [&](View *view) -> View*
 	{
-		if (down(view, user))
+		if (down(view))
 		{
 			std::for_each(begin(view->m_children), end(view->m_children), [&] (auto &child)
 			{
-				forward_tree(child.get(), user);
+				forward_tree(child.get());
 			});
 		}
-		up(view, user);
+		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (down(this, user))
+	if (down(this))
 	{
 		std::for_each(begin(m_children), end(m_children), [&] (auto &child)
 		{
-			forward_tree(child.get(), user);
+			forward_tree(child.get());
 		});
 	}
-	up(this, user);
+	up(this);
 	return this;
 }
 
-View *View::backward_tree(void *user, std::function<bool(View *view, void *user)> down, std::function<bool(View *view, void *user)> up)
+View *View::backward_tree(std::function<bool(View *view)> down, std::function<bool(View *view)> up)
 {
 	//child function
-	std::function<bool(View *view, void *user)> backward_tree = [&](View *view, void *user) -> View*
+	std::function<bool(View *view)> backward_tree = [&](View *view) -> View*
 	{
-		if (down(view, user))
+		if (down(view))
 		{
 			std::for_each(rbegin(view->m_children), rend(view->m_children), [&] (auto &child)
 			{
-				backward_tree(child.get(), user);
+				backward_tree(child.get());
 			});
 		}
-		up(view, user);
+		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (down(this, user))
+	if (down(this))
 	{
 		std::for_each(rbegin(m_children), rend(m_children), [&] (auto &child)
 		{
-			backward_tree(child.get(), user);
+			backward_tree(child.get());
 		});
 	}
-	up(this, user);
+	up(this);
 	return this;
 }
 
