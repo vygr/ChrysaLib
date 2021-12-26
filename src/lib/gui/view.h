@@ -120,8 +120,8 @@ public:
 	View *to_back();
 	View *to_front();
 	//tree iteration
-	View *forward_tree(std::function<bool(View*)>down, std::function<bool(View*)>up);
-	View *backward_tree(std::function<bool(View*)>down, std::function<bool(View*)>up);
+	View *forward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
+	View *backward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	//visability
 	View *add_opaque(const Rect &rect);
 	View *sub_opaque(const Rect &rect);
