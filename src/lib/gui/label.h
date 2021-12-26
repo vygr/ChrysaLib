@@ -11,7 +11,7 @@ public:
 	view_size get_pref_size() override;
 	Label *layout() override;
 	Label *add_child(std::shared_ptr<View> child) override;
-	Label *draw(Ctx *ctx) override;
+	Label *draw(const Ctx &ctx) override;
 	std::shared_ptr<Flow> m_flow;
 	std::shared_ptr<Text> m_text;
 };

@@ -11,14 +11,13 @@ class Region;
 class Ctx
 {
 public:
-	Ctx()
-	{}
-	Ctx *set_color(uint32_t col);
-	Ctx *box(int x, int y, int w, int h);
-	Ctx *filled_box(int x, int y, int w, int h);
-	Ctx *panel(uint32_t col, bool filled, int depth, int x, int y, int w, int h);
-	uint32_t darker(uint32_t col);
-	uint32_t brighter(uint32_t col);
+	Ctx() {}
+	const Ctx &set_color(uint32_t col) const;
+	const Ctx &box(int x, int y, int w, int h) const;
+	const Ctx &filled_box(int x, int y, int w, int h) const;
+	const Ctx &panel(uint32_t col, bool filled, int depth, int x, int y, int w, int h) const;
+	uint32_t darker(uint32_t col) const;
+	uint32_t brighter(uint32_t col) const;
 	SDL_Renderer *m_renderer = nullptr;
 	Region *m_region = nullptr;
 	int m_x = 0;

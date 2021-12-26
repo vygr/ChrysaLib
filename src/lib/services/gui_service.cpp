@@ -31,8 +31,6 @@ void GUI_Service::run()
 	flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	window->add_child(flow);
 	auto label = std::make_shared<Label>();
-	label->def_prop("color", std::make_shared<Property>(argb_grey12));
-	label->def_prop("ink_color", std::make_shared<Property>(argb_black));
 	label->def_prop("text", std::make_shared<Property>("Some Test Text"));
 	flow->add_child(label);
 	auto s = window->get_pref_size();
@@ -166,7 +164,7 @@ void GUI_Service::composit()
 			ctx.m_y = view->m_ctx_y;
 			ctx.m_renderer = m_renderer;
 			ctx.m_region = &region;
-			view->draw(&ctx);
+			view->draw(ctx);
 			return true;
 		},
 		[&](View *view, void *user)
@@ -176,56 +174,8 @@ void GUI_Service::composit()
 }
 
 // 	;iterate through views back to front
-// 	;setting abs cords
-// 	(vp-xor-rr :r7 :r7)
-// 	(vp-xor-rr :r8 :r8)
-// 	(call 'view :backward_tree '(:r0 :r0 ($ abs_down_callback) ($ abs_up_callback)))
-
-// 	;iterate through views back to front
 // 	;create visible region at root
 // 	(call 'view :backward_tree '(:r0 :r0 ($ visible_down_callback) ($ visible_up_callback)))
-
-// 	(when (/= num_old_regions 0)
-// 		;copy new damaged region
-// 		(vp-xor-rr :r1 :r1)
-// 		(assign '(:r1) '((:rsp local_damaged_region)))
-// 		(fn-bind 'sys/statics/statics :r4)
-// 		(call 'region :copy_rect '((& :r4 statics_gui_rect_heap) (& :r0 view_dirty_region)
-// 			(& :rsp local_damaged_region) 0 0 (:r0 view_w) (:r0 view_h)) '(:r0))
-
-// 		;paste old damaged region into root
-// 		(fn-bind 'sys/statics/statics :r4)
-// 		(assign '((& :r4 statics_gui_old_regions) (:r4 statics_gui_old_region_index) (:rsp local_root)) '(:r1 :r2 :r3))
-// 		(call 'region :paste_region '(:r0 (& :r1 :r2) (& :r3 view_dirty_region) 0 0) '(:r0))
-
-// 		;free old damaged region
-// 		(fn-bind 'sys/statics/statics :r4)
-// 		(assign '((& :r4 statics_gui_old_regions) (:r4 statics_gui_old_region_index)) '(:r1 :r2))
-// 		(call 'region :free '(:r0 (& :r1 :r2)) '(:r0))
-
-// 		;paste new damaged region into all old damaged regions
-// 		(assign '((:r4 statics_gui_old_region_index)) '(:r2))
-// 		(loop-start)
-// 			(vp-add-cr +ptr_size :r2)
-// 			(vpif (list :r2 '= (* num_old_regions +ptr_size)))
-// 				(vp-xor-rr :r2 :r2)
-// 			(endif)
-// 			(assign '((& :r4 statics_gui_old_regions) (:r4 statics_gui_old_region_index)) '(:r1 :r3))
-// 			(breakif '(:r2 = :r3))
-// 			(assign '(:r2) '((:rsp local_index)))
-// 			(call 'region :paste_region '(:r0 (& :rsp local_damaged_region) (& :r1 :r2) 0 0) '(:r0))
-// 			(assign '((:rsp local_index)) '(:r2))
-// 			(fn-bind 'sys/statics/statics :r4)
-// 		(loop-end)
-// 		(assign '((:rsp local_damaged_region)) '(:r0))
-// 		(assign '(:r0) '((:r1 :r2)))
-
-// 		;move on to next old region
-// 		(vp-add-cr +ptr_size :r2)
-// 		(vpif (list :r2 '= (* num_old_regions +ptr_size)))
-// 			(vp-xor-rr :r2 :r2)
-// 		(endif)
-// 		(assign '((:rsp local_root) :r2) '(:r0 (:r4 statics_gui_old_region_index))))
 
 // 	;iterate through views front to back
 // 	;distribute visible region

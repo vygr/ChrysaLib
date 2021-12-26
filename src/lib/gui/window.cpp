@@ -6,6 +6,7 @@ Window::Window()
 	: View()
 {
 	def_prop("color", std::make_shared<Property>(argb_grey12));
+	def_prop("ink_color", std::make_shared<Property>(argb_black));
 	def_prop("border", std::make_shared<Property>(1));
 	def_prop("shadow", std::make_shared<Property>(5));
 }
@@ -49,18 +50,18 @@ Window *Window::layout()
 	return this;
 }
 
-Window *Window::draw(Ctx *ctx)
+Window *Window::draw(const Ctx &ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
 	auto border = (int)get_long_prop("border");
 	auto shadow = (int)get_long_prop("shadow");
-	ctx->panel(col, true, border, shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
+	ctx.panel(col, true, border, shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
 	col = 0x80000000;
 	while (--shadow >= 0 && col != 0)
 	{
-		ctx->set_color(col);
-		ctx->box(shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
+		ctx.set_color(col)
+			.box(shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
 		col = 0xff000000 & ((col >> 1) + (col >> 4));
 	}
 	return this;

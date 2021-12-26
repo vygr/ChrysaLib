@@ -10,7 +10,7 @@ public:
         : View()
 	{}
 	view_size get_pref_size() override;
-	Text *draw(Ctx *ctx) override;
+	Text *draw(const Ctx &ctx) override;
 };
 
 #endif

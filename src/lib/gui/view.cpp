@@ -1,6 +1,7 @@
 #include "view.h"
 #include "property.h"
 #include <algorithm>
+#include <iterator>
 
 std::recursive_mutex View::m_mutex;
 
@@ -231,7 +232,7 @@ View *View::set_flags(unsigned int flags, unsigned int mask)
 	return this;
 }
 
-View *View::draw(Ctx *ctx)
+View *View::draw(const Ctx &ctx)
 {
 	return this;
 }

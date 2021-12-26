@@ -8,7 +8,7 @@ class Backdrop : public View
 {
 public:
 	Backdrop();
-	Backdrop *draw(Ctx *ctx) override;
+	Backdrop *draw(const Ctx &ctx) override;
 };
 
 #endif

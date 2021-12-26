@@ -82,7 +82,7 @@ public:
 	virtual View *layout();
 	virtual View *change(int x, int y, int w, int h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }
-	virtual View *draw(Ctx *ctx);
+	virtual View *draw(const Ctx &ctx);
 
 	static std::recursive_mutex m_mutex;
 	View *m_parent = nullptr;
