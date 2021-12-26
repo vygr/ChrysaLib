@@ -4,7 +4,9 @@
 #include "../gui/backdrop.h"
 #include "../gui/window.h"
 #include "../gui/flow.h"
+#include "../gui/grid.h"
 #include "../gui/title.h"
+#include "../gui/button.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
@@ -27,12 +29,29 @@ void GUI_Service::run()
 	m_screen->dirty_all();
 
 	auto window = std::make_shared<Window>();
-	auto flow = std::make_shared<Flow>();
-	flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	window->add_child(flow);
+	auto window_flow = std::make_shared<Flow>();
+	auto title_flow = std::make_shared<Flow>();
+	auto button_grid = std::make_shared<Grid>();
 	auto title = std::make_shared<Title>();
+	auto min_button = std::make_shared<Button>();
+	auto max_button = std::make_shared<Button>();
+	auto close_button = std::make_shared<Button>();
+
+	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
+	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
+	button_grid->def_prop("grid_height", std::make_shared<Property>(1));
 	title->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	flow->add_child(title);
+	close_button->def_prop("text", std::make_shared<Property>("X"));
+	min_button->def_prop("text", std::make_shared<Property>("-"));
+	max_button->def_prop("text", std::make_shared<Property>("+"));
+
+	window->add_child(window_flow);
+	window_flow->add_child(title_flow);
+	title_flow->add_child(button_grid);
+	title_flow->add_child(title);
+	button_grid->add_child(min_button);
+	button_grid->add_child(max_button);
+	button_grid->add_child(close_button);
 	auto s = window->get_pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(window);

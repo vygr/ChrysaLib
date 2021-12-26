@@ -55,7 +55,7 @@ Layout *Flow::layout()
 		}
 
 		//last one ?
-		if (child_num == last_child - 1)
+		if (child_num == last_child)
 		{
 			if (flow_flags & flow_flag_lastw)
 			{

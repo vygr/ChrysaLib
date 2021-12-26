@@ -18,7 +18,7 @@ View *View::add_front(std::shared_ptr<View> child)
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (child->m_parent) child->sub();
 	child->m_parent = this;
-	m_children.push_back(child);
+	m_children.push_front(child);
 	return this;
 }
 
@@ -27,7 +27,7 @@ View *View::add_back(std::shared_ptr<View> child)
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (child->m_parent) child->sub();
 	child->m_parent = this;
-	m_children.push_front(child);
+	m_children.push_back(child);
 	return this;
 }
 
