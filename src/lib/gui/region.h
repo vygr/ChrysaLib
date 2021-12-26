@@ -22,8 +22,7 @@ public:
 class Region
 {
 public:
-	Region()
-	{}
+	Region() {}
 	std::forward_list<Rect> m_region;
 	Rect bounds();
 	Region *free();

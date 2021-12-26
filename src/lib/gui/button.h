@@ -3,15 +3,12 @@
 
 #include "label.h"
 
-class Button
-	: public Label
+class Button : public Label
 {
 public:
-    Button()
-		: Label()
-	{}
-	Button *draw(const Ctx &ctx) override;
+    Button();
 	Button *layout() override;
+	Button *draw(const Ctx &ctx) override;
 	Button *mouse_down(const std::shared_ptr<Msg> &event) override;
 	Button *mouse_up(const std::shared_ptr<Msg> &event) override;
 	Button *mouse_move(const std::shared_ptr<Msg> &event) override;

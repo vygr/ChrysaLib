@@ -3,13 +3,10 @@
 
 #include "label.h"
 
-class Title
-	: public Label
+class Title : public Label
 {
 public:
-    Title()
-		: Label()
-	{}
+    Title();
 	Title *mouse_down(const std::shared_ptr<Msg> &event) override;
 	Title *mouse_move(const std::shared_ptr<Msg> &event) override;
 	int m_drag_x = 0;

@@ -4,8 +4,7 @@
 #include "flow.h"
 #include "text.h"
 
-class Label
-	: public View
+class Label : public View
 {
 public:
     Label();

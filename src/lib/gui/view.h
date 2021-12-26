@@ -66,12 +66,12 @@ struct view_bounds
 class View
 {
 public:
-	struct Event_ev_msg
+	struct Event
 	{
 		unsigned long m_target_id;
 		unsigned long m_type;
 	};
-	struct Event_ev_msg_mouse : public Event_ev_msg
+	struct Event_mouse : public Event
 	{
 		unsigned int m_buttons;
 		unsigned int m_count;
@@ -80,27 +80,27 @@ public:
 		int m_rx;
 		int m_ry;
 	};
-	struct Event_ev_msg_wheel : public Event_ev_msg
+	struct Event_wheel : public Event
 	{
 		unsigned int m_direction;
 		int m_x;
 		int m_y;
 	};
-	struct Event_ev_msg_key : public Event_ev_msg
+	struct Event_key : public Event
 	{
 		unsigned int m_keycode;
 		unsigned int m_key;
 		unsigned int m_mod;
 	};
-	struct Event_ev_msg_action : public Event_ev_msg
+	struct Event_action : public Event
 	{
 		unsigned long m_source_id;
 	};
-	struct Event_ev_msg_gui : public Event_ev_msg
+	struct Event_gui : public Event
 	{};
-	struct Event_ev_msg_enter : public Event_ev_msg
+	struct Event_enter : public Event
 	{};
-	struct Event_ev_msg_exit : public Event_ev_msg
+	struct Event_exit : public Event
 	{};
 	View() {}
 	//properties

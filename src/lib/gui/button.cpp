@@ -1,9 +1,37 @@
 #include "button.h"
 #include "ctx.h"
 
+Button::Button()
+	: Label()
+{
+	def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_vcenter | flow_flag_align_hcenter));
+	def_prop("border", std::make_shared<Property>(1));
+}
+
+Button *Button::layout()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto border = (int)get_long_prop("border");
+	auto pos = border;
+	if (m_state != 1) pos *= 2;
+	m_flow->change(pos, pos, m_w - border * 2, m_h - border * 2)->layout();
+	set_flags(view_flag_opaque, view_flag_opaque);
+	return this;
+}
+
+Button *Button::draw(const Ctx &ctx)
+{
+	//allready locked by GUI thread
+	auto col = (uint32_t)get_long_prop("color");
+	auto border = (int)get_long_prop("border");
+	ctx.panel(col, true, border * m_state, 0, 0, m_w, m_h);
+	return this;
+}
+
 Button *Button::mouse_down(const std::shared_ptr<Msg> &event)
 {
-	auto event_struct = (View::Event_ev_msg_mouse*)&*(event->begin());
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	m_state = -1;
 	layout()->dirty_all();
 	return this;
@@ -11,7 +39,8 @@ Button *Button::mouse_down(const std::shared_ptr<Msg> &event)
 
 Button *Button::mouse_up(const std::shared_ptr<Msg> &event)
 {
-	auto event_struct = (View::Event_ev_msg_mouse*)&*(event->begin());
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	if (m_state != 1)
 	{
 		m_state = 1;
@@ -22,7 +51,8 @@ Button *Button::mouse_up(const std::shared_ptr<Msg> &event)
 
 Button *Button::mouse_move(const std::shared_ptr<Msg> &event)
 {
-	auto event_struct = (View::Event_ev_msg_mouse*)&*(event->begin());
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	auto state = 1;
 	if (event_struct->m_rx >= 0
 		&& event_struct->m_ry >= 0

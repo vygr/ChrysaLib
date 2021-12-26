@@ -169,14 +169,14 @@ View *View::trans_dirty(int rx, int ry)
 
 View *View::dirty()
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	add_dirty(Rect(0, 0, m_w, m_h));
 	return this;
 }
 
 View *View::dirty_all()
 {
-	set_flags(view_flag_dirty_all, view_flag_dirty_all);
-	return this;
+	return set_flags(view_flag_dirty_all, view_flag_dirty_all);
 }
 
 View *View::forward_tree(void *user, std::function<bool(View *view, void *user)> down, std::function<bool(View *view, void *user)> up)
@@ -237,6 +237,7 @@ View *View::backward_tree(void *user, std::function<bool(View *view, void *user)
 
 View *View::set_flags(unsigned int flags, unsigned int mask)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto dirty_state = m_flags & view_flag_dirty_all;
 	m_flags = (m_flags & ~mask) | flags | dirty_state;
 	return this;

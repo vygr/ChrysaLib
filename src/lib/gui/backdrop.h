@@ -3,7 +3,6 @@
 
 #include "view.h"
 
-//backdrop widget
 class Backdrop : public View
 {
 public:
