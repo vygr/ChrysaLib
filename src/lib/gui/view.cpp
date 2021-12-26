@@ -49,6 +49,16 @@ View *View::sub()
 	return this;
 }
 
+View *View::to_back()
+{
+	return this;
+}
+
+View *View::to_front()
+{
+	return this;
+}
+
 View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -249,6 +259,12 @@ view_size View::get_size()
 	return view_size{m_w, m_h};
 }
 
+view_bounds View::get_bounds()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	return view_bounds{m_x, m_y, m_w, m_h};
+}
+
 view_size View::get_pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -271,4 +287,11 @@ View *View::change(int x, int y, int w, int h)
 	m_h = h;
 	if (s == view_size{w, h}) return this;
 	return layout();
+}
+
+View *View::change_dirty(int x, int y, int w, int h)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto old_p = get_pos();
+	return dirty()->change(x, y, w, h)->trans_dirty(old_p.m_x - x, old_p.m_y - y);
 }

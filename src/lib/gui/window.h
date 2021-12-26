@@ -3,7 +3,8 @@
 
 #include "view.h"
 
-class Window : public View
+class Window
+	: public View
 {
 public:
     Window();

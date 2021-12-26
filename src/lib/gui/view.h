@@ -3,6 +3,7 @@
 
 #include "property.h"
 #include "region.h"
+#include "../mail/msg.h"
 #include <list>
 #include <mutex>
 #include <map>
@@ -11,6 +12,18 @@
 #include <vector>
 
 class Ctx;
+
+//view event msg
+enum
+{
+	ev_type_mouse,
+	ev_type_key,
+	ev_type_action,
+	ev_type_gui,
+	ev_type_wheel,
+	ev_type_enter,
+	ev_type_exit
+};
 
 //view flags
 enum
@@ -40,11 +53,55 @@ struct view_size
 	int m_h = 0;
 };
 
+struct view_bounds
+{
+	int m_x = 0;
+	int m_y = 0;
+	int m_w = 0;
+	int m_h = 0;
+};
+
 //view class
 //base class for all widgets
 class View
 {
 public:
+	struct Event_ev_msg
+	{
+		unsigned long m_target_id;
+		unsigned long m_type;
+	};
+	struct Event_ev_msg_mouse : public Event_ev_msg
+	{
+		unsigned int m_buttons;
+		unsigned int m_count;
+		int m_x;
+		int m_y;
+		int m_rx;
+		int m_ry;
+	};
+	struct Event_ev_msg_wheel : public Event_ev_msg
+	{
+		unsigned int m_direction;
+		int m_x;
+		int m_y;
+	};
+	struct Event_ev_msg_key : public Event_ev_msg
+	{
+		unsigned int m_keycode;
+		unsigned int m_key;
+		unsigned int m_mod;
+	};
+	struct Event_ev_msg_action : public Event_ev_msg
+	{
+		unsigned long m_source_id;
+	};
+	struct Event_ev_msg_gui : public Event_ev_msg
+	{};
+	struct Event_ev_msg_enter : public Event_ev_msg
+	{};
+	struct Event_ev_msg_exit : public Event_ev_msg
+	{};
 	View() {}
 	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
@@ -60,6 +117,8 @@ public:
 	View *add_front(std::shared_ptr<View> child);
 	View *add_back(std::shared_ptr<View> child);
 	View *sub();
+	View *to_back();
+	View *to_front();
 	//tree iteration
 	View *forward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
 	View *backward_tree(void *user, std::function<bool(View*, void*)>down, std::function<bool(View*, void*)>up);
@@ -72,17 +131,25 @@ public:
 	View *trans_dirty(int rx, int ry);
 	View *dirty();
 	View *dirty_all();
+	View *change_dirty(int x, int y, int w, int h);
 	//flags
 	View *set_flags(unsigned int flags, unsigned int mask);
 	//info
     view_pos get_pos();
     view_size get_size();
+    view_bounds get_bounds();
+	//action
+	View *emit() { return this; }
 	//subclass overides
     virtual view_size get_pref_size();
 	virtual View *layout();
 	virtual View *change(int x, int y, int w, int h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }
 	virtual View *draw(const Ctx &ctx);
+	virtual View *mouse_down(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_up(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_move(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_hover(const std::shared_ptr<Msg> &event) { return this; }
 
 	static std::recursive_mutex m_mutex;
 	View *m_parent = nullptr;

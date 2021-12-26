@@ -5,6 +5,7 @@
 Window::Window()
 	: View()
 {
+	def_prop("is_window", std::make_shared<Property>(0));
 	def_prop("color", std::make_shared<Property>(argb_grey12));
 	def_prop("ink_color", std::make_shared<Property>(argb_black));
 	def_prop("border", std::make_shared<Property>(1));
