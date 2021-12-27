@@ -102,7 +102,7 @@ public:
 	{};
 	struct Event_exit : public Event
 	{};
-	View() {}
+	View();
 	//properties
 	View *def_prop(const std::string &prop, std::shared_ptr<Property>);
 	View *set_prop(const std::string &prop, std::shared_ptr<Property>);
@@ -135,10 +135,12 @@ public:
 	//flags
 	View *set_flags(unsigned int flags, unsigned int mask);
 	//info
+	int64_t get_id() { return m_id; }
     view_pos get_pos();
     view_size get_size();
     view_bounds get_bounds();
 	//action
+	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit() { return this; }
 	//subclass overides
     virtual view_size pref_size();
@@ -146,12 +148,15 @@ public:
 	virtual View *change(int x, int y, int w, int h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }
 	virtual View *draw(const Ctx &ctx);
+	virtual View *action(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_down(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_up(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_move(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_hover(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_wheel(const std::shared_ptr<Msg> &event) { return this; }
 
 	static std::recursive_mutex m_mutex;
+	static int64_t m_next_id;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
@@ -163,7 +168,9 @@ public:
 	int m_h = 0;
 	int m_ctx_x = 0;
 	int m_ctx_y = 0;
-	unsigned int m_flags = view_flag_solid; 
+	unsigned int m_flags = view_flag_solid;
+	int64_t m_id = 0;
+	std::vector<int64_t> m_actions;
 };
 
 #endif

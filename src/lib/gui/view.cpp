@@ -4,6 +4,11 @@
 #include <iterator>
 
 std::recursive_mutex View::m_mutex;
+int64_t View::m_next_id = 0;
+
+View::View()
+	: m_id(m_next_id++)
+{}
 
 std::vector<std::shared_ptr<View>> View::children()
 {
