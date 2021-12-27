@@ -23,10 +23,9 @@ void GUI_Service::run()
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
 	m_screen = std::make_shared<Backdrop>();
-	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2));
-	m_screen->def_prop("ink_color", std::make_shared<Property>(argb_grey1));
-	m_screen->change(0, 0, 1280, 960);
-	m_screen->dirty_all();
+	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2))
+		->def_prop("ink_color", std::make_shared<Property>(argb_grey1))
+		->change(0, 0, 1280, 960)->dirty_all();
 
 	auto window = std::make_shared<Window>();
 	auto window_flow = std::make_shared<Flow>();
@@ -45,18 +44,14 @@ void GUI_Service::run()
 	close_button->def_prop("text", std::make_shared<Property>("X"));
 	min_button->def_prop("text", std::make_shared<Property>("-"));
 	max_button->def_prop("text", std::make_shared<Property>("+"));
-	main_widget->def_prop("text", std::make_shared<Property>("main_widget"));
-	main_widget->def_prop("min_width", std::make_shared<Property>(256));
-	main_widget->def_prop("min_height", std::make_shared<Property>(256));
+	main_widget->def_prop("text", std::make_shared<Property>("main_widget"))
+		->def_prop("min_width", std::make_shared<Property>(256))
+		->def_prop("min_height", std::make_shared<Property>(256));
 
 	window->add_child(window_flow);
-	window_flow->add_child(title_flow);
-	window_flow->add_child(main_widget);
-	title_flow->add_child(button_grid);
-	title_flow->add_child(title);
-	button_grid->add_child(min_button);
-	button_grid->add_child(max_button);
-	button_grid->add_child(close_button);
+	window_flow->add_child(title_flow)->add_child(main_widget);
+	title_flow->add_child(button_grid)->add_child(title);
+	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
 	auto s = window->get_pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(window);

@@ -3,8 +3,8 @@
 Title::Title()
 	: Label()
 {
-	def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_hleft | flow_flag_align_vcenter));
-	def_prop("border", std::make_shared<Property>(1));
+	def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_hleft | flow_flag_align_vcenter))
+	->def_prop("border", std::make_shared<Property>(1));
 }
 
 Title *Title::mouse_down(const std::shared_ptr<Msg> &event)

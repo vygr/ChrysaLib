@@ -18,9 +18,7 @@ Text *Text::draw(const Ctx &ctx)
 	auto text = get_string_prop("text");
 	auto col = (uint32_t)get_long_prop("color");
 	auto ink_col = (uint32_t)get_long_prop("ink_color");
-	ctx.set_color(col)
-		.filled_box(0, 0, m_w, m_h)
-		.set_color(ink_col)
-		.box(0, 0, m_w, m_h);
+	ctx.set_color(col).filled_box(0, 0, m_w, m_h)
+		.set_color(ink_col).box(0, 0, m_w, m_h);
 	return this;
 }
