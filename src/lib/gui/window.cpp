@@ -14,6 +14,7 @@ Window::Window()
 
 Window *Window::add_child(std::shared_ptr<View> child)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (m_child) m_child->sub();
 	if (child) add_back(child);
 	m_child = child;

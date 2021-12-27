@@ -6,13 +6,13 @@ Scroll::Scroll(int flags)
 	if ((flags & scroll_flag_vertical) != 0)
 	{
 		m_vslider = std::make_shared<Slider>();
-		m_vslider->connect(get_id());
+		m_vslider->connect(m_id);
 		add_front(m_vslider);
 	}
 	if ((flags & scroll_flag_horizontal) != 0)
 	{
 		m_hslider = std::make_shared<Slider>();
-		m_hslider->connect(get_id());
+		m_hslider->connect(m_id);
 		add_front(m_hslider);
 	}
 }
@@ -29,6 +29,7 @@ view_size Scroll::pref_size()
 
 Scroll *Scroll::add_child(std::shared_ptr<View> child)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (m_child) m_child->sub();
 	if (child) add_back(child);
 	m_child = child;

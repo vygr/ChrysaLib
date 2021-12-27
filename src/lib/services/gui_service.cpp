@@ -7,6 +7,7 @@
 #include "../gui/grid.h"
 #include "../gui/title.h"
 #include "../gui/button.h"
+#include "../gui/scroll.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
@@ -35,6 +36,7 @@ void GUI_Service::run()
 	auto min_button = std::make_shared<Button>();
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
+	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
 	auto main_widget = std::make_shared<Button>();
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
@@ -44,14 +46,18 @@ void GUI_Service::run()
 	close_button->def_prop("text", std::make_shared<Property>("X"));
 	min_button->def_prop("text", std::make_shared<Property>("-"));
 	max_button->def_prop("text", std::make_shared<Property>("+"));
+	scroll->def_prop("min_width", std::make_shared<Property>(256))
+		->def_prop("min_height", std::make_shared<Property>(256));
 	main_widget->def_prop("text", std::make_shared<Property>("main_widget"))
 		->def_prop("min_width", std::make_shared<Property>(256))
 		->def_prop("min_height", std::make_shared<Property>(256));
 
 	window->add_child(window_flow);
-	window_flow->add_child(title_flow)->add_child(main_widget);
+	window_flow->add_child(title_flow)->add_child(scroll);
 	title_flow->add_child(button_grid)->add_child(title);
 	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
+	scroll->add_child(main_widget);
+	main_widget->change(0, 0, 256, 256);
 	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(window);
