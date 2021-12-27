@@ -6,9 +6,7 @@
 class Slider : public View
 {
 public:
-	Slider()
-		: View()
-	{}
+	Slider();
 	view_size pref_size() override;
 	Slider *draw(const Ctx &ctx) override;
 	Slider *mouse_down(const std::shared_ptr<Msg> &event) override;

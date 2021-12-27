@@ -2,6 +2,15 @@
 #include "colors.h"
 #include "ctx.h"
 
+Slider::Slider()
+	: View()
+{
+	def_prop("value", std::make_shared<Property>(0))
+	->def_prop("maximum", std::make_shared<Property>(0))
+	->def_prop("minimum", std::make_shared<Property>(0))
+	->def_prop("portion", std::make_shared<Property>(0));
+}
+
 view_size Slider::pref_size()
 {
 	return view_size{10, 10};
