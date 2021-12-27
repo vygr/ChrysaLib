@@ -269,7 +269,9 @@ view_bounds View::get_bounds()
 view_size View::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	return view_size{m_w, m_h};
+	auto mw = (int)get_long_prop("min_width");
+	auto mh = (int)get_long_prop("min_height");
+	return view_size{mw, mh};
 }
 
 View *View::layout()
