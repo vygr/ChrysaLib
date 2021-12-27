@@ -26,7 +26,7 @@ Layout *Flow::layout()
 		};
 
 		//flow
-		auto s = child->get_pref_size();
+		auto s = child->pref_size();
 		auto cw = s.m_w;
 		auto ch = s.m_h;
 		auto cx = x;
@@ -73,7 +73,7 @@ Layout *Flow::layout()
 	return this;
 }
 
-view_size Flow::get_pref_size()
+view_size Flow::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto kids = children();
@@ -85,7 +85,7 @@ view_size Flow::get_pref_size()
 	for (auto &child : kids)
 	{
 		if (child->m_flags & view_flag_hidden) continue;
-		auto s = child->get_pref_size();
+		auto s = child->pref_size();
 		if (flow_flags & (flow_flag_left | flow_flag_right)) pw += s.m_w;
 		if (flow_flags & (flow_flag_up | flow_flag_down)) ph += s.m_h;
 		pw = std::max(pw, s.m_w);

@@ -141,7 +141,7 @@ public:
 	//action
 	View *emit() { return this; }
 	//subclass overides
-    virtual view_size get_pref_size();
+    virtual view_size pref_size();
 	virtual View *layout();
 	virtual View *change(int x, int y, int w, int h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }

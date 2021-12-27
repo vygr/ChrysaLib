@@ -266,7 +266,7 @@ view_bounds View::get_bounds()
 	return view_bounds{m_x, m_y, m_w, m_h};
 }
 
-view_size View::get_pref_size()
+view_size View::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	return view_size{m_w, m_h};
@@ -275,6 +275,8 @@ view_size View::get_pref_size()
 View *View::layout()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto col = (uint32_t)get_long_prop("color");
+	if ((col >> 24) == 0xff) set_flags(view_flag_opaque, view_flag_opaque);
 	return this;
 }
 

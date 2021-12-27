@@ -52,7 +52,7 @@ void GUI_Service::run()
 	window_flow->add_child(title_flow)->add_child(main_widget);
 	title_flow->add_child(button_grid)->add_child(title);
 	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
-	auto s = window->get_pref_size();
+	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 	m_screen->add_back(window);
 

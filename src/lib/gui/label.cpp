@@ -18,13 +18,13 @@ Label *Label::add_child(std::shared_ptr<View> child)
 	return this;
 }
 
-view_size Label::get_pref_size()
+view_size Label::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto border = std::abs((int)get_long_prop("border"));
 	auto mw = (int)got_long_prop("min_width");
 	auto mh = (int)got_long_prop("min_height");
-	auto s = m_flow->get_pref_size();
+	auto s = m_flow->pref_size();
 	return view_size{std::max(s.m_w + 2 * border, mw), std::max(s.m_h + 2 * border, mh)};
 }
 

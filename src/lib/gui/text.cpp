@@ -1,7 +1,7 @@
 #include "text.h"
 #include "ctx.h"
 
-view_size Text::get_pref_size()
+view_size Text::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto font = get_string_prop("font");

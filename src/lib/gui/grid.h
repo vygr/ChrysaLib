@@ -9,7 +9,7 @@ public:
     Grid()
         : Layout()
 	{}
-	view_size get_pref_size() override;
+	view_size pref_size() override;
 	Grid *layout() override;
 };
 

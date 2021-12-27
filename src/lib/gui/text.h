@@ -9,7 +9,7 @@ public:
     Text()
         : View()
 	{}
-	view_size get_pref_size() override;
+	view_size pref_size() override;
 	Text *draw(const Ctx &ctx) override;
 };
 

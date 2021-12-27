@@ -20,13 +20,13 @@ Window *Window::add_child(std::shared_ptr<View> child)
 	return this;
 }
 
-view_size Window::get_pref_size()
+view_size Window::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto border = (int)get_long_prop("border");
 	auto shadow = (int)get_long_prop("shadow");
 	view_size s;
-	if (m_child) s = m_child->get_pref_size();
+	if (m_child) s = m_child->pref_size();
 	s.m_w += 2 * (shadow + border);
 	s.m_h += 2 * (shadow + border);
 	return s;

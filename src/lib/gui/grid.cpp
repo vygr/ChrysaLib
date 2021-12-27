@@ -2,7 +2,7 @@
 #include "../settings.h"
 #include <algorithm>
 
-view_size Grid::get_pref_size()
+view_size Grid::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto kids = children();
@@ -16,7 +16,7 @@ view_size Grid::get_pref_size()
 	auto max_h = 0;
 	for (auto &child : kids)
 	{
-		auto s = child->get_pref_size();
+		auto s = child->pref_size();
 		max_w = std::max(max_w, s.m_w);
 		max_h = std::max(max_h, s.m_h);
 	}

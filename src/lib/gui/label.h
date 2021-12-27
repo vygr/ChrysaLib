@@ -8,7 +8,7 @@ class Label : public View
 {
 public:
     Label();
-	view_size get_pref_size() override;
+	view_size pref_size() override;
 	Label *layout() override;
 	Label *add_child(std::shared_ptr<View> child) override;
 	Label *draw(const Ctx &ctx) override;
