@@ -191,25 +191,15 @@ View *View::forward_tree(std::function<bool(View &view)> down, std::function<boo
 	//child function
 	std::function<View &(View &view)> forward_tree = [&](View &view) -> View&
 	{
-		if (down(view))
-		{
-			std::for_each(begin(view.m_children), end(view.m_children), [&] (auto &child)
-			{
-				forward_tree(*child);
-			});
-		}
+		if (down(view)) std::for_each(begin(view.m_children), end(view.m_children),
+						[&] (auto &child) { forward_tree(*child); });
 		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (down(*this))
-	{
-		std::for_each(begin(m_children), end(m_children), [&] (auto &child)
-		{
-			forward_tree(*child);
-		});
-	}
+	if (down(*this)) std::for_each(begin(m_children), end(m_children),
+						[&] (auto &child) { forward_tree(*child); });
 	up(*this);
 	return this;
 }
@@ -219,25 +209,15 @@ View *View::backward_tree(std::function<bool(View &view)> down, std::function<bo
 	//child function
 	std::function<View &(View &view)> backward_tree = [&](View &view) -> View&
 	{
-		if (down(view))
-		{
-			std::for_each(rbegin(view.m_children), rend(view.m_children), [&] (auto &child)
-			{
-				backward_tree(*child);
-			});
-		}
+		if (down(view)) std::for_each(rbegin(view.m_children), rend(view.m_children),
+						[&] (auto &child) { backward_tree(*child); });
 		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	if (down(*this))
-	{
-		std::for_each(rbegin(m_children), rend(m_children), [&] (auto &child)
-		{
-			backward_tree(*child);
-		});
-	}
+	if (down(*this)) std::for_each(rbegin(m_children), rend(m_children),
+						[&] (auto &child) { backward_tree(*child); });
 	up(*this);
 	return this;
 }

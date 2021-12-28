@@ -182,22 +182,21 @@ void GUI_Service::composit()
 	m_screen->backward_tree(
 		[&](View &view)
 		{
-			//remove opaque region from ancestors if not root
+			//if not root
 			auto parent = view.m_parent;
 			if (parent)
 			{
 				//remove my opaque region from ancestors
 				if ((view.m_flags & view_flag_opaque) != 0)
 				{
-					//remove entire view from ancestors
+					//remove entire view
 					auto x = 0;
 					auto y = 0;
 					auto x1 = view.m_w;
 					auto y1 = view.m_h;
 					auto ancestor = &view;
-					do
+					while (auto parent = ancestor->m_parent)
 					{
-						auto parent = ancestor->m_parent;
 						//translate region
 						auto px = ancestor->m_x;
 						auto py = ancestor->m_y;
@@ -216,23 +215,20 @@ void GUI_Service::composit()
 						//remove opaque region
 						parent->m_dirty.remove_rect(Rect(x, y, x1, y1));
 						ancestor = parent;
-					} while (ancestor != &*m_screen);
+					}
 				}
 				else
 				{
-					//use opaque region, so my opaque area is the visible region
+					//remove opaque region
 					Region vis_region;
 					auto x = -view.m_x;
 					auto y = -view.m_y;
 					auto x1 = x + parent->m_w;
 					auto y1 = y + parent->m_h;
 					view.m_opaque.copy_rect(vis_region, Rect(x, y, x1, y1));
-
-					//remove from ancestors
 					auto ancestor = &view;
-					do
+					while (auto parent = ancestor->m_parent)
 					{
-						parent = ancestor->m_parent;
 						//exit if clipped away
 						if (vis_region.m_region.empty()) break;
 						//translate temp opaque region
@@ -242,7 +238,7 @@ void GUI_Service::composit()
 						//remove temp opaque region
 						vis_region.remove_region(parent->m_dirty, 0, 0);
 						ancestor = parent;
-					} while (ancestor != &*m_screen);
+					}
 				}
 			}
 			return true;
@@ -295,25 +291,23 @@ void GUI_Service::composit()
 			auto parent = view.m_parent;
 			if (!parent) return true;
 
-			//remove opaque region from ancestors
+			//copy my area from parent
 			auto x = view.m_ctx.m_x;
 			auto y = view.m_ctx.m_y;
 			auto x1 = x + view.m_w;
 			auto y1 = y + view.m_h;
-			//copy my area from parent
 			parent->m_dirty.copy_rect(view.m_dirty, Rect(x, y, x1, y1));
 
-			//did we find any opaque region ?
+			//do we have any dirty region ?
 			if (view.m_dirty.m_region.empty()) return false;
 
 			//remove my opaque region from ancestors
 			if ((view.m_flags & view_flag_opaque) != 0)
 			{
-				//remove entire view from ancestors
+				//remove entire view
 				auto ancestor = &view;
-				do
+				while (auto parent = ancestor->m_parent)
 				{
-					parent = ancestor->m_parent;
 					//clip to parent, exit if clipped away
 					auto px = parent->m_ctx.m_x;
 					auto py = parent->m_ctx.m_y;
@@ -324,23 +318,21 @@ void GUI_Service::composit()
 					y = std::max(py, y);
 					x1 = std::min(px1, x1);
 					y1 = std::min(py1, y1);
-					//remove opaque region
 					parent->m_dirty.remove_rect(Rect(x, y, x1, y1));
 					ancestor = parent;
-				} while (ancestor != &*m_screen);
+				}
 			}
 			else
 			{
-				//remove opaque region from ancestors
+				//remove opaque region
 				auto ancestor = &view;
-				do
+				while (auto parent = ancestor->m_parent)
 				{
-					parent = ancestor->m_parent;
-					x = view.m_ctx.m_x;
-					y = view.m_ctx.m_y;
-					view.m_opaque.remove_region(parent->m_dirty, x, y);
+					x = ancestor->m_ctx.m_x;
+					y = ancestor->m_ctx.m_y;
+					ancestor->m_opaque.remove_region(parent->m_dirty, x, y);
 					ancestor = parent;
-				} while (ancestor != &*m_screen);
+				}
 			}
 
 			//recursion if we have drawing
