@@ -158,7 +158,8 @@ void GUI_Service::run()
 
 void GUI_Service::composit()
 {
-	//iterate through views back to front, setting abs cords of views
+	//iterate through views back to front
+	//setting abs cords of views
 	view_pos abs;
 	m_screen->backward_tree(
 		[&](View &view)
@@ -182,7 +183,8 @@ void GUI_Service::composit()
 		[&](View &view)
 		{
 			//remove opaque region from ancestors if not root
-			if (&view != &*m_screen)
+			auto parent = view.m_parent;
+			if (parent)
 			{
 				//remove my opaque region from ancestors
 				if ((view.m_flags & view_flag_opaque) != 0)
@@ -192,13 +194,13 @@ void GUI_Service::composit()
 					auto y = 0;
 					auto x1 = view.m_w;
 					auto y1 = view.m_h;
-					auto view_o = &view;
+					auto ancestor = &view;
 					do
 					{
-						auto parent = view_o->m_parent;
+						auto parent = ancestor->m_parent;
 						//translate region
-						auto px = view_o->m_x;
-						auto py = view_o->m_y;
+						auto px = ancestor->m_x;
+						auto py = ancestor->m_y;
 						auto px1 = parent->m_w;
 						auto py1 = parent->m_h;
 						x += px;
@@ -213,15 +215,13 @@ void GUI_Service::composit()
 						y1 = std::min(py1, y1);
 						//remove opaque region
 						parent->m_dirty.remove_rect(Rect(x, y, x1, y1));
-						view_o = parent;
-					} while (view_o != &*m_screen);
+						ancestor = parent;
+					} while (ancestor != &*m_screen);
 				}
 				else
 				{
-					//temp visible region
-					Region vis_region;
 					//use opaque region, so my opaque area is the visible region
-					auto parent = view.m_parent;
+					Region vis_region;
 					auto x = -view.m_x;
 					auto y = -view.m_y;
 					auto x1 = x + parent->m_w;
@@ -229,23 +229,20 @@ void GUI_Service::composit()
 					view.m_opaque.copy_rect(vis_region, Rect(x, y, x1, y1));
 
 					//remove from ancestors
-					auto view_o = &view;
+					auto ancestor = &view;
 					do
 					{
-						parent = view.m_parent;
+						parent = ancestor->m_parent;
 						//exit if clipped away
 						if (vis_region.m_region.empty()) break;
 						//translate temp opaque region
-						vis_region.translate(view_o->m_x, view_o->m_y);
+						vis_region.translate(ancestor->m_x, ancestor->m_y);
 						//clip temp opaque region
 						vis_region.clip_rect(Rect(0, 0, parent->m_w, parent->m_h));
 						//remove temp opaque region
 						vis_region.remove_region(parent->m_dirty, 0, 0);
-						view_o = parent;
-					} while (view_o != &*m_screen);
-
-					//free any temp region
-					vis_region.free();
+						ancestor = parent;
+					} while (ancestor != &*m_screen);
 				}
 			}
 			return true;
@@ -254,7 +251,7 @@ void GUI_Service::composit()
 		{
 			//clip local dirty region with parent bounds
 			auto parent = view.m_parent;
-			if (&view == &*m_screen) parent = &view;
+			if (!parent) parent = &view;
 			auto x = -view.m_x;
 			auto y = -view.m_y;
 			auto x1 = x + parent->m_w;
@@ -262,9 +259,9 @@ void GUI_Service::composit()
 			view.m_dirty.clip_rect(Rect(x, y, x1, y1));
 
 			//paste local dirty region onto parent if not root
-			if (&view != &*m_screen)
+			parent = view.m_parent;
+			if (parent)
 			{
-				parent = view.m_parent;
 				x = view.m_x;
 				y = view.m_y;
 				view.m_dirty.paste_region(parent->m_dirty, x, y);
@@ -282,7 +279,7 @@ void GUI_Service::composit()
 				x1 = x + view.m_w;
 				y1 = y + view.m_h;
 				parent = view.m_parent;
-				if (&view == &*m_screen) parent = &view;
+				if (!parent) parent = &view;
 				parent->m_dirty.paste_rect(Rect(x, y, x1, y1));
 			}
 			return true;
@@ -295,10 +292,10 @@ void GUI_Service::composit()
 		[&](View &view)
 		{
 			//copy view from parent if not root
-			if (&view == &*m_screen) return true;
+			auto parent = view.m_parent;
+			if (!parent) return true;
 
 			//remove opaque region from ancestors
-			auto parent = view.m_parent;
 			auto x = view.m_ctx.m_x;
 			auto y = view.m_ctx.m_y;
 			auto x1 = x + view.m_w;
@@ -313,10 +310,10 @@ void GUI_Service::composit()
 			if ((view.m_flags & view_flag_opaque) != 0)
 			{
 				//remove entire view from ancestors
-				auto view_o = &view;
+				auto ancestor = &view;
 				do
 				{
-					parent = view_o->m_parent;
+					parent = ancestor->m_parent;
 					//clip to parent, exit if clipped away
 					auto px = parent->m_ctx.m_x;
 					auto py = parent->m_ctx.m_y;
@@ -329,21 +326,21 @@ void GUI_Service::composit()
 					y1 = std::min(py1, y1);
 					//remove opaque region
 					parent->m_dirty.remove_rect(Rect(x, y, x1, y1));
-					view_o = parent;
-				} while (view_o != &*m_screen);
+					ancestor = parent;
+				} while (ancestor != &*m_screen);
 			}
 			else
 			{
 				//remove opaque region from ancestors
-				auto view_o = &view;
+				auto ancestor = &view;
 				do
 				{
-					parent = view_o->m_parent;
+					parent = ancestor->m_parent;
 					x = view.m_ctx.m_x;
 					y = view.m_ctx.m_y;
 					view.m_opaque.remove_region(parent->m_dirty, x, y);
-					view_o = parent;
-				} while (view_o != &*m_screen);
+					ancestor = parent;
+				} while (ancestor != &*m_screen);
 			}
 
 			//recursion if we have drawing
