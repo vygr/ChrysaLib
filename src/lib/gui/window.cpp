@@ -24,8 +24,8 @@ Window *Window::add_child(std::shared_ptr<View> child)
 view_size Window::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto border = (int)get_long_prop("border");
-	auto shadow = (int)get_long_prop("shadow");
+	auto border = get_long_prop("border");
+	auto shadow = get_long_prop("shadow");
 	view_size s;
 	if (m_child) s = m_child->pref_size();
 	s.m_w += 2 * (shadow + border);
@@ -36,9 +36,9 @@ view_size Window::pref_size()
 Window *Window::layout()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto border = (int)get_long_prop("border");
-	auto shadow = (int)get_long_prop("shadow");
 	auto col = (uint32_t)get_long_prop("color");
+	auto border = get_long_prop("border");
+	auto shadow = get_long_prop("shadow");
 	//position any child
 	auto w = m_w - 2 * (shadow + border);
 	auto h = m_h - 2 * (shadow + border);
@@ -56,8 +56,8 @@ Window *Window::draw(const Ctx &ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	auto border = (int)get_long_prop("border");
-	auto shadow = (int)get_long_prop("shadow");
+	auto border = get_long_prop("border");
+	auto shadow = get_long_prop("shadow");
 	ctx.panel(col, true, border, shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
 	col = 0x80000000;
 	while (--shadow >= 0 && col != 0)

@@ -31,8 +31,8 @@ view_size Label::pref_size()
 Label *Label::layout()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto border = (int)get_long_prop("border");
 	auto col = (uint32_t)get_long_prop("color");
+	auto border = get_long_prop("border");
 	m_flow->change(border, border, m_w - border * 2, m_h - border * 2)->layout();
 	if ((col >> 24) == 0xff) set_flags(view_flag_opaque, view_flag_opaque);
 	return this;
@@ -42,7 +42,7 @@ Label *Label::draw(const Ctx &ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	auto border = (int)get_long_prop("border");
+	auto border = get_long_prop("border");
 	ctx.panel(col, true, border, 0, 0, m_w, m_h);
 	return this;
 }

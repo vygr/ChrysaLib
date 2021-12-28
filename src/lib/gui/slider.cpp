@@ -20,9 +20,9 @@ Slider *Slider::draw(const Ctx &ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	auto value = (int)get_long_prop("value");
-	auto portion = (int)get_long_prop("portion");
-	auto max = (int)get_long_prop("maximum");
+	auto value = get_long_prop("value");
+	auto portion = get_long_prop("portion");
+	auto max = get_long_prop("maximum");
 	auto dark = ctx.darker(col);
 	auto bright = ctx.darker(col);
 	//border
@@ -68,7 +68,7 @@ Slider *Slider::mouse_down(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto event_struct = (View::Event_mouse*)&*(event->begin());
-	m_old_value = (int)get_long_prop("value");
+	m_old_value = get_long_prop("value");
 	m_state = 1;
 	m_down_xy = m_w > m_h ? event_struct->m_rx : event_struct->m_ry;
 	dirty_all()->mouse_move(event);
@@ -91,23 +91,21 @@ Slider *Slider::mouse_move(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto event_struct = (View::Event_mouse*)&*(event->begin());
-	auto value_prop = get_prop("value");
-	auto value = 0;
-	if (value_prop) value = (int)value_prop->get_long();
-	auto portion = (int)get_long_prop("portion");
-	auto max = (int)get_long_prop("maximum");
+	auto value = get_long_prop("value");
+	auto portion = get_long_prop("portion");
+	auto max = get_long_prop("maximum");
 	auto state = 1;
 	if (event_struct->m_rx >= 0
 		&& event_struct->m_ry >= 0
 		&& event_struct->m_rx < m_w
 		&& event_struct->m_ry < m_h) state = 0;
-	auto new_value = m_w > m_h ?
+	int64_t new_value = m_w > m_h ?
 		(event_struct->m_rx - m_down_xy) * (max + portion) / m_w:
 		(event_struct->m_ry - m_down_xy) * (max + portion) / m_h;
-	new_value = (std::max(0, std::min(max, (new_value + m_old_value))));
+	new_value = std::max((int64_t)0, std::min(max, (new_value + m_old_value)));
 	if (new_value != value)
 	{
-		if (value_prop) value_prop->set_long(new_value);
+		def_prop("value", std::make_shared<Property>(new_value));
 		dirty_all()->emit();
 	}
 	if (state != m_state)

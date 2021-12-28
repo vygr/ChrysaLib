@@ -10,8 +10,8 @@ Progress *Progress::draw(const Ctx &ctx)
 {
 	//allready locked by GUI thread
 	auto col = (uint32_t)get_long_prop("color");
-	auto value = (int)get_long_prop("value");
-	auto max = (int)get_long_prop("maximum");
+	auto value = get_long_prop("value");
+	auto max = get_long_prop("maximum");
 	auto gap = value * (m_w - 2) / max;
 	auto dark = ctx.darker(col);
 	auto darker = ctx.darker(dark);

@@ -60,31 +60,25 @@ Scroll *Scroll::layout()
 		auto cs = m_child->get_size();
 		if (m_vslider)
 		{
-			auto value_prop = m_vslider->get_prop("value");
-			auto max_prop = m_vslider->get_prop("maximum");
-			auto portion_prop = m_vslider->get_prop("portion");
-			auto mo = std::max(0, cs.m_h - (m_h - sh));
-			if (max_prop && value_prop && portion_prop)
-			{
-				vval = std::max(0, std::min((int)value_prop->get_long(), mo));
-				max_prop->set_long(mo);
-				portion_prop->set_long(m_h - sh);
-				value_prop->set_long(vval);
-			}
+			auto vval = m_vslider->get_long_prop("value");
+			auto max = m_vslider->get_long_prop("maximum");
+			auto portion = m_vslider->get_long_prop("portion");
+			auto mo = (int64_t)std::max(0, cs.m_h - (m_h - sh));
+			vval = std::max((int64_t)0, std::min(vval, mo));
+			m_vslider->def_prop("value", std::make_shared<Property>(vval));
+			m_vslider->def_prop("maximum", std::make_shared<Property>(mo));
+			m_vslider->def_prop("portion", std::make_shared<Property>(m_h - sh));
 		}
 		if (m_hslider)
 		{
-			auto value_prop = m_hslider->get_prop("value");
-			auto max_prop = m_hslider->get_prop("maximum");
-			auto portion_prop = m_hslider->get_prop("portion");
-			auto mo = std::max(0, cs.m_w - (m_w - sw));
-			if (max_prop && value_prop && portion_prop)
-			{
-				hval = std::max(0, std::min((int)value_prop->get_long(), mo));
-				max_prop->set_long(mo);
-				portion_prop->set_long(m_w - sw);
-				value_prop->set_long(hval);
-			}
+			auto hval = m_hslider->get_long_prop("value");
+			auto max = m_hslider->get_long_prop("maximum");
+			auto portion = m_hslider->get_long_prop("portion");
+			auto mo = (int64_t)std::max(0, cs.m_w - (m_w - sw));
+			hval = std::max((int64_t)0, std::min(hval, mo));
+			m_hslider->def_prop("value", std::make_shared<Property>(hval));
+			m_hslider->def_prop("maximum", std::make_shared<Property>(mo));
+			m_hslider->def_prop("portion", std::make_shared<Property>(m_w - sw));
 		}
 		m_child->m_x = -hval;
 		m_child->m_y = -vval;
@@ -106,13 +100,13 @@ Scroll *Scroll::mouse_wheel(const std::shared_ptr<Msg> &event)
 	auto event_struct = (View::Event_wheel*)&*(event->begin());
 	if (m_hslider)
 	{
-		auto value_prop = m_hslider->get_prop("value");
-		if (value_prop) value_prop->set_long(value_prop->get_long() + 16 * event_struct->m_x);
+		auto value = m_hslider->get_long_prop("value");
+		m_hslider->def_prop("value", std::make_shared<Property>(value + 16 * event_struct->m_x));
 	}
 	if (m_vslider)
 	{
-		auto value_prop = m_vslider->get_prop("value");
-		if (value_prop) value_prop->set_long(value_prop->get_long() - 16 * event_struct->m_y);
+		auto value = m_vslider->get_long_prop("value");
+		m_vslider->def_prop("value", std::make_shared<Property>(value - 16 * event_struct->m_y));
 	}
 	layout()->dirty_all();
 	return this;
