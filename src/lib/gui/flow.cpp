@@ -1,6 +1,6 @@
 #include "flow.h"
 
-Layout *Flow::layout()
+Flow *Flow::layout()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto fw = m_w;

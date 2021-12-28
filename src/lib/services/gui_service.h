@@ -35,7 +35,6 @@ public:
 	void run() override;
 	void composit();
 	unsigned int m_gui_flags = 0;
-	bool m_dirty_flag = true;
 	std::shared_ptr<View> m_screen;
 	SDL_Renderer *m_renderer = nullptr;
 };

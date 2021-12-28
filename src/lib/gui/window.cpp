@@ -40,14 +40,13 @@ Window *Window::layout()
 	auto border = get_long_prop("border");
 	auto shadow = get_long_prop("shadow");
 	//position any child
-	auto w = m_w - 2 * (shadow + border);
-	auto h = m_h - 2 * (shadow + border);
-	if (m_child) m_child->change(border + shadow, border + shadow, w, h);
+	if (m_child) m_child->change(border + shadow, border + shadow,
+		m_w - 2 * (shadow + border), m_h - 2 * (shadow + border));
 	//adjust window transparency details based on color and shadow
 	if ((col >> 24) == 0xff)
 	{
 		if (!shadow) set_flags(view_flag_opaque, view_flag_opaque);
-		else clr_opaque()->add_opaque(Rect(border + shadow, border + shadow, w, h));
+		else clr_opaque()->add_opaque(shadow, shadow, m_w - 2 * shadow, m_h - 2 * shadow);
 	}
 	return this;
 }

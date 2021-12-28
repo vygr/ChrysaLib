@@ -3,6 +3,7 @@
 
 #include "property.h"
 #include "region.h"
+#include "ctx.h"
 #include "../mail/msg.h"
 #include <list>
 #include <mutex>
@@ -10,8 +11,6 @@
 #include <functional>
 #include <memory>
 #include <vector>
-
-class Ctx;
 
 //view event msg
 enum
@@ -123,11 +122,11 @@ public:
 	View *forward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	View *backward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	//visability
-	View *add_opaque(const Rect &rect);
-	View *sub_opaque(const Rect &rect);
+	View *add_opaque(int x, int y, int w, int h);
+	View *sub_opaque(int x, int y, int w, int h);
 	View *clr_opaque();
 	//dirty areas
-	View *add_dirty(const Rect &rect);
+	View *add_dirty(int x, int y, int w, int h);
 	View *trans_dirty(int rx, int ry);
 	View *dirty();
 	View *dirty_all();
@@ -157,6 +156,7 @@ public:
 
 	static std::recursive_mutex m_mutex;
 	static int64_t m_next_id;
+	static unsigned int m_gui_flags;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
@@ -166,11 +166,10 @@ public:
 	int m_y = 0;
 	int m_w = 0;
 	int m_h = 0;
-	int m_ctx_x = 0;
-	int m_ctx_y = 0;
 	unsigned int m_flags = view_flag_solid;
 	int64_t m_id = 0;
 	std::vector<int64_t> m_actions;
+	Ctx m_ctx;
 };
 
 #endif

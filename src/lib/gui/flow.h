@@ -1,7 +1,7 @@
 #ifndef FLOW_H
 #define FLOW_H
 
-#include "layout.h"
+#include "view.h"
 
 //flow flags
 enum
@@ -29,14 +29,14 @@ const auto flow_right_fill = flow_flag_right | flow_flag_fillh | flow_flag_lastw
 const auto flow_left_fill = flow_flag_left | flow_flag_fillh | flow_flag_lastw;
 const auto flow_stack_fill = flow_flag_fillw | flow_flag_fillh | flow_flag_lastw | flow_flag_lasth;
 
-class Flow : public Layout
+class Flow : public View
 {
 public:
 	Flow()
-		: Layout()
+		: View()
 	{}
 	view_size pref_size() override;
-	Layout *layout() override;
+	Flow *layout() override;
 };
 
 #endif

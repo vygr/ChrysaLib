@@ -1,5 +1,5 @@
 #include "ctx.h"
-#include "region.h"
+#include "view.h"
 #include <SDL.h>
 
 uint32_t Ctx::darker(uint32_t col) const

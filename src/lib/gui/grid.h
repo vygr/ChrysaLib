@@ -1,13 +1,13 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "layout.h"
+#include "view.h"
 
-class Grid : public Layout
+class Grid : public View
 {
 public:
     Grid()
-        : Layout()
+        : View()
 	{}
 	view_size pref_size() override;
 	Grid *layout() override;

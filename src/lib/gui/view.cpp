@@ -5,6 +5,7 @@
 
 std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
+unsigned int View::m_gui_flags = 0;
 
 View::View()
 	: m_id(--m_next_id)
@@ -137,17 +138,17 @@ const std::string View::get_string_prop(const std::string &prop)
 	return "";
 };
 
-View *View::add_opaque(const Rect &rect)
+View *View::add_opaque(int x, int y, int w, int h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_opaque.paste_rect(rect);
+	m_opaque.paste_rect(Rect(x, y, x + w, y + h));
 	return this;
 }
 
-View *View::sub_opaque(const Rect &rect)
+View *View::sub_opaque(int x, int y, int w, int h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_opaque.remove_rect(rect);
+	m_opaque.remove_rect(Rect(x, y, x + w, y + h));
 	return this;
 }
 
@@ -158,10 +159,11 @@ View *View::clr_opaque()
 	return this;
 }
 
-View *View::add_dirty(const Rect &rect)
+View *View::add_dirty(int x, int y, int w, int h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_dirty.paste_rect(rect);
+	m_dirty.paste_rect(Rect(x, y, x + w, y + h));
+	m_gui_flags = view_flag_dirty_all;
 	return this;
 }
 
@@ -175,7 +177,7 @@ View *View::trans_dirty(int rx, int ry)
 View *View::dirty()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	add_dirty(Rect(0, 0, m_w, m_h));
+	add_dirty(0, 0, m_w, m_h);
 	return this;
 }
 
@@ -245,6 +247,7 @@ View *View::set_flags(unsigned int flags, unsigned int mask)
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto dirty_state = m_flags & view_flag_dirty_all;
 	m_flags = (m_flags & ~mask) | flags | dirty_state;
+	m_gui_flags |= (m_flags & view_flag_dirty_all);
 	return this;
 }
 

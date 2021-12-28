@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 class SDL_Renderer;
+class View;
 class Region;
 
 //ctx class
@@ -19,6 +20,7 @@ public:
 	uint32_t darker(uint32_t col) const;
 	uint32_t brighter(uint32_t col) const;
 	SDL_Renderer *m_renderer = nullptr;
+	View *m_view = nullptr;
 	Region *m_region = nullptr;
 	int m_x = 0;
 	int m_y = 0;
