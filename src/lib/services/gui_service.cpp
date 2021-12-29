@@ -1,5 +1,5 @@
 #include "gui_service.h"
-#include "task.h"
+#include "gui_task.h"
 #include "../gui/region.h"
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
@@ -39,7 +39,7 @@ void GUI_Service::run()
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
 	//start up test task
-	auto task = std::make_unique<Task>(m_router);
+	auto task = std::make_unique<GUI_Task>(m_router);
 	auto task_id = task->start_task(task.get());
 
 	//event loop
