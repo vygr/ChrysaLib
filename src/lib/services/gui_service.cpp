@@ -12,8 +12,6 @@
 // gui
 //////
 
-std::vector<std::string> split_string(std::string str, const std::string &token);
-
 void GUI_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor
