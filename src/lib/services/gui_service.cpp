@@ -159,25 +159,6 @@ void GUI_Service::run()
 void GUI_Service::composit()
 {
 	//iterate through views back to front
-	//setting abs cords of views
-	view_pos abs;
-	m_screen->backward_tree(
-		[&](View &view)
-		{
-			abs.m_x += view.m_x;
-			abs.m_y += view.m_y;
-			view.m_ctx.m_x = abs.m_x;
-			view.m_ctx.m_y = abs.m_y;
-			return true;
-		},
-		[&](View &view)
-		{
-			abs.m_x -= view.m_x;
-			abs.m_y -= view.m_y;
-			return true;
-		});
-
-	//iterate through views back to front
 	//create visible region at root
 	m_screen->backward_tree(
 		[&](View &view)
@@ -283,10 +264,18 @@ void GUI_Service::composit()
 
 	//iterate through views front to back
 	//distribute visible region
+	//setting abs cords of views
 	auto draw_list = std::forward_list<View*>{};
+	view_pos abs;
 	m_screen->forward_tree(
 		[&](View &view)
 		{
+			//abs cords
+			abs.m_x += view.m_x;
+			abs.m_y += view.m_y;
+			view.m_ctx.m_x = abs.m_x;
+			view.m_ctx.m_y = abs.m_y;
+
 			//copy view from parent if not root
 			auto parent = view.m_parent;
 			if (!parent) return true;
@@ -340,6 +329,10 @@ void GUI_Service::composit()
 		},
 		[&](View &view)
 		{
+			//abs cords
+			abs.m_x -= view.m_x;
+			abs.m_y -= view.m_y;
+
 			//add myself to draw list if not empty
 			if (!view.m_dirty.m_region.empty())
 			{
