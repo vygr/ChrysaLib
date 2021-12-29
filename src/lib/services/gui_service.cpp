@@ -1,13 +1,8 @@
 #include "gui_service.h"
+#include "task.h"
 #include "../gui/region.h"
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
-#include "../gui/window.h"
-#include "../gui/flow.h"
-#include "../gui/grid.h"
-#include "../gui/title.h"
-#include "../gui/button.h"
-#include "../gui/scroll.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
@@ -16,6 +11,8 @@
 //////
 // gui
 //////
+
+std::vector<std::string> split_string(std::string str, const std::string &token);
 
 void GUI_Service::run()
 {
@@ -27,41 +24,6 @@ void GUI_Service::run()
 	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2))
 		->def_prop("ink_color", std::make_shared<Property>(argb_grey1))
 		->change(0, 0, 1280, 960)->dirty_all();
-
-	auto window = std::make_shared<Window>();
-	auto window_flow = std::make_shared<Flow>();
-	auto title_flow = std::make_shared<Flow>();
-	auto button_grid = std::make_shared<Grid>();
-	auto title = std::make_shared<Title>();
-	auto min_button = std::make_shared<Button>();
-	auto max_button = std::make_shared<Button>();
-	auto close_button = std::make_shared<Button>();
-	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Button>();
-
-	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
-	button_grid->def_prop("grid_height", std::make_shared<Property>(1));
-	title->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	close_button->def_prop("text", std::make_shared<Property>("X"));
-	min_button->def_prop("text", std::make_shared<Property>("-"));
-	max_button->def_prop("text", std::make_shared<Property>("+"));
-	scroll->def_prop("min_width", std::make_shared<Property>(128))
-		->def_prop("min_height", std::make_shared<Property>(128));
-	main_widget->def_prop("text", std::make_shared<Property>("main_widget"))
-		->def_prop("min_width", std::make_shared<Property>(256))
-		->def_prop("min_height", std::make_shared<Property>(256));
-
-	window->add_child(window_flow);
-	window_flow->add_child(title_flow)->add_child(scroll);
-	title_flow->add_child(button_grid)->add_child(title);
-	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
-	scroll->add_child(main_widget);
-	main_widget->change(0, 0, 256, 256);
-	auto s = window->pref_size();
-	window->change(107, 107, s.m_w, s.m_h);
-
-	m_screen->add_back(window);
 
 	//init SDL
 	SDL_SetMainReady();
@@ -76,6 +38,10 @@ void GUI_Service::run()
 	//set blend mode
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
+	//start up test task
+	auto task = std::make_unique<Task>(m_router);
+	auto task_id = task->start_task(task.get());
+
 	//event loop
 	while (m_running)
 	{
@@ -85,22 +51,37 @@ void GUI_Service::run()
 			auto evt = (Event*)msg->begin();
 			switch (evt->m_evt)
 			{
-			case evt_add_front_view:
+			case evt_add_front:
 			{
 				//add view to screen
-				auto body_struct = (Event_add_front_view*)msg->begin();
+				auto body_struct = (Event_add_front*)evt;
+				m_screen->add_front(body_struct->m_view);
+				body_struct->m_view->dirty_all();
+				auto reply = std::make_shared<Msg>();
+				reply->set_dest(body_struct->m_reply);
+				m_router.send(reply);
 				break;
 			}
-			case evt_add_back_view:
+			case evt_add_back:
 			{
 				//add view to screen
-				auto body_struct = (Event_add_back_view*)msg->begin();
+				auto body_struct = (Event_add_back*)evt;
+				m_screen->add_back(body_struct->m_view);
+				body_struct->m_view->dirty_all();
+				auto reply = std::make_shared<Msg>();
+				reply->set_dest(body_struct->m_reply);
+				m_router.send(reply);
 				break;
 			}
-			case evt_sub_view:
+			case evt_sub:
 			{
 				//sub view from screen
-				auto body_struct = (Event_sub_view*)msg->begin();
+				auto body_struct = (Event_sub*)evt;
+				body_struct->m_view->sub();
+				m_screen->dirty_all();
+				auto reply = std::make_shared<Msg>();
+				reply->set_dest(body_struct->m_reply);
+				m_router.send(reply);
 				break;
 			}
 			default:
@@ -151,6 +132,10 @@ void GUI_Service::run()
 	//quit SDL
 	SDL_DestroyWindow(sdl_window);
 	SDL_Quit();
+
+	//stop test task
+	task->stop_thread();
+	task->join_thread();
 
 	//forget myself
 	m_router.forget(entry);

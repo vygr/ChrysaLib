@@ -1,4 +1,5 @@
 #include "kernel_service.h"
+#include "task.h"
 #include <iostream>
 #include <sstream>
 
@@ -26,7 +27,7 @@ void Kernel_Service::run()
 				&& m_router.update_dir(*msg->m_data))
 			{
 				//new session so flood to peers
-				auto body_struct = (Event_directory*)msg->begin();
+				auto body_struct = (Event_directory*)evt;
 				auto via = body_struct->m_via;
 				//fill in the new via and increment the distance as we flood out !
 				body_struct->m_via = m_router.get_dev_id();
@@ -40,6 +41,26 @@ void Kernel_Service::run()
 					m_router.send(flood_msg);
 				}
 			}
+			break;
+		}
+		case evt_start_task:
+		{
+			//start task
+			auto body_struct = (Event_start_task*)evt;
+			body_struct->m_task->start_thread();
+			auto reply = std::make_shared<Msg>(sizeof(start_task_reply));
+			auto reply_struct = (start_task_reply*)reply->begin();
+			reply->set_dest(body_struct->m_reply);
+			reply_struct->m_task = body_struct->m_task->get_id();
+			m_router.send(reply);
+			break;
+		}
+		case evt_stop_task:
+		{
+			//stop task
+			auto body_struct = (Event_stop_task*)evt;
+			body_struct->m_task->stop_thread();
+			body_struct->m_task->join_thread();
 			break;
 		}
 		default:

@@ -3,6 +3,8 @@
 
 #include "service.h"
 
+class Task;
+
 //kernel service.
 //this is the very first service to be run, therfore mailbox id 0.
 //this is critical as routers talk to each other via this kernel service.
@@ -15,6 +17,8 @@ public:
 	{
 		evt_exit, //must be first !
 		evt_directory,
+		evt_start_task,
+		evt_stop_task,
 	};
 	struct Event_directory : public Event
 	{
@@ -22,6 +26,19 @@ public:
 		Dev_ID m_via;
 		uint32_t m_hops;
 		char m_data[];
+	};
+	struct Event_start_task : public Event
+	{
+		Net_ID m_reply;
+		Task *m_task;
+	};
+	struct start_task_reply
+	{
+		Net_ID m_task;
+	};
+	struct Event_stop_task : public Event
+	{
+		Task *m_task;
 	};
 	Kernel_Service(Router &router)
 		: Service(router)

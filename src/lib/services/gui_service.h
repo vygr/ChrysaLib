@@ -13,21 +13,24 @@ public:
 	enum
 	{
 		evt_exit, //must be first !
-		evt_add_front_view,
-		evt_add_back_view,
-		evt_sub_view,
+		evt_add_front,
+		evt_add_back,
+		evt_sub,
 	};
-	struct Event_add_front_view : public Event
+	struct Event_add_front : public Event
 	{
 		Net_ID m_reply;
+		std::shared_ptr<View> m_view;
 	};
-	struct Event_add_back_view : public Event
+	struct Event_add_back : public Event
 	{
 		Net_ID m_reply;
+		std::shared_ptr<View> m_view;
 	};
-	struct Event_sub_view : public Event
+	struct Event_sub : public Event
 	{
 		Net_ID m_reply;
+		std::shared_ptr<View> m_view;
 	};
 	GUI_Service(Router &router)
 		: Service(router)
