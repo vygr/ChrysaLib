@@ -31,7 +31,6 @@ Button *Button::draw(const Ctx &ctx)
 Button *Button::mouse_down(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	m_state = -1;
 	layout()->dirty_all();
 	return this;
@@ -40,7 +39,6 @@ Button *Button::mouse_down(const std::shared_ptr<Msg> &event)
 Button *Button::mouse_up(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	if (m_state != 1)
 	{
 		m_state = 1;

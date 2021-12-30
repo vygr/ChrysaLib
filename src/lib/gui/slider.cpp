@@ -24,7 +24,7 @@ Slider *Slider::draw(const Ctx &ctx)
 	auto portion = get_long_prop("portion");
 	auto max = get_long_prop("maximum");
 	auto dark = ctx.darker(col);
-	auto bright = ctx.darker(col);
+	auto bright = ctx.brighter(col);
 	//border
 	ctx.set_color(argb_black).box(0, 0, m_w, m_h)
 	//middle
@@ -78,7 +78,6 @@ Slider *Slider::mouse_down(const std::shared_ptr<Msg> &event)
 Slider *Slider::mouse_up(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)&*(event->begin());
 	if (m_state != 0)
 	{
 		m_state = 0;

@@ -90,7 +90,7 @@ void GUI_Task::add_front(std::shared_ptr<View> view)
 	msg_struct->m_view = view;
 	m_router.send(msg);
 	//wait for reply
-	auto reply = reply_mbox->read();
+	reply_mbox->read();
 	m_router.free(reply_id);
 }
 
@@ -110,7 +110,7 @@ void GUI_Task::add_back(std::shared_ptr<View> view)
 	msg_struct->m_view = view;
 	m_router.send(msg);
 	//wait for reply
-	auto reply = reply_mbox->read();
+	reply_mbox->read();
 	m_router.free(reply_id);
 }
 
@@ -130,6 +130,6 @@ void GUI_Task::sub(std::shared_ptr<View> view)
 	msg_struct->m_view = view;
 	m_router.send(msg);
 	//wait for reply
-	auto reply = reply_mbox->read();
+	reply_mbox->read();
 	m_router.free(reply_id);
 }

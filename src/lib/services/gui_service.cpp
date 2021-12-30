@@ -159,7 +159,7 @@ void GUI_Service::composit()
 					auto x1 = view.m_w;
 					auto y1 = view.m_h;
 					auto ancestor = &view;
-					while (auto parent = ancestor->m_parent)
+					while ((parent = ancestor->m_parent))
 					{
 						//translate region
 						auto px = ancestor->m_x;
@@ -191,7 +191,7 @@ void GUI_Service::composit()
 					auto y1 = y + parent->m_h;
 					view.m_opaque.copy_rect(vis_region, Rect(x, y, x1, y1));
 					auto ancestor = &view;
-					while (auto parent = ancestor->m_parent)
+					while ((parent = ancestor->m_parent))
 					{
 						//exit if clipped away
 						if (vis_region.m_region.empty()) break;
@@ -278,7 +278,7 @@ void GUI_Service::composit()
 			{
 				//remove entire view
 				auto ancestor = &view;
-				while (auto parent = ancestor->m_parent)
+				while ((parent = ancestor->m_parent))
 				{
 					//clip to parent, exit if clipped away
 					auto px = parent->m_ctx.m_x;
@@ -298,7 +298,7 @@ void GUI_Service::composit()
 			{
 				//remove opaque region
 				auto ancestor = &view;
-				while (auto parent = ancestor->m_parent)
+				while ((parent = ancestor->m_parent))
 				{
 					x = ancestor->m_ctx.m_x;
 					y = ancestor->m_ctx.m_y;
