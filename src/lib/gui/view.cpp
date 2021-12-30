@@ -302,8 +302,7 @@ Net_ID View::find_owner()
 
 bool View::hit(int x, int y)
 {
-	if (x >= 0 && y >= 0
-		&& x < m_w && y < m_h
+	if (x >= 0 && y >= 0 && x < m_w && y < m_h
 		&& (m_flags & view_flag_solid) != 0) return true;
 	return false;
 }
@@ -319,7 +318,7 @@ bool View::hit_tree(int x, int y, view_pos &pos)
 		{
 			pos.m_x -= view.m_x;
 			pos.m_y -= view.m_y;
-			if (!hit(pos.m_x, pos.m_y)) return true;
+			if (!view.hit(pos.m_x, pos.m_y)) return true;
 			flag = true;
 			return false;
 		},
