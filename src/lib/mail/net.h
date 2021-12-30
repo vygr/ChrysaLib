@@ -27,6 +27,10 @@ struct Net_ID
 	{
 		return std::tie(p.m_mailbox_id, p.m_device_id) == std::tie(m_mailbox_id, m_device_id);
 	}
+	bool operator!=(const Net_ID &p) const
+	{
+		return std::tie(p.m_mailbox_id, p.m_device_id) != std::tie(m_mailbox_id, m_device_id);
+	}
 	//can be a key in std::set and std::map !
 	bool operator<(const Net_ID &p) const
 	{

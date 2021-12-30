@@ -138,6 +138,10 @@ public:
     view_pos get_pos();
     view_size get_size();
     view_bounds get_bounds();
+	Net_ID find_owner();
+	View *find_id(int64_t id);
+	bool hit(int x, int y);
+	bool hit_tree(int x, int y, view_pos &pos);
 	//action
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit() { return this; }
@@ -170,6 +174,7 @@ public:
 	int64_t m_id = 0;
 	std::vector<int64_t> m_actions;
 	Ctx m_ctx;
+	Net_ID m_owner;
 };
 
 #endif

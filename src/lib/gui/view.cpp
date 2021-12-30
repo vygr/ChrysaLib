@@ -286,3 +286,68 @@ View *View::change_dirty(int x, int y, int w, int h)
 	auto old_p = get_pos();
 	return dirty()->change(x, y, w, h)->trans_dirty(old_p.m_x - x, old_p.m_y - y);
 }
+
+Net_ID View::find_owner()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto view = this;
+	const Net_ID owner_id;
+	while (view != nullptr)
+	{
+		if (m_owner != owner_id) return m_owner;
+		view = view->m_parent;
+	}
+	return owner_id;
+}
+
+bool View::hit(int x, int y)
+{
+	if (x >= 0 && y >= 0
+		&& x < m_w && y < m_h
+		&& (m_flags & view_flag_solid) != 0)
+		return true;
+	return false;
+}
+
+bool View::hit_tree(int x, int y, view_pos &pos)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	pos.m_x = x;
+	pos.m_y = y;
+	bool flag = false;
+	forward_tree(
+		[&](View &view)
+		{
+			pos.m_x -= view.m_x;
+			pos.m_y -= view.m_y;
+			if (!hit(pos.m_x, pos.m_y)) return true;
+			flag = true;
+			return false;
+		},
+		[&](View &view)
+		{
+			if (flag) return true;
+			pos.m_x += view.m_x;
+			pos.m_y += view.m_y;
+			return true;
+		});
+	return flag;
+}
+
+View *View::find_id(int64_t id)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	View *id_view = nullptr;
+	forward_tree(
+		[&](View &view)
+		{
+			if (id != view.m_id) return true;
+			id_view = &view;
+			return false;
+		},
+		[&](View &view)
+		{
+			return true;
+		});
+	return id_view;
+}
