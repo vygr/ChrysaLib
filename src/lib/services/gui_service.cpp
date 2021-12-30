@@ -143,6 +143,7 @@ void GUI_Service::composit()
 {
 	//iterate through views back to front
 	//create visible region at root
+	std::lock_guard<std::recursive_mutex> lock(m_screen->m_mutex);
 	m_screen->backward_tree(
 		[&](View &view)
 		{
