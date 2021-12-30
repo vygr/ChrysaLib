@@ -327,6 +327,7 @@ void GUI_Service::composit()
 			}
 			return true;
 		});
+
 	//draw all views on draw list, and free dirty regions.
 	//at the end we have drawn all view areas that are dirty and visible.
 	//plus we have freed all dirty regions and cleared all dirty_all flags.
