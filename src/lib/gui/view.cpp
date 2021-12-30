@@ -294,7 +294,7 @@ Net_ID View::find_owner()
 	const Net_ID owner_id;
 	while (view != nullptr)
 	{
-		if (m_owner != owner_id) return m_owner;
+		if (view->m_owner != owner_id) return m_owner;
 		view = view->m_parent;
 	}
 	return owner_id;
@@ -304,8 +304,7 @@ bool View::hit(int x, int y)
 {
 	if (x >= 0 && y >= 0
 		&& x < m_w && y < m_h
-		&& (m_flags & view_flag_solid) != 0)
-		return true;
+		&& (m_flags & view_flag_solid) != 0) return true;
 	return false;
 }
 
