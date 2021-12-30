@@ -60,8 +60,8 @@ Scroll *Scroll::layout()
 		auto cs = m_child->get_size();
 		if (m_vslider)
 		{
-			vval = m_vslider->get_long_prop("value");
 			auto mo = (int64_t)std::max(0, cs.m_h - (m_h - sh));
+			vval = m_vslider->get_long_prop("value");
 			vval = std::max((int64_t)0, std::min(vval, mo));
 			m_vslider->def_prop("value", std::make_shared<Property>(vval));
 			m_vslider->def_prop("maximum", std::make_shared<Property>(mo));
@@ -69,8 +69,8 @@ Scroll *Scroll::layout()
 		}
 		if (m_hslider)
 		{
-			hval = m_hslider->get_long_prop("value");
 			auto mo = (int64_t)std::max(0, cs.m_w - (m_w - sw));
+			hval = m_hslider->get_long_prop("value");
 			hval = std::max((int64_t)0, std::min(hval, mo));
 			m_hslider->def_prop("value", std::make_shared<Property>(hval));
 			m_hslider->def_prop("maximum", std::make_shared<Property>(mo));
