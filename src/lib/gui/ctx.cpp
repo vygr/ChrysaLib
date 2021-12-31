@@ -24,7 +24,7 @@ const Ctx &Ctx::set_color(uint32_t col) const
 	return *this;
 }
 
-const Ctx &Ctx::box(int x, int y, int w, int h) const
+const Ctx &Ctx::box(int32_t x, int32_t y, int32_t w, int32_t h) const
 {
 	SDL_Rect drect;
 	SDL_Rect clip_rect;
@@ -53,7 +53,7 @@ const Ctx &Ctx::box(int x, int y, int w, int h) const
 	return *this;
 }
 
-const Ctx &Ctx::filled_box(int x, int y, int w, int h) const
+const Ctx &Ctx::filled_box(int32_t x, int32_t y, int32_t w, int32_t h) const
 {
 	SDL_Rect drect;
 	SDL_Rect clip_rect;
@@ -82,7 +82,7 @@ const Ctx &Ctx::filled_box(int x, int y, int w, int h) const
 	return *this;
 }
 
-const Ctx &Ctx::panel(uint32_t col, bool filled, int depth, int x, int y, int w, int h) const
+const Ctx &Ctx::panel(uint32_t col, bool filled, int32_t depth, int32_t x, int32_t y, int32_t w, int32_t h) const
 {
 	auto dark_col = darker(col);
 	auto bright_col = brighter(col);

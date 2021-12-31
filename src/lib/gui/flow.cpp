@@ -7,7 +7,7 @@ Flow *Flow::layout()
 	auto fh = m_h;
 	auto kids = children();
 	auto flow_flags = get_long_prop("flow_flags");
-	auto last_child = (int)kids.size() - 1;
+	auto last_child = (int32_t)kids.size() - 1;
 	auto x = 0;
 	auto y = 0;
 	if (flow_flags & flow_flag_left) x = fw;
@@ -78,8 +78,8 @@ view_size Flow::pref_size()
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto kids = children();
 	auto flow_flags = get_long_prop("flow_flags");
-	auto mw = (int)got_long_prop("min_width");
-	auto mh = (int)got_long_prop("min_height");
+	auto mw = (int32_t)got_long_prop("min_width");
+	auto mh = (int32_t)got_long_prop("min_height");
 	auto pw = 0;
 	auto ph = 0;
 	for (auto &child : kids)

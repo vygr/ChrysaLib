@@ -19,7 +19,7 @@ class Msg;
 struct Mailbox_ID
 {
 	Mailbox_ID() {}
-	Mailbox_ID(unsigned int id)
+	Mailbox_ID(uint32_t id)
 		:m_id(id)
 	{}
 	//can be compared !
@@ -124,8 +124,8 @@ public:
 	void free(Mailbox_ID id);
 	Mbox<std::shared_ptr<Msg>> *validate(Mailbox_ID id);
 	//poll and select
-	int poll(const std::vector<Mailbox_ID> &ids);
-	int select(const std::vector<Mailbox_ID> &ids);
+	int32_t poll(const std::vector<Mailbox_ID> &ids);
+	int32_t select(const std::vector<Mailbox_ID> &ids);
 private:
 	std::mutex m_mutex;
 	Mailbox_ID m_next_mailbox_id;

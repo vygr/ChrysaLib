@@ -37,7 +37,7 @@ Mbox<std::shared_ptr<Msg>> *Mbox_Manager::validate(Mailbox_ID id)
 	return itr == end(m_mailboxes) ? nullptr : &itr->second;
 }
 
-int Mbox_Manager::poll(const std::vector<Mailbox_ID> &ids)
+int32_t Mbox_Manager::poll(const std::vector<Mailbox_ID> &ids)
 {
 	//given a list of mailbox id's check to see if any of them contain mail.
 	//return the index of the first one that does, else -1.
@@ -51,7 +51,7 @@ int Mbox_Manager::poll(const std::vector<Mailbox_ID> &ids)
 	return -1;
 }
 
-int Mbox_Manager::select(const std::vector<Mailbox_ID> &ids)
+int32_t Mbox_Manager::select(const std::vector<Mailbox_ID> &ids)
 {
 	//block until one of the list of mailboxes contains some mail.
 	//returns the index of the first mailbox that has mail.

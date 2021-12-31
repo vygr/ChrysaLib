@@ -1,6 +1,6 @@
 #include "scroll.h"
 
-Scroll::Scroll(int flags)
+Scroll::Scroll(int32_t flags)
 	: View()
 {
 	if ((flags & scroll_flag_vertical) != 0)
@@ -20,8 +20,8 @@ Scroll::Scroll(int flags)
 view_size Scroll::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto mw = (int)got_long_prop("min_width");
-	auto mh = (int)got_long_prop("min_height");
+	auto mw = (int32_t)got_long_prop("min_width");
+	auto mh = (int32_t)got_long_prop("min_height");
 	if (m_vslider) mw = mw + m_vslider->pref_size().m_w;
 	if (m_hslider) mh = mh + m_hslider->pref_size().m_h;
 	return view_size{mw, mh};

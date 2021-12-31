@@ -10,9 +10,9 @@
 struct Route
 {
 	//increments on each routing ping
-	unsigned int m_session = 0;
+	uint32_t m_session = 0;
 	//distance from the origin
-	unsigned int m_hops = -1;
+	uint32_t m_hops = -1;
 	//time this ping arrived
 	std::chrono::high_resolution_clock::time_point m_time;
 	//peers this ping has come via
@@ -95,7 +95,7 @@ private:
 	Mailbox_ID m_next_parcel_id;
 	Mbox_Manager m_mailbox_manager;
 	Directory_Manager m_directory_manager;
-	std::map<Net_ID, std::pair<unsigned int, Que_Item>> m_parcels;
+	std::map<Net_ID, std::pair<uint32_t, Que_Item>> m_parcels;
 	std::list<Que_Item> m_outgoing_msg_que;
 	std::map<Link*, Dev_ID> m_links;
 	std::map<Dev_ID, Route> m_routes;

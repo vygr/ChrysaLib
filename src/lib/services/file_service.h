@@ -64,7 +64,7 @@ public:
 	File_Service *set_file_list(const Net_ID &net_id, const std::vector<std::string> &file_list);
 	//request helper methods
 	File_Service *get_file_list(const Net_ID &net_id);
-	File_Service *transfer_file(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int ctx);
+	File_Service *transfer_file(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int32_t ctx);
 private:
 	//note the use of two threadpools, one for the responce and one for the requests
 	//you do not want to deadlock due to all the threads being taken by requests and
@@ -87,17 +87,17 @@ protected:
 		(void) file_list; (void) src_id;
 		return;
 	}
-	virtual void out_error(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int ctx)
+	virtual void out_error(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int32_t ctx)
 	{
 		(void) dst_id; (void) src_id; (void) dst_name; (void) src_name; (void) ctx;
 		return;
 	}
-	virtual void out_progress(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int ctx, int progress)
+	virtual void out_progress(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int32_t ctx, int32_t progress)
 	{
 		(void) dst_id; (void) src_id; (void) dst_name; (void) src_name; (void) ctx; (void) progress;
 		return;
 	}
-	virtual void out_ok(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int ctx)
+	virtual void out_ok(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int32_t ctx)
 	{
 		(void) dst_id; (void) src_id; (void) dst_name; (void) src_name; (void) ctx;
 		return;

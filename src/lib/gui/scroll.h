@@ -16,7 +16,7 @@ const auto scroll_flag_both = scroll_flag_vertical | scroll_flag_horizontal;
 class Scroll : public View
 {
 public:
-	Scroll(int flags);
+	Scroll(int32_t flags);
 	view_size pref_size() override;
 	Scroll *add_child(std::shared_ptr<View> child) override;
 	Scroll *layout() override;

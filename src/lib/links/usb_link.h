@@ -12,8 +12,8 @@ struct USBDeviceInstanceInfo
 	{
 		return std::tie(p.m_vid, p.m_pid) == std::tie(m_vid, m_pid);
 	}
-	unsigned int m_vid;
-	unsigned int m_pid;
+	uint32_t m_vid;
+	uint32_t m_pid;
 	uint8_t m_bulk_out_addr;
 	uint8_t m_bulk_in_addr;
 };

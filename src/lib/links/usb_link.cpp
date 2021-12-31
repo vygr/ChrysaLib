@@ -16,11 +16,11 @@ std::string get_usb_dev_inst_path(libusb_device *device)
 {
 	std::string path;
 	uint8_t portNumbers[7];
-	int r = libusb_get_port_numbers(device, portNumbers, sizeof(portNumbers));
+	int32_t r = libusb_get_port_numbers(device, portNumbers, sizeof(portNumbers));
 	if (r > 0)
 	{
 		path = std::to_string(portNumbers[0]);
-		for (int j = 1; j < r; j++)
+		for (int32_t j = 1; j < r; j++)
 		{
 			path.append(".");
 			path.append(std::to_string(portNumbers[j]));
@@ -173,7 +173,7 @@ bool USB_Link::send(const std::shared_ptr<Msg> &msg)
 	//send the buffer down the link
 	auto error = 0;
 	auto sent = 0;
-	int len = offsetof(Link_Buf, m_msg_body) + msg->m_header.m_frag_length;
+	int32_t len = offsetof(Link_Buf, m_msg_body) + msg->m_header.m_frag_length;
 	do
 	{
 		//send down link, retry till no error or exiting

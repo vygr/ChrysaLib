@@ -14,7 +14,7 @@ class Router;
 struct Directory
 {
 	//session number will increment each time it changes
-	unsigned int m_session = 0;
+	uint32_t m_session = 0;
 	//the last time our device saw it change
 	std::chrono::high_resolution_clock::time_point m_time_modified;
 	//the set of all services on that device

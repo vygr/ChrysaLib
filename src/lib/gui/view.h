@@ -37,8 +37,8 @@ enum
 
 struct view_pos
 {
-	int m_x = 0;
-	int m_y = 0;
+	int32_t m_x = 0;
+	int32_t m_y = 0;
 };
 
 struct view_size
@@ -48,16 +48,16 @@ struct view_size
 	{
 		return std::tie(p.m_w, p.m_h) == std::tie(m_w, m_h);
 	}
-	int m_w = 0;
-	int m_h = 0;
+	int32_t m_w = 0;
+	int32_t m_h = 0;
 };
 
 struct view_bounds
 {
-	int m_x = 0;
-	int m_y = 0;
-	int m_w = 0;
-	int m_h = 0;
+	int32_t m_x = 0;
+	int32_t m_y = 0;
+	int32_t m_w = 0;
+	int32_t m_h = 0;
 };
 
 //view class
@@ -67,33 +67,33 @@ class View
 public:
 	struct Event
 	{
-		unsigned long m_target_id;
-		unsigned long m_type;
+		uint64_t m_target_id;
+		uint64_t m_type;
 	};
 	struct Event_mouse : public Event
 	{
-		unsigned int m_buttons;
-		unsigned int m_count;
-		int m_x;
-		int m_y;
-		int m_rx;
-		int m_ry;
+		uint32_t m_buttons;
+		uint32_t m_count;
+		int32_t m_x;
+		int32_t m_y;
+		int32_t m_rx;
+		int32_t m_ry;
 	};
 	struct Event_wheel : public Event
 	{
-		unsigned int m_direction;
-		int m_x;
-		int m_y;
+		uint32_t m_direction;
+		int32_t m_x;
+		int32_t m_y;
 	};
 	struct Event_key : public Event
 	{
-		unsigned int m_keycode;
-		unsigned int m_key;
-		unsigned int m_mod;
+		uint32_t m_keycode;
+		uint32_t m_key;
+		uint32_t m_mod;
 	};
 	struct Event_action : public Event
 	{
-		unsigned long m_source_id;
+		uint64_t m_source_id;
 	};
 	struct Event_gui : public Event
 	{};
@@ -122,17 +122,17 @@ public:
 	View *forward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	View *backward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	//visability
-	View *add_opaque(int x, int y, int w, int h);
-	View *sub_opaque(int x, int y, int w, int h);
+	View *add_opaque(int32_t x, int32_t y, int32_t w, int32_t h);
+	View *sub_opaque(int32_t x, int32_t y, int32_t w, int32_t h);
 	View *clr_opaque();
 	//dirty areas
-	View *add_dirty(int x, int y, int w, int h);
-	View *trans_dirty(int rx, int ry);
+	View *add_dirty(int32_t x, int32_t y, int32_t w, int32_t h);
+	View *trans_dirty(int32_t rx, int32_t ry);
 	View *dirty();
 	View *dirty_all();
-	View *change_dirty(int x, int y, int w, int h);
+	View *change_dirty(int32_t x, int32_t y, int32_t w, int32_t h);
 	//flags
-	View *set_flags(unsigned int flags, unsigned int mask);
+	View *set_flags(uint32_t flags, uint32_t mask);
 	//info
 	int64_t get_id() { return m_id; }
     view_pos get_pos();
@@ -140,15 +140,15 @@ public:
     view_bounds get_bounds();
 	Net_ID find_owner();
 	View *find_id(int64_t id);
-	bool hit(int x, int y);
-	bool hit_tree(int x, int y, view_pos &pos);
+	bool hit(int32_t x, int32_t y);
+	bool hit_tree(int32_t x, int32_t y, view_pos &pos);
 	//action
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit() { return this; }
 	//subclass overides
     virtual view_size pref_size();
 	virtual View *layout();
-	virtual View *change(int x, int y, int w, int h);
+	virtual View *change(int32_t x, int32_t y, int32_t w, int32_t h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }
 	virtual View *draw(const Ctx &ctx);
 	virtual View *action(const std::shared_ptr<Msg> &event) { return this; }
@@ -160,17 +160,17 @@ public:
 
 	static std::recursive_mutex m_mutex;
 	static int64_t m_next_id;
-	static unsigned int m_gui_flags;
+	static uint32_t m_gui_flags;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
 	Region m_dirty;
 	Region m_opaque;
-	int m_x = 0;
-	int m_y = 0;
-	int m_w = 0;
-	int m_h = 0;
-	unsigned int m_flags = view_flag_solid;
+	int32_t m_x = 0;
+	int32_t m_y = 0;
+	int32_t m_w = 0;
+	int32_t m_h = 0;
+	uint32_t m_flags = view_flag_solid;
 	int64_t m_id = 0;
 	std::vector<int64_t> m_actions;
 	Ctx m_ctx;

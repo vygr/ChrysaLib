@@ -12,7 +12,7 @@ public:
 	Button *mouse_down(const std::shared_ptr<Msg> &event) override;
 	Button *mouse_up(const std::shared_ptr<Msg> &event) override;
 	Button *mouse_move(const std::shared_ptr<Msg> &event) override;
-	int m_state = 1;
+	int32_t m_state = 1;
 };
 
 #endif

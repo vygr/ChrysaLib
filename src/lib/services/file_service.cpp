@@ -205,7 +205,7 @@ void File_Service::run()
 						m_router.send(ack);
 					}
 					//send a progress report to origin every 10%
-					auto new_progress = (int)(amount * 100 / total);
+					auto new_progress = (int32_t)(amount * 100 / total);
 					if (new_progress - progress >= 10)
 					{
 						msg = std::make_shared<Msg>(sizeof(transfer_file_progress));
@@ -271,7 +271,7 @@ File_Service *File_Service::get_file_list(const Net_ID &net_id)
 	return this;
 }
 
-File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int ctx)
+File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &src_id, const std::string &dst_name, const std::string &src_name, int32_t ctx)
 {
 	//big job so hive off into a thread from the thread pool.
 	//this method can be called on ANY file_service object and it will arrange the transfer of a file

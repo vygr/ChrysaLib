@@ -9,13 +9,13 @@
 ///////////////
 
 template<class T>
-void rle_encode(std::shared_ptr<std::string> &data, T *src, unsigned int src_len)
+void rle_encode(std::shared_ptr<std::string> &data, T *src, uint32_t src_len)
 {
 	auto src_end = &src[src_len / sizeof(T)];
 	T token;
 	T next_token;
 	T *src_start;
-	unsigned int state = 0;
+	uint32_t state = 0;
 	while (src != src_end)
 	{
 		switch (state)
@@ -73,7 +73,7 @@ void rle_encode(std::shared_ptr<std::string> &data, T *src, unsigned int src_len
 }
 
 template<class T>
-uint8_t *rle_decode(T *dst, uint8_t *src, unsigned int dst_len)
+uint8_t *rle_decode(T *dst, uint8_t *src, uint32_t dst_len)
 {
 	auto dst_end = &dst[dst_len / sizeof(T)];
 	T token;
@@ -82,7 +82,7 @@ uint8_t *rle_decode(T *dst, uint8_t *src, unsigned int dst_len)
 		auto l = *src++;
 		if (l & 0x80)
 		{
-			for (auto i = 0; i < (int)sizeof(T); ++i)
+			for (auto i = 0; i < (int32_t)sizeof(T); ++i)
 			{
 				*(((uint8_t*)&token) + i) = *src++;
 			}

@@ -10,7 +10,7 @@
 struct Msg_Header
 {
 	Msg_Header() {}
-	Msg_Header(unsigned int total_len)
+	Msg_Header(uint32_t total_len)
 		: m_frag_length(total_len)
 		, m_total_length(total_len)
 	{}
@@ -21,7 +21,7 @@ struct Msg_Header
 		, m_frag_offset(header.m_frag_offset)
 		, m_total_length(header.m_total_length)
 	{}
-	Msg_Header(const Net_ID &dst, const Net_ID &src, unsigned int total_len, unsigned int frag_len, unsigned int frag_offset)
+	Msg_Header(const Net_ID &dst, const Net_ID &src, uint32_t total_len, uint32_t frag_len, uint32_t frag_offset)
 		: m_dest(dst)
 		, m_src(src)
 		, m_frag_length(frag_len)
@@ -53,17 +53,17 @@ public:
 	Msg() : m_data(std::make_shared<std::string>())
 	{}
 	Msg(std::shared_ptr<std::string> data)
-		: m_header((unsigned int)data->size())
+		: m_header((uint32_t)data->size())
 		, m_data(data)
 	{}
-	Msg(std::shared_ptr<std::string> data, const Net_ID &dst, const Net_ID &src, unsigned int frag_len, unsigned int frag_offset)
-		: m_header(dst, src, (unsigned int)data->size(), frag_len, frag_offset)
+	Msg(std::shared_ptr<std::string> data, const Net_ID &dst, const Net_ID &src, uint32_t frag_len, uint32_t frag_offset)
+		: m_header(dst, src, (uint32_t)data->size(), frag_len, frag_offset)
 		, m_data(data)
 	{}
 	//the fill constructors used here wastes time, need to work out how to
 	//tell C++ to allocate the buffer but not bother to zero it !
 	Msg(size_t length)
-		: m_header((unsigned int)length)
+		: m_header((uint32_t)length)
 		, m_data(std::make_shared<std::string>(length, '\0'))
 	{}
 	Msg(const Msg_Header &header, const uint8_t *buf)
@@ -81,14 +81,14 @@ public:
 	auto append(const std::string &data)
 	{
 		m_data->append(data);
-		m_header.m_frag_length = m_header.m_total_length = (unsigned int)m_data->size();
+		m_header.m_frag_length = m_header.m_total_length = (uint32_t)m_data->size();
 		return this;
 	}
 	//append some raw bytes to the body data
-	auto append(const char *data, unsigned int len)
+	auto append(const char *data, uint32_t len)
 	{
 		m_data->append(data, len);
-		m_header.m_frag_length = m_header.m_total_length = (unsigned int)m_data->size();
+		m_header.m_frag_length = m_header.m_total_length = (uint32_t)m_data->size();
 		return this;
 	}
 	//msg info

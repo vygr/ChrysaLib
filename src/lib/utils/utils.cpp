@@ -62,7 +62,7 @@ std::string join(const std::vector<std::string> &strings, const std::string &joi
 //trim from start (in place)
 static inline void ltrim(std::string &s)
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int32_t ch)
 	{
 		return !std::isspace(ch);
 	}));
@@ -71,7 +71,7 @@ static inline void ltrim(std::string &s)
 //trim from end (in place)
 static inline void rtrim(std::string &s)
 {
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int32_t ch)
 	{
 		return !std::isspace(ch);
 	}).base(), s.end());

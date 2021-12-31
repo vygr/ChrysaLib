@@ -50,7 +50,7 @@ void IP_Link_Manager::run()
 		std::chrono::duration<double, std::milli> elapsed = finish - start;
 		if (elapsed.count() < IP_LINK_MANAGER_POLLING_RATE)
 		{
-			unsigned int sleep = IP_LINK_MANAGER_POLLING_RATE - elapsed.count();
+			uint32_t sleep = IP_LINK_MANAGER_POLLING_RATE - elapsed.count();
 			std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 		}
 

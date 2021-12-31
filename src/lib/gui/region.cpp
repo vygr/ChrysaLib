@@ -10,7 +10,7 @@ Region *Region::free()
 	return this;
 }
 
-Region *Region::translate(int rx, int ry)
+Region *Region::translate(int32_t rx, int32_t ry)
 {
 	//translate all rects
 	for (auto &rect : m_region)
@@ -1124,7 +1124,7 @@ Region *Region::paste_rect(const Rect &r)
 	return this;
 }
 
-Region *Region::remove_region(Region &dest, int rx, int ry)
+Region *Region::remove_region(Region &dest, int32_t rx, int32_t ry)
 {
 	//remove all rects in region from dest
 	for (auto rect : m_region)
@@ -1138,7 +1138,7 @@ Region *Region::remove_region(Region &dest, int rx, int ry)
 	return this;
 }
 
-Region *Region::paste_region(Region &dest, int rx, int ry)
+Region *Region::paste_region(Region &dest, int32_t rx, int32_t ry)
 {
 	//paste all rects in region to dest
 	for (auto rect : m_region)
@@ -1152,7 +1152,7 @@ Region *Region::paste_region(Region &dest, int rx, int ry)
 	return this;
 }
 
-Region *Region::copy_region(Region &dest, const Region &copy, int rx, int ry)
+Region *Region::copy_region(Region &dest, const Region &copy, int32_t rx, int32_t ry)
 {
 	//copy all rects of region to dest
 	for (auto rect : copy.m_region)

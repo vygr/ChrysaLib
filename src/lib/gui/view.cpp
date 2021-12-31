@@ -5,7 +5,7 @@
 
 std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
-unsigned int View::m_gui_flags = 0;
+uint32_t View::m_gui_flags = 0;
 
 View::View()
 	: m_id(--m_next_id)
@@ -138,14 +138,14 @@ const std::string View::get_string_prop(const std::string &prop)
 	return "";
 };
 
-View *View::add_opaque(int x, int y, int w, int h)
+View *View::add_opaque(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_opaque.paste_rect(Rect(x, y, x + w, y + h));
 	return this;
 }
 
-View *View::sub_opaque(int x, int y, int w, int h)
+View *View::sub_opaque(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_opaque.remove_rect(Rect(x, y, x + w, y + h));
@@ -159,7 +159,7 @@ View *View::clr_opaque()
 	return this;
 }
 
-View *View::add_dirty(int x, int y, int w, int h)
+View *View::add_dirty(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_dirty.paste_rect(Rect(x, y, x + w, y + h));
@@ -167,7 +167,7 @@ View *View::add_dirty(int x, int y, int w, int h)
 	return this;
 }
 
-View *View::trans_dirty(int rx, int ry)
+View *View::trans_dirty(int32_t rx, int32_t ry)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	m_dirty.translate(rx, ry);
@@ -222,7 +222,7 @@ View *View::backward_tree(std::function<bool(View &view)> down, std::function<bo
 	return this;
 }
 
-View *View::set_flags(unsigned int flags, unsigned int mask)
+View *View::set_flags(uint32_t flags, uint32_t mask)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto dirty_state = m_flags & view_flag_dirty_all;
@@ -257,7 +257,7 @@ view_bounds View::get_bounds()
 view_size View::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	return view_size{(int)get_long_prop("min_width"), (int)get_long_prop("min_height")};
+	return view_size{(int32_t)get_long_prop("min_width"), (int32_t)get_long_prop("min_height")};
 }
 
 View *View::layout()
@@ -268,7 +268,7 @@ View *View::layout()
 	return this;
 }
 
-View *View::change(int x, int y, int w, int h)
+View *View::change(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto s = get_size();
@@ -280,7 +280,7 @@ View *View::change(int x, int y, int w, int h)
 	return layout();
 }
 
-View *View::change_dirty(int x, int y, int w, int h)
+View *View::change_dirty(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto old_p = get_pos();
@@ -300,14 +300,14 @@ Net_ID View::find_owner()
 	return owner_id;
 }
 
-bool View::hit(int x, int y)
+bool View::hit(int32_t x, int32_t y)
 {
 	if (x >= 0 && y >= 0 && x < m_w && y < m_h
 		&& (m_flags & view_flag_solid) != 0) return true;
 	return false;
 }
 
-bool View::hit_tree(int x, int y, view_pos &pos)
+bool View::hit_tree(int32_t x, int32_t y, view_pos &pos)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	pos.m_x = x;

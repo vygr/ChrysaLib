@@ -36,7 +36,7 @@ struct Dev_ID
 	{
 		Dev_ID id;
 		std::random_device rd;
-		std::uniform_int_distribution<int> dist(0, 256);
+		std::uniform_int_distribution<int32_t> dist(0, 256);
 		for (auto &c : id.m_id) c = dist(rd);
 		return id;
 	}

@@ -14,7 +14,7 @@ void ss_reset(std::stringstream &ss, std::string s)
 	ss.clear();
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
 	//process comand args
 	auto arg_t = 0U;

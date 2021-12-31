@@ -24,11 +24,11 @@ Backdrop *Backdrop::draw(const Ctx &ctx)
 	if (style == "grid")
 	{
 		ctx.set_color(ink_col);
-		for (int x = (((m_w >> 1) % spaceing) - spaceing); x < m_w; x += spaceing)
+		for (int32_t x = (((m_w >> 1) % spaceing) - spaceing); x < m_w; x += spaceing)
 		{
 			ctx.filled_box(x, 0, 1, m_h);
 		}
-		for (int y = (((m_h >> 1) % spaceing) - spaceing); y < m_h; y += spaceing)
+		for (int32_t y = (((m_h >> 1) % spaceing) - spaceing); y < m_h; y += spaceing)
 		{
 			ctx.filled_box(0, y, m_w, 1);
 		}
@@ -58,7 +58,7 @@ Backdrop *Backdrop::draw(const Ctx &ctx)
 	else if (style == "lines")
 	{
 		ctx.set_color(ink_col);
-		for (int y = (((m_h >> 1) % spaceing) - spaceing); y < m_h; y += spaceing)
+		for (int32_t y = (((m_h >> 1) % spaceing) - spaceing); y < m_h; y += spaceing)
 		{
 			ctx.filled_box(0, y, m_w, 1);
 		}
