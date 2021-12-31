@@ -37,7 +37,7 @@ Slider *Slider::draw(const Ctx &ctx)
 		if (max > 0)
 		{
 			portion = portion * w / (max + portion);
-			w = value * (w - portion) * max;
+			w = value * (w - portion) / max;
 		}
 		else
 		{
@@ -52,7 +52,7 @@ Slider *Slider::draw(const Ctx &ctx)
 		if (max > 0)
 		{
 			portion = portion * h / (max + portion);
-			h = value * (h - portion) * max;
+			h = value * (h - portion) / max;
 		}
 		else
 		{
