@@ -44,8 +44,7 @@ void GUI_Service::run()
 	//event loop
 	while (m_running)
 	{
-		auto msg = mbox->poll();
-		if (msg)
+		while (auto msg = mbox->poll())
 		{
 			auto evt = (Event*)msg->begin();
 			switch (evt->m_evt)
@@ -90,35 +89,37 @@ void GUI_Service::run()
 			}
 		}
 
-		SDL_Event e;
-		while (SDL_PollEvent(&e))
 		{
-			if (e.type == SDL_QUIT) quit(e);
-			else if (e.type == SDL_KEYDOWN) key_down((SDL_KeyboardEvent&)e);
-			else if (e.type == SDL_MOUSEWHEEL) mouse_wheel((SDL_MouseWheelEvent&)e);
-			else if (e.type == SDL_MOUSEBUTTONDOWN) mouse_button_down((SDL_MouseButtonEvent&)e);
-			else if (e.type == SDL_MOUSEBUTTONUP) mouse_button_up((SDL_MouseButtonEvent&)e);
-			else if (e.type == SDL_MOUSEMOTION) mouse_motion((SDL_MouseMotionEvent&)e);
-			else if (e.type == SDL_WINDOWEVENT) window_event((SDL_WindowEvent&)e);
-		}
+			std::lock_guard<std::recursive_mutex> lock(View::m_mutex);
+			SDL_Event e;
+			while (SDL_PollEvent(&e))
+			{
+				if (e.type == SDL_QUIT) quit(e);
+				else if (e.type == SDL_KEYDOWN) key_down((SDL_KeyboardEvent&)e);
+				else if (e.type == SDL_MOUSEWHEEL) mouse_wheel((SDL_MouseWheelEvent&)e);
+				else if (e.type == SDL_MOUSEBUTTONDOWN) mouse_button_down((SDL_MouseButtonEvent&)e);
+				else if (e.type == SDL_MOUSEBUTTONUP) mouse_button_up((SDL_MouseButtonEvent&)e);
+				else if (e.type == SDL_MOUSEMOTION) mouse_motion((SDL_MouseMotionEvent&)e);
+				else if (e.type == SDL_WINDOWEVENT) window_event((SDL_WindowEvent&)e);
+			}
 
-		if (m_gui_flags)
-		{
-			//resize back buffer and then do full redraw
-			SDL_DestroyTexture(texture);
-			SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
-			m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
-			View::m_gui_flags |= view_flag_dirty_all;
-			m_gui_flags = 0;
-		}
-		if (View::m_gui_flags)
-		{
-			SDL_SetRenderTarget(m_renderer, texture);
-			composit();
-			SDL_SetRenderTarget(m_renderer, 0);
-			SDL_RenderCopy(m_renderer, texture, 0, 0);
-			SDL_RenderPresent(m_renderer);
-			View::m_gui_flags = 0;
+			if ((View::m_gui_flags & view_flag_screen) != 0)
+			{
+				//resize back buffer and then do full redraw
+				View::m_gui_flags &= ~view_flag_screen;
+				SDL_DestroyTexture(texture);
+				SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
+				m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
+			}
+			if ((View::m_gui_flags & view_flag_dirty_all) != 0)
+			{
+				View::m_gui_flags &= ~view_flag_dirty_all;
+				SDL_SetRenderTarget(m_renderer, texture);
+				composit();
+				SDL_SetRenderTarget(m_renderer, 0);
+				SDL_RenderCopy(m_renderer, texture, 0, 0);
+				SDL_RenderPresent(m_renderer);
+			}
 		}
 
 		//frame polling loop
@@ -530,7 +531,7 @@ GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 				m_router.send(msg);
 			}
 		}
-		m_gui_flags = 1;
+		View::m_gui_flags |= view_flag_screen;
 	}
 	else if (event == SDL_WINDOWEVENT_SHOWN
 		|| event == SDL_WINDOWEVENT_RESTORED)

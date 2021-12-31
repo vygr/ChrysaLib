@@ -49,6 +49,7 @@ enum
 	view_flag_hidden = 1 << 3,
 	view_flag_at_back = 1 << 4,
 	view_flag_at_front = 1 << 5,
+	view_flag_screen = 1 << 6,
 };
 
 struct view_pos
