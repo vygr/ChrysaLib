@@ -35,9 +35,11 @@ void GUI_Service::run()
 	//set blend mode
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
-	//start up test task
-	auto task = std::make_unique<GUI_Task>(m_router);
-	auto task_id = task->start_task(task.get());
+	//start up test tasks
+	auto task1 = std::make_unique<GUI_Task>(m_router);
+	auto task1_id = task1->start_task(task1.get());
+	auto task2 = std::make_unique<GUI_Task>(m_router);
+	auto task2_id = task2->start_task(task2.get());
 
 	//event loop
 	while (m_running)
@@ -126,8 +128,10 @@ void GUI_Service::run()
 	SDL_Quit();
 
 	//stop test task
-	task->stop_thread();
-	task->join_thread();
+	task1->stop_thread();
+	task1->join_thread();
+	task2->stop_thread();
+	task2->join_thread();
 
 	//forget myself
 	m_router.forget(entry);
