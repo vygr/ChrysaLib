@@ -2,6 +2,7 @@
 #define REGION_H
 
 #include <forward_list>
+#include <stdint.h>
 
 //rectangle math
 class Rect
