@@ -254,6 +254,16 @@ view_bounds View::get_bounds()
 	return view_bounds{m_x, m_y, m_w, m_h};
 }
 
+View *View::set_bounds(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	m_x = x;
+	m_y = y;
+	m_w = w;
+	m_h = h;
+	return this;
+}
+
 view_size View::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -307,29 +317,29 @@ bool View::hit(int32_t x, int32_t y)
 	return false;
 }
 
-bool View::hit_tree(int32_t x, int32_t y, view_pos &pos)
+View *View::hit_tree(int32_t x, int32_t y, view_pos &pos)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	pos.m_x = x;
 	pos.m_y = y;
-	bool flag = false;
+	View *hit_view = nullptr;
 	forward_tree(
 		[&](View &view)
 		{
 			pos.m_x -= view.m_x;
 			pos.m_y -= view.m_y;
 			if (!view.hit(pos.m_x, pos.m_y)) return true;
-			flag = true;
+			hit_view = &view;
 			return false;
 		},
 		[&](const View &view)
 		{
-			if (flag) return true;
+			if (hit_view) return true;
 			pos.m_x += view.m_x;
 			pos.m_y += view.m_y;
 			return true;
 		});
-	return flag;
+	return hit_view;
 }
 
 View *View::find_id(int64_t id)

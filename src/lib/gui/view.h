@@ -24,6 +24,22 @@ enum
 	ev_type_exit
 };
 
+//key mods
+enum
+{
+	ev_key_mod_left_shift = 0x1,
+	ev_key_mod_right_shift = 0x2,
+	ev_key_mod_left_option = 0x100,
+	ev_key_mod_right_option = 0x200,
+	ev_key_mod_left_command = 0x400,
+	ev_key_mod_right_command = 0x800,
+	ev_key_mod_caps_lock = 0x2000,
+	ev_key_mod_control = 0x40,
+	ev_key_mod_shift = ev_key_mod_left_shift + ev_key_mod_right_shift,
+	ev_key_mod_option = ev_key_mod_left_option + ev_key_mod_right_option,
+	ev_key_mod_command = ev_key_mod_left_command +ev_key_mod_right_command,
+};
+
 //view flags
 enum
 {
@@ -135,18 +151,19 @@ public:
 	View *set_flags(uint32_t flags, uint32_t mask);
 	//info
 	int64_t get_id() { return m_id; }
-    view_pos get_pos();
-    view_size get_size();
-    view_bounds get_bounds();
+	view_pos get_pos();
+	view_size get_size();
+	view_bounds get_bounds();
+	View *set_bounds(int32_t x, int32_t y, int32_t w, int32_t h);
 	Net_ID find_owner();
 	View *find_id(int64_t id);
 	bool hit(int32_t x, int32_t y);
-	bool hit_tree(int32_t x, int32_t y, view_pos &pos);
+	View *hit_tree(int32_t x, int32_t y, view_pos &pos);
 	//action
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit() { return this; }
 	//subclass overides
-    virtual view_size pref_size();
+	virtual view_size pref_size();
 	virtual View *layout();
 	virtual View *change(int32_t x, int32_t y, int32_t w, int32_t h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }

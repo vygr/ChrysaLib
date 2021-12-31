@@ -6,7 +6,6 @@
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
-#include <SDL.h>
 
 //////
 // gui
@@ -90,18 +89,13 @@ void GUI_Service::run()
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
-			if (e.type == SDL_QUIT)
-			{
-				m_running = false;
-			}
-			if (e.type == SDL_KEYDOWN)
-			{
-				m_running = false;
-			}
-			if (e.type == SDL_MOUSEBUTTONDOWN)
-			{
-				m_running = false;
-			}
+			if (e.type == SDL_QUIT) quit(e);
+			else if (e.type == SDL_KEYDOWN) key_down((SDL_KeyboardEvent&)e);
+			else if (e.type == SDL_MOUSEWHEEL) mouse_wheel((SDL_MouseWheelEvent&)e);
+			else if (e.type == SDL_MOUSEBUTTONDOWN) mouse_button_down((SDL_MouseButtonEvent&)e);
+			else if (e.type == SDL_MOUSEBUTTONUP) mouse_button_up((SDL_MouseButtonEvent&)e);
+			else if (e.type == SDL_MOUSEMOTION) mouse_motion((SDL_MouseMotionEvent&)e);
+			else if (e.type == SDL_WINDOWEVENT) window_event((SDL_WindowEvent&)e);
 		}
 
 		if (m_gui_flags)
@@ -143,10 +137,18 @@ void GUI_Service::composit()
 {
 	//iterate through views back to front
 	//create visible region at root
+	//setting abs cords of views
+	view_pos abs;
 	std::lock_guard<std::recursive_mutex> lock(m_screen->m_mutex);
 	m_screen->backward_tree(
 		[&](View &view)
 		{
+			//abs cords
+			abs.m_x += view.m_x;
+			abs.m_y += view.m_y;
+			view.m_ctx.m_x = abs.m_x;
+			view.m_ctx.m_y = abs.m_y;
+
 			//if not root
 			auto parent = view.m_parent;
 			if (parent)
@@ -210,6 +212,10 @@ void GUI_Service::composit()
 		},
 		[&](View &view)
 		{
+			//abs cords
+			abs.m_x -= view.m_x;
+			abs.m_y -= view.m_y;
+
 			//clip local dirty region with parent bounds
 			auto parent = view.m_parent;
 			if (!parent) parent = &view;
@@ -248,18 +254,10 @@ void GUI_Service::composit()
 
 	//iterate through views front to back
 	//distribute visible region
-	//setting abs cords of views
 	auto draw_list = std::forward_list<View*>{};
-	view_pos abs;
 	m_screen->forward_tree(
 		[&](View &view)
 		{
-			//abs cords
-			abs.m_x += view.m_x;
-			abs.m_y += view.m_y;
-			view.m_ctx.m_x = abs.m_x;
-			view.m_ctx.m_y = abs.m_y;
-
 			//copy view from parent if not root
 			auto parent = view.m_parent;
 			if (!parent) return true;
@@ -313,10 +311,6 @@ void GUI_Service::composit()
 		},
 		[&](View &view)
 		{
-			//abs cords
-			abs.m_x -= view.m_x;
-			abs.m_y -= view.m_y;
-
 			//add myself to draw list if not empty
 			if (!view.m_dirty.m_region.empty())
 			{
@@ -336,4 +330,206 @@ void GUI_Service::composit()
 		view->draw(view->m_ctx);
 		view->m_dirty.free();
 	}
+}
+
+GUI_Service *GUI_Service::quit(SDL_Event &e)
+{
+	m_running = false;
+	return this;
+}
+
+View *GUI_Service::set_mouse_id()
+{
+	view_pos pos;
+	auto view = m_screen->hit_tree(m_mouse_x, m_mouse_y, pos);
+	if (auto mouse_id = view->get_id() == m_mouse_id)
+	{
+		if (auto old_view = m_screen->find_id(m_mouse_id))
+		{
+			auto owner = old_view->find_owner();
+			if (owner != Net_ID())
+			{
+				auto msg = std::make_shared<Msg>(sizeof(View::Event_exit));
+				auto msg_struct = (View::Event_exit*)msg->begin();
+				msg->set_dest(owner);
+				msg_struct->m_type = ev_type_exit;
+				msg_struct->m_target_id = m_mouse_id;
+				m_router.send(msg);
+			}
+		}
+		m_mouse_id = mouse_id;
+		auto owner = view->find_owner();
+		if (owner != Net_ID())
+		{
+			auto msg = std::make_shared<Msg>(sizeof(View::Event_enter));
+			auto msg_struct = (View::Event_enter*)msg->begin();
+			msg->set_dest(owner);
+			msg_struct->m_type = ev_type_enter;
+			msg_struct->m_target_id = m_mouse_id;
+			m_router.send(msg);
+		}
+	}
+	return view;
+}
+
+GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
+{
+	auto view = set_mouse_id();
+	auto owner = view->find_owner();
+	if (owner != Net_ID())
+	{
+		auto msg = std::make_shared<Msg>(sizeof(View::Event_wheel));
+		auto msg_struct = (View::Event_wheel*)msg->begin();
+		msg->set_dest(owner);
+		msg_struct->m_type = ev_type_wheel;
+		msg_struct->m_target_id = m_mouse_id;
+		msg_struct->m_x = e.x;
+		msg_struct->m_y = e.y;
+		msg_struct->m_direction = e.direction;
+		m_router.send(msg);
+	}
+	return this;
+}
+
+GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
+{
+	m_mouse_x = e.x;
+	m_mouse_y = e.y;
+	m_mouse_buttons |= e.button;
+	auto view = set_mouse_id();
+	auto owner = view->find_owner();
+	if (owner != Net_ID())
+	{
+		auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
+		auto msg_struct = (View::Event_mouse*)msg->begin();
+		msg->set_dest(owner);
+		msg_struct->m_type = ev_type_mouse;
+		msg_struct->m_target_id = m_mouse_id;
+		msg_struct->m_x = m_mouse_x;
+		msg_struct->m_y = m_mouse_y;
+		msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
+		msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
+		msg_struct->m_buttons = m_mouse_buttons;
+		msg_struct->m_count = e.clicks;
+		m_router.send(msg);
+	}
+	return this;
+}
+
+GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
+{
+	m_mouse_x = e.x;
+	m_mouse_y = e.y;
+	m_mouse_buttons ^= e.button;
+	auto view = set_mouse_id();
+	auto owner = view->find_owner();
+	if (owner != Net_ID())
+	{
+		auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
+		auto msg_struct = (View::Event_mouse*)msg->begin();
+		msg->set_dest(owner);
+		msg_struct->m_type = ev_type_mouse;
+		msg_struct->m_target_id = m_mouse_id;
+		msg_struct->m_x = m_mouse_x;
+		msg_struct->m_y = m_mouse_y;
+		msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
+		msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
+		msg_struct->m_buttons = m_mouse_buttons;
+		msg_struct->m_count = e.clicks;
+		m_router.send(msg);
+	}
+	return this;
+}
+
+GUI_Service *GUI_Service::mouse_motion(SDL_MouseMotionEvent &e)
+{
+	m_mouse_x = e.x;
+	m_mouse_y = e.y;
+	m_mouse_buttons = e.state;
+	if (!m_mouse_buttons) set_mouse_id();
+	if (auto view = m_screen->find_id(m_mouse_id))
+	{
+		auto owner = view->find_owner();
+		if (owner != Net_ID())
+		{
+			auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
+			auto msg_struct = (View::Event_mouse*)msg->begin();
+			msg->set_dest(owner);
+			msg_struct->m_type = ev_type_mouse;
+			msg_struct->m_target_id = m_mouse_id;
+			msg_struct->m_x = m_mouse_x;
+			msg_struct->m_y = m_mouse_y;
+			msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
+			msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
+			msg_struct->m_buttons = m_mouse_buttons;
+			msg_struct->m_count = 0;
+			m_router.send(msg);
+		}
+	}
+	return this;
+}
+
+int cook_key(uint32_t key_code, uint32_t key, uint32_t mod)
+{
+	if (mod & (ev_key_mod_caps_lock | ev_key_mod_shift))
+	{
+		auto idx = 0;
+		auto keys = "§1234567890-=qwertyuiop[]asdfghjkl;\\`zxcvbnm,./'";
+		auto cooked_keys = "±!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:|~ZXCVBNM<>?\"";
+		auto itr = strchr(keys, key_code);
+		if (itr) key = cooked_keys[itr - keys];
+	}
+	return key;
+}
+
+GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
+{
+	auto view = set_mouse_id();
+	auto key_code = e.keysym.scancode;
+	auto key = e.keysym.sym;
+	auto mod = e.keysym.mod;
+	auto owner = view->find_owner();
+	if (owner != Net_ID())
+	{
+		auto msg = std::make_shared<Msg>(sizeof(View::Event_key));
+		auto msg_struct = (View::Event_key*)msg->begin();
+		msg->set_dest(owner);
+		msg_struct->m_type = ev_type_key;
+		msg_struct->m_target_id = m_mouse_id;
+		msg_struct->m_keycode = key_code;
+		msg_struct->m_key = cook_key(key_code, key, mod);
+		msg_struct->m_mod = mod;
+		m_router.send(msg);
+	}
+	return this;
+}
+
+GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
+{
+	auto event = e.type;
+	if (event == SDL_WINDOWEVENT_SIZE_CHANGED)
+	{
+		m_screen->set_bounds(0, 0, e.data1, e.data2);
+		auto children = m_screen->children();
+		for (auto &child : children)
+		{
+			auto owner = child->find_owner();
+			if (owner != Net_ID())
+			{
+				auto msg = std::make_shared<Msg>(sizeof(View::Event_gui));
+				auto msg_struct = (View::Event_gui*)msg->begin();
+				msg->set_dest(owner);
+				msg_struct->m_type = ev_type_key;
+				msg_struct->m_target_id = child->get_id();
+				m_router.send(msg);
+			}
+		}
+		m_gui_flags = 1;
+	}
+	else if (event == SDL_WINDOWEVENT_SHOWN
+		|| event == SDL_WINDOWEVENT_RESTORED)
+	{
+		m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
+	}
+	return this;
 }

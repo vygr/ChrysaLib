@@ -77,6 +77,7 @@ void GUI_Task::run()
 void GUI_Task::add_front(std::shared_ptr<View> view)
 {
 	//message to my GUI
+	view->m_owner = m_net_id;
 	auto services = m_router.enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
@@ -97,6 +98,7 @@ void GUI_Task::add_front(std::shared_ptr<View> view)
 void GUI_Task::add_back(std::shared_ptr<View> view)
 {
 	//message to my GUI
+	view->m_owner = m_net_id;
 	auto services = m_router.enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
@@ -117,6 +119,7 @@ void GUI_Task::add_back(std::shared_ptr<View> view)
 void GUI_Task::sub(std::shared_ptr<View> view)
 {
 	//message to my GUI
+	view->m_owner = m_net_id;
 	auto services = m_router.enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
