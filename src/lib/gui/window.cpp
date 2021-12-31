@@ -121,7 +121,6 @@ Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 	if ((m_mode.m_mode & 8) != 0) bounds.m_h = std::max(ay - m_mode.m_y, bounds.m_y + size.m_h);
 	change_dirty(bounds.m_x, bounds.m_y, bounds.m_w - bounds.m_x, bounds.m_h - bounds.m_y)
 		->emit();
-	std::cout << bounds.m_x << " " << bounds.m_y << std::endl;
 	return this;
 }
 
