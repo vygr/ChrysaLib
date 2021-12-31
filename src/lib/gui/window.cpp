@@ -67,3 +67,132 @@ Window *Window::draw(const Ctx &ctx)
 	}
 	return this;
 }
+
+drag_mode Window::get_drag_mode(int32_t rx, int32_t ry)
+{
+	drag_mode mode;
+	auto border = get_long_prop("border");
+	auto shadow = get_long_prop("shadow");
+	if (rx < (border + shadow))
+	{
+		mode.m_mode |= 1;
+		mode.m_x = rx;
+	}
+	if (ry < (border + shadow))
+	{
+		mode.m_mode |= 2;
+		mode.m_y = ry;
+	}
+	if (rx >= (m_w - border - shadow))
+	{
+		mode.m_mode |= 4;
+		mode.m_x = rx - m_w;
+	}
+	if (ry >= (m_h - border - shadow))
+	{
+		mode.m_mode |= 8;
+		mode.m_y = ry - m_h;
+	}
+	return mode;
+}
+
+Window *Window::mouse_down(const std::shared_ptr<Msg> &event)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto event_struct = (View::Event_mouse*)event->begin();
+	auto m_mode = get_drag_mode(event_struct->m_rx, event_struct->m_ry);
+	return this;
+}
+
+Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto event_struct = (View::Event_mouse*)event->begin();
+	auto ax = event_struct->m_x;
+	auto ay = event_struct->m_y;
+	auto bounds = get_bounds();
+	auto size = pref_size();
+	bounds.m_w += bounds.m_x;
+	bounds.m_h += bounds.m_y;
+	if ((m_mode.m_mode & 1) != 0) bounds.m_x = std::min(ax - m_mode.m_x, bounds.m_w - size.m_w);
+	if ((m_mode.m_mode & 2) != 0) bounds.m_y = std::min(ay - m_mode.m_y, bounds.m_h - size.m_h);
+	if ((m_mode.m_mode & 4) != 0) bounds.m_w = std::max(ax - m_mode.m_x, bounds.m_x + size.m_w);
+	if ((m_mode.m_mode & 8) != 0) bounds.m_h = std::max(ay - m_mode.m_y, bounds.m_y + size.m_h);
+	change_dirty(bounds.m_x, bounds.m_y, bounds.m_w - bounds.m_x, bounds.m_h - bounds.m_y)
+		->emit();
+	return this;
+}
+
+Window *Window::event(const std::shared_ptr<Msg> &event)
+{
+	auto event_struct = (View::Event*)event->begin();
+	auto target = find_id(event_struct->m_target_id);
+	auto type = event_struct->m_type;
+	if (target)
+	{
+		if (type == ev_type_mouse)
+		{
+			//so what state are we in ?
+			auto event_struct = (View::Event_mouse*)event->begin();
+			auto buttons = event_struct->m_buttons;
+			if (m_last_buttons)
+			{
+				//was down previously
+				if (buttons)
+				{
+					//is down now, so move
+					target->mouse_move(event);
+				}
+				else
+				{
+					//is not down now, so release
+					m_last_buttons = 0;
+					target->mouse_up(event);
+				}
+			}
+			else
+			{
+				//was not down previously
+				if (buttons)
+				{
+					//is down now, so first down
+					m_last_buttons = buttons;
+					target->mouse_down(event);
+				}
+				else
+				{
+					//is not down now, so hover
+					target->mouse_hover(event);
+				}
+			}
+		}
+		else if (type == ev_type_key)
+		{
+			auto event_struct = (View::Event_key*)event->begin();
+			if (event_struct->m_keycode >= 0)
+			{
+				target->key_down(event);
+				target->key_up(event);
+			}
+		}
+		else if (type == ev_type_wheel)
+		{
+			auto event_struct = (View::Event_wheel*)event->begin();
+			//find first wheel aceptor... TODO
+			target->mouse_wheel(event);
+		}
+		else if (type == ev_type_enter)
+		{
+			target->mouse_enter(event);
+		}
+		else if (type == ev_type_exit)
+		{
+			target->mouse_enter(event);
+		}
+		else if (type == ev_type_action)
+		{
+			target->action(event);
+		}
+	}
+	return this;
+}

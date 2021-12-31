@@ -151,14 +151,14 @@ public:
 	View *set_flags(uint32_t flags, uint32_t mask);
 	//info
 	int64_t get_id() { return m_id; }
-	view_pos get_pos();
-	view_size get_size();
-	view_bounds get_bounds();
+	view_pos get_pos() const;
+	view_size get_size() const;
+	view_bounds get_bounds() const;
 	View *set_bounds(int32_t x, int32_t y, int32_t w, int32_t h);
-	Net_ID find_owner();
+	Net_ID find_owner() const;
 	View *find_id(int64_t id);
-	bool hit(int32_t x, int32_t y);
-	View *hit_tree(int32_t x, int32_t y, view_pos &pos);
+	bool hit(int32_t x, int32_t y) const;
+	View *hit_tree(int32_t x, int32_t y);
 	//action
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit() { return this; }
@@ -174,6 +174,10 @@ public:
 	virtual View *mouse_move(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_hover(const std::shared_ptr<Msg> &event) { return this; }
 	virtual View *mouse_wheel(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_enter(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *mouse_exit(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *key_down(const std::shared_ptr<Msg> &event) { return this; }
+	virtual View *key_up(const std::shared_ptr<Msg> &event) { return this; }
 
 	static std::recursive_mutex m_mutex;
 	static int64_t m_next_id;

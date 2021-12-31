@@ -66,7 +66,11 @@ void GUI_Task::run()
 			switch (evt->m_evt)
 			{
 			default:
+			{
+				//dispatch to widgets
+				window->event(msg);
 				break;
+			}
 			}
 		}
 	}

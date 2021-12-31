@@ -340,9 +340,9 @@ GUI_Service *GUI_Service::quit(SDL_Event &e)
 
 View *GUI_Service::set_mouse_id()
 {
-	view_pos pos;
-	auto view = m_screen->hit_tree(m_mouse_x, m_mouse_y, pos);
-	if (auto mouse_id = view->get_id() == m_mouse_id)
+	auto view = m_screen->hit_tree(m_mouse_x, m_mouse_y);
+	auto mouse_id = view->get_id();
+	if (mouse_id != m_mouse_id)
 	{
 		if (auto old_view = m_screen->find_id(m_mouse_id))
 		{

@@ -40,7 +40,7 @@ struct Dev_ID
 		for (auto &c : id.m_id) c = dist(rd);
 		return id;
 	}
-	std::array<uint8_t, 16> m_id;
+	std::array<uint8_t, 16> m_id = {0};
 };
 
 #endif

@@ -192,14 +192,14 @@ View *View::forward_tree(std::function<bool(View &view)> down, std::function<boo
 	std::function<View &(View &view)> forward_tree = [&](View &view) -> View&
 	{
 		if (down(view)) std::for_each(begin(view.m_children), end(view.m_children),
-						[&] (const auto &child) { forward_tree(*child); });
+						[&] (auto &child) { forward_tree(*child); });
 		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (down(*this)) std::for_each(begin(m_children), end(m_children),
-						[&] (const auto &child) { forward_tree(*child); });
+						[&] (auto &child) { forward_tree(*child); });
 	up(*this);
 	return this;
 }
@@ -210,14 +210,14 @@ View *View::backward_tree(std::function<bool(View &view)> down, std::function<bo
 	std::function<View &(View &view)> backward_tree = [&](View &view) -> View&
 	{
 		if (down(view)) std::for_each(rbegin(view.m_children), rend(view.m_children),
-						[&] (const auto &child) { backward_tree(*child); });
+						[&] (auto &child) { backward_tree(*child); });
 		up(view);
 		return view;
 	};
 	//root locking function
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (down(*this)) std::for_each(rbegin(m_children), rend(m_children),
-						[&] (const auto &child) { backward_tree(*child); });
+						[&] (auto &child) { backward_tree(*child); });
 	up(*this);
 	return this;
 }
@@ -236,19 +236,19 @@ View *View::draw(const Ctx &ctx)
 	return this;
 }
 
-view_pos View::get_pos()
+view_pos View::get_pos() const
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	return view_pos{m_x, m_y};
 }
 
-view_size View::get_size()
+view_size View::get_size() const
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	return view_size{m_w, m_h};
 }
 
-view_bounds View::get_bounds()
+view_bounds View::get_bounds() const
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	return view_bounds{m_x, m_y, m_w, m_h};
@@ -297,46 +297,49 @@ View *View::change_dirty(int32_t x, int32_t y, int32_t w, int32_t h)
 	return dirty()->change(x, y, w, h)->trans_dirty(old_p.m_x - x, old_p.m_y - y);
 }
 
-Net_ID View::find_owner()
+Net_ID View::find_owner() const
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto view = this;
 	const Net_ID owner_id;
 	while (view != nullptr)
 	{
-		if (view->m_owner != owner_id) return m_owner;
+		if (view->m_owner != owner_id) return view->m_owner;
 		view = view->m_parent;
 	}
 	return owner_id;
 }
 
-bool View::hit(int32_t x, int32_t y)
+bool View::hit(int32_t x, int32_t y) const
 {
 	if (x >= 0 && y >= 0 && x < m_w && y < m_h
 		&& (m_flags & view_flag_solid) != 0) return true;
 	return false;
 }
 
-View *View::hit_tree(int32_t x, int32_t y, view_pos &pos)
+View *View::hit_tree(int32_t x, int32_t y)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	pos.m_x = x;
-	pos.m_y = y;
 	View *hit_view = nullptr;
 	forward_tree(
 		[&](View &view)
 		{
-			pos.m_x -= view.m_x;
-			pos.m_y -= view.m_y;
-			if (!view.hit(pos.m_x, pos.m_y)) return true;
-			hit_view = &view;
-			return false;
+			x -= view.m_x;
+			y -= view.m_y;
+			if (hit_view) return false;
+			return view.hit(x, y);
 		},
-		[&](const View &view)
+		[&](View &view)
 		{
-			if (hit_view) return true;
-			pos.m_x += view.m_x;
-			pos.m_y += view.m_y;
+			if (hit_view)
+			{
+				x += view.m_x;
+				y += view.m_y;
+				return true;
+			}
+			if (view.hit(x, y)) hit_view = &view;
+			x += view.m_x;
+			y += view.m_y;
 			return true;
 		});
 	return hit_view;
