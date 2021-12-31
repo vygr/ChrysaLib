@@ -1,6 +1,7 @@
 #include "window.h"
 #include "colors.h"
 #include "ctx.h"
+#include <iostream>
 
 Window::Window()
 	: View()
@@ -100,7 +101,7 @@ Window *Window::mouse_down(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto event_struct = (View::Event_mouse*)event->begin();
-	auto m_mode = get_drag_mode(event_struct->m_rx, event_struct->m_ry);
+	m_mode = get_drag_mode(event_struct->m_rx, event_struct->m_ry);
 	return this;
 }
 
@@ -120,6 +121,7 @@ Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 	if ((m_mode.m_mode & 8) != 0) bounds.m_h = std::max(ay - m_mode.m_y, bounds.m_y + size.m_h);
 	change_dirty(bounds.m_x, bounds.m_y, bounds.m_w - bounds.m_x, bounds.m_h - bounds.m_y)
 		->emit();
+	std::cout << bounds.m_x << " " << bounds.m_y << std::endl;
 	return this;
 }
 
