@@ -111,7 +111,7 @@ const Ctx &Ctx::panel(uint32_t col, bool filled, int32_t depth, int32_t x, int32
 			.filled_box(x, y + abs_depth, abs_depth, h - 2 * abs_depth)
 			.set_color(bright_col)
 			.filled_box(x, y + h - abs_depth, w, abs_depth)
-			.filled_box(x + w - abs_depth, y, abs_depth, h - 2 * abs_depth);
+			.filled_box(x + w - abs_depth, y + abs_depth, abs_depth, h - 2 * abs_depth);
 	}
 	return *this;
 }
