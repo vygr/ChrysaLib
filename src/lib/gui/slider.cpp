@@ -93,11 +93,11 @@ Slider *Slider::mouse_move(const std::shared_ptr<Msg> &event)
 	auto value = get_long_prop("value");
 	auto portion = get_long_prop("portion");
 	auto max = get_long_prop("maximum");
-	auto state = 1;
+	auto state = 0;
 	if (event_struct->m_rx >= 0
 		&& event_struct->m_ry >= 0
 		&& event_struct->m_rx < m_w
-		&& event_struct->m_ry < m_h) state = 0;
+		&& event_struct->m_ry < m_h) state = 1;
 	int64_t new_value = m_w > m_h ?
 		(event_struct->m_rx - m_down_xy) * (max + portion) / m_w:
 		(event_struct->m_ry - m_down_xy) * (max + portion) / m_h;

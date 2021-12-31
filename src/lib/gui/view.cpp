@@ -294,7 +294,10 @@ View *View::change_dirty(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto old_p = get_pos();
-	return dirty()->change(x, y, w, h)->trans_dirty(old_p.m_x - x, old_p.m_y - y);
+	return dirty()
+		->change(x, y, w, h)
+		->trans_dirty(old_p.m_x - x, old_p.m_y - y)
+		->dirty_all();
 }
 
 Net_ID View::find_owner() const
