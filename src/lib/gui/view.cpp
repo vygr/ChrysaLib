@@ -226,9 +226,11 @@ View *View::backward_tree(std::function<bool(View &view)> down, std::function<bo
 View *View::set_flags(uint32_t flags, uint32_t mask)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto dirty_state = m_flags & view_flag_dirty_all;
-	m_flags = (m_flags & ~mask) | flags | dirty_state;
-	m_gui_flags |= (m_flags & view_flag_dirty_all);
+	auto sticky_states = m_flags & view_flag_dirty_all;
+	auto sticky_gui_states = m_gui_flags & (view_flag_dirty_all | view_flag_screen);
+	m_flags = (m_flags & ~mask) | flags | sticky_states;
+	flags &= (view_flag_dirty_all | view_flag_screen);
+	m_gui_flags |= flags | sticky_gui_states;
 	return this;
 }
 

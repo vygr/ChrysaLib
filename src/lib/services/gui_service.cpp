@@ -106,19 +106,19 @@ void GUI_Service::run()
 			if ((View::m_gui_flags & view_flag_screen) != 0)
 			{
 				//resize back buffer and then do full redraw
-				View::m_gui_flags &= ~view_flag_screen;
 				SDL_DestroyTexture(texture);
-				SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
-				m_screen->set_flags(view_flag_dirty_all, view_flag_dirty_all);
+				texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
+				m_screen->dirty_all();
+				View::m_gui_flags &= ~view_flag_screen;
 			}
 			if ((View::m_gui_flags & view_flag_dirty_all) != 0)
 			{
-				View::m_gui_flags &= ~view_flag_dirty_all;
 				SDL_SetRenderTarget(m_renderer, texture);
 				composit();
 				SDL_SetRenderTarget(m_renderer, 0);
 				SDL_RenderCopy(m_renderer, texture, 0, 0);
 				SDL_RenderPresent(m_renderer);
+				View::m_gui_flags &= ~view_flag_dirty_all;
 			}
 		}
 
@@ -513,7 +513,7 @@ GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
 
 GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 {
-	auto event = e.type;
+	auto event = e.event;
 	if (event == SDL_WINDOWEVENT_SIZE_CHANGED)
 	{
 		m_screen->set_bounds(0, 0, e.data1, e.data2);
@@ -526,12 +526,12 @@ GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 				auto msg = std::make_shared<Msg>(sizeof(View::Event_gui));
 				auto msg_struct = (View::Event_gui*)msg->begin();
 				msg->set_dest(owner);
-				msg_struct->m_type = ev_type_key;
+				msg_struct->m_type = ev_type_gui;
 				msg_struct->m_target_id = child->get_id();
 				m_router.send(msg);
 			}
 		}
-		View::m_gui_flags |= view_flag_screen;
+		m_screen->set_flags(view_flag_dirty_all | view_flag_screen, view_flag_dirty_all | view_flag_screen);
 	}
 	else if (event == SDL_WINDOWEVENT_SHOWN
 		|| event == SDL_WINDOWEVENT_RESTORED)
