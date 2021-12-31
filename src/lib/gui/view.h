@@ -76,6 +76,8 @@ struct view_bounds
 	int32_t m_h = 0;
 };
 
+class Router;
+
 //view class
 //base class for all widgets
 class View
@@ -156,12 +158,13 @@ public:
 	view_bounds get_bounds() const;
 	View *set_bounds(int32_t x, int32_t y, int32_t w, int32_t h);
 	Net_ID find_owner() const;
+	Router *find_router() const;
 	View *find_id(int64_t id);
 	bool hit(int32_t x, int32_t y) const;
 	View *hit_tree(int32_t x, int32_t y);
-	//action
+	//actions
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
-	View *emit() { return this; }
+	View *emit();
 	//subclass overides
 	virtual view_size pref_size();
 	virtual View *layout();
@@ -196,6 +199,7 @@ public:
 	std::vector<int64_t> m_actions;
 	Ctx m_ctx;
 	Net_ID m_owner;
+	Router *m_router = nullptr;
 };
 
 #endif

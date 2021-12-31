@@ -54,6 +54,7 @@ void GUI_Service::run()
 			{
 				//add view to screen
 				auto body_struct = (Event_add_front*)evt;
+				body_struct->m_view->m_router = &m_router;
 				m_screen->add_front(body_struct->m_view);
 				body_struct->m_view->dirty_all();
 				auto reply = std::make_shared<Msg>();
@@ -65,6 +66,7 @@ void GUI_Service::run()
 			{
 				//add view to screen
 				auto body_struct = (Event_add_back*)evt;
+				body_struct->m_view->m_router = &m_router;
 				m_screen->add_back(body_struct->m_view);
 				body_struct->m_view->dirty_all();
 				auto reply = std::make_shared<Msg>();

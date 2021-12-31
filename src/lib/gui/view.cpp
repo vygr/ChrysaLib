@@ -1,5 +1,6 @@
 #include "view.h"
 #include "property.h"
+#include "../mail/router.h"
 #include <algorithm>
 #include <iterator>
 
@@ -313,6 +314,18 @@ Net_ID View::find_owner() const
 	return owner_id;
 }
 
+Router *View::find_router() const
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto view = this;
+	while (view != nullptr)
+	{
+		if (view->m_router != nullptr) return view->m_router;
+		view = view->m_parent;
+	}
+	return nullptr;
+}
+
 bool View::hit(int32_t x, int32_t y) const
 {
 	if (x >= 0 && y >= 0 && x < m_w && y < m_h
@@ -364,4 +377,25 @@ View *View::find_id(int64_t id)
 			return true;
 		});
 	return id_view;
+}
+
+View *View::emit()
+{
+	auto owner = find_owner();
+	auto router = find_router();
+	if (owner != Net_ID() && router)
+	{
+		auto source_id = get_id();
+		for (auto &id : m_actions)
+		{
+			auto msg = std::make_shared<Msg>(sizeof(View::Event_action));
+			auto msg_struct = (View::Event_action*)msg->begin();
+			msg->set_dest(owner);
+			msg_struct->m_type = ev_type_action;
+			msg_struct->m_target_id = id;
+			msg_struct->m_source_id = source_id;
+			router->send(msg);
+		}
+	}
+	return this;
 }
