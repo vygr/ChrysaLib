@@ -12,7 +12,6 @@ public:
 	GUI_Task(Router &router)
 		: Task(router)
 	{}
-	void run() override;
 	//helper methods
 	void add_front(std::shared_ptr<View> view);
 	void add_back(std::shared_ptr<View> view);

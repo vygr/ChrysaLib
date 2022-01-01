@@ -87,8 +87,8 @@ make clean
 Run with:
 
 ```text
-hub_app [switches] ip_addr ...
-eg. hub_app -t 10000 -usb -ip 192.168.0.64 192.168.0.65
+hub_node [switches] ip_addr ...
+eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65
 -h:    this help info
 -t ms: exit timeout, default 0, ie never
 -usb:  start the usb link manager
@@ -120,17 +120,17 @@ While you could use the code to construct an arbitrary setup of what process
 runs what services there are some practical matters to consider about who can
 own USB handles and such that make me suggest the following.
 
-Run a `hub_app` on each machine and wire them to other peers `hubs` with:
+Run a `hub_node` on each machine and wire them to other peers `hubs` with:
 
-`./hub_app -ip -usb peer_ip peer_ip ...`
+`./hub_node -ip -usb peer_ip peer_ip ...`
 
 These hubs take care of USB links getting plugged in between machines and run a
 server for IP link connections.
 
 For an application or stand alone service, they should `dial` the `localhost`
-`hub_app` to connect to the network with:
+`hub_node` to connect to the network with:
 
-`./hub_app 127.0.0.1`
+`./hub_node 127.0.0.1`
 
 Nothing stops you from having a bundle of services as threads of a single
 process, but the router for that bundle `dials` the local `hub` to give them
@@ -150,12 +150,11 @@ failure is easy to arrange with the timed message reading and selection lists.
 Discarding mailboxes and allocating fresh ones as you need allows you to
 silently ignore any in flight messages that may still be on route.
 
-### File_Service
+### GUI_Service
 
-The `File_Service` standalone example app/service can be launched with:
+The `GUI_Service` can be launched with:
 
-`files_app 127.0.0.1`
+`gui_node 127.0.0.1`
 
-This example is only a base class, you would provide a subclass overriding the
-virtual methods to provide an implementation for a specific OS or filesystem
-API etc.
+This is a work in progress, to port the current ChrysaLisp GUI system and
+widgets over to C++.
