@@ -24,9 +24,9 @@ void File_Service::run()
 	while (m_running)
 	{
 		auto msg = mbox->read();
-		auto evt = (Event*)msg->begin();
-		auto evt_end = msg->end();
-		switch (evt->m_evt)
+		auto body = (Event*)msg->begin();
+		auto body_end = msg->end();
+		switch (body->m_evt)
 		{
 		case evt_get_file_list:
 		{
@@ -35,7 +35,7 @@ void File_Service::run()
 			//for each file in the exported folder
 			auto file_list = std::vector<std::string>{};
 			in_file_list(file_list);
-			auto event = (Event_get_file_list*)evt;
+			auto event = (Event_get_file_list*)body;
 			set_file_list(event->m_reply, file_list);
 			break;
 		}
@@ -43,8 +43,8 @@ void File_Service::run()
 		{
 			//set file list, done this way so it can be a push event as well as requested
 			//the subclass on the receiver will probably put this info into a UI widget etc
-			auto event = (Event_set_file_list*)evt;
-			auto file_list = split_string(std::string(event->m_data, evt_end), "\n");
+			auto event = (Event_set_file_list*)body;
+			auto file_list = split_string(std::string(event->m_data, body_end), "\n");
 			//now call out to whoever wants this
 			out_file_list(event->m_src, file_list);
 			break;
@@ -60,9 +60,9 @@ void File_Service::run()
 				//we will time how long things take
 				auto start = std::chrono::high_resolution_clock::now();
 
-				auto event = (Event_send_file*)evt;
+				auto event = (Event_send_file*)body;
 				//prepend the path prefix ?
-				auto filename = std::string(event->m_name, evt_end);
+				auto filename = std::string(event->m_name, body_end);
 				if (filename.find('/') == std::string::npos) filename = in_file_path() + filename;
 				auto fs = std::ifstream(filename, std::ifstream::ate | std::ifstream::binary);
 				if (fs.is_open())
@@ -145,17 +145,17 @@ void File_Service::run()
 			//big job so hive off into a thread from the thread pool.
 			m_thread_pool1->enqueue([=, msg_ref = std::move(msg)]
 			{
-				auto event = (Event_transfer_file*)evt;
+				auto event = (Event_transfer_file*)body;
 				//temp mailbox to await reply chunks
 				auto rep_id = m_router.alloc();
 				auto mbox = m_router.validate(rep_id);
 				//send off the file request
-				auto files = split_string(std::string(event->m_data, evt_end), "\n");
+				auto files = split_string(std::string(event->m_data, body_end), "\n");
 				auto msg = std::make_shared<Msg>(sizeof(Event_send_file));
 				msg->set_dest(event->m_src);
-				auto msg_body = (Event_send_file*)msg->begin();
-				msg_body->m_evt = evt_send_file;
-				msg_body->m_reply = rep_id;
+				auto event_body = (Event_send_file*)msg->begin();
+				event_body->m_evt = evt_send_file;
+				event_body->m_reply = rep_id;
 				msg->append(files[1]);
 				m_router.send(msg);
 
@@ -180,28 +180,28 @@ void File_Service::run()
 						m_router.free(rep_id);
 						return;
 					}
-					auto chunk_struct = (send_file_chunk*)chunk_msg->begin();
-					if (chunk_struct->m_total == 0) goto nofile1;
+					auto chunk_body = (send_file_chunk*)chunk_msg->begin();
+					if (chunk_body->m_total == 0) goto nofile1;
 					//first time we know the total size we open a temp file for writing the chunks
 					if (!total)
 					{
 						//create some temp filename for the reply chunks
-						total = chunk_struct->m_total;
+						total = chunk_body->m_total;
 						tmpname = in_temp_file();
 						fs.open(tmpname, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
 					}
 					//write this chunks data into the file
-					if (offset != chunk_struct->m_offset) fs.seekp(chunk_struct->m_offset);
-					fs.write(chunk_struct->m_data, chunk_struct->m_length);
-					offset = chunk_struct->m_offset + chunk_struct->m_length;
-					amount += chunk_struct->m_length;
+					if (offset != chunk_body->m_offset) fs.seekp(chunk_body->m_offset);
+					fs.write(chunk_body->m_data, chunk_body->m_length);
+					offset = chunk_body->m_offset + chunk_body->m_length;
+					amount += chunk_body->m_length;
 					//do we need to send an ack ?
 					if (++num_packets >= FILE_CHUNK_WINDOW_SIZE)
 					{
 						num_packets = 0;
 						static auto tag = std::make_shared<std::string>("ack");
 						auto ack = std::make_shared<Msg>(tag);
-						ack->set_dest(chunk_struct->m_ack);
+						ack->set_dest(chunk_body->m_ack);
 						m_router.send(ack);
 					}
 					//send a progress report to origin every 10%
@@ -250,9 +250,9 @@ File_Service *File_Service::set_file_list(const Net_ID &net_id, const std::vecto
 {
 	auto msg = std::make_shared<Msg>(sizeof(Event_set_file_list));
 	msg->set_dest(net_id);
-	auto msg_body = (Event_set_file_list*)msg->begin();
-	msg_body->m_evt = evt_set_file_list;
-	msg_body->m_src = m_net_id;
+	auto event_body = (Event_set_file_list*)msg->begin();
+	event_body->m_evt = evt_set_file_list;
+	event_body->m_src = m_net_id;
 	for (auto &file : file_list) { msg->append(file)->append("\n"); }
 	m_router.send(msg);
 	return this;
@@ -264,9 +264,9 @@ File_Service *File_Service::get_file_list(const Net_ID &net_id)
 {
 	auto msg = std::make_shared<Msg>(sizeof(Event_get_file_list));
 	msg->set_dest(net_id);
-	auto msg_body = (Event_get_file_list*)msg->begin();
-	msg_body->m_evt = evt_get_file_list;
-	msg_body->m_reply = m_net_id;
+	auto event_body = (Event_get_file_list*)msg->begin();
+	event_body->m_evt = evt_get_file_list;
+	event_body->m_reply = m_net_id;
 	m_router.send(msg);
 	return this;
 }
@@ -285,10 +285,10 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 		//send off the transfer request
 		auto msg = std::make_shared<Msg>(sizeof(Event_transfer_file));
 		msg->set_dest(dst_id);
-		auto msg_body = (Event_transfer_file*)msg->begin();
-		msg_body->m_evt = evt_transfer_file;
-		msg_body->m_src = src_id;
-		msg_body->m_origin = origin_id;
+		auto event_body = (Event_transfer_file*)msg->begin();
+		event_body->m_evt = evt_transfer_file;
+		event_body->m_src = src_id;
+		event_body->m_origin = origin_id;
 		msg->append(dst_name)->append("\n")->append(src_name);
 		m_router.send(msg);
 		//wait for progress and confirmation
@@ -306,8 +306,8 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 				out_error(dst_id, src_id, dst_name, src_name, ctx);
 				break;
 			}
-			auto prog_struct = (transfer_file_progress*)prog_msg->begin();
-			if (prog_struct->m_progress == -1)
+			auto prog_body = (transfer_file_progress*)prog_msg->begin();
+			if (prog_body->m_progress == -1)
 			{
 				//all has finished
 				auto log = std::ostringstream();
@@ -317,7 +317,7 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 				break;
 			}
 			//call the subclass to update a progress bar etc
-			out_progress(dst_id, src_id, dst_name, src_name, ctx, prog_struct->m_progress);
+			out_progress(dst_id, src_id, dst_name, src_name, ctx, prog_body->m_progress);
 		}
 		m_router.free(origin_id);
 	});

@@ -58,18 +58,15 @@ void Test_Task::run()
 	while (m_running)
 	{
 		auto msg = mbox->read();
-		if (msg)
+		auto body = (Event*)msg->begin();
+		switch (body->m_evt)
 		{
-			auto evt = (Event*)msg->begin();
-			switch (evt->m_evt)
-			{
-			default:
-			{
-				//dispatch to widgets
-				window->event(msg);
-				break;
-			}
-			}
+		default:
+		{
+			//dispatch to widgets
+			window->event(msg);
+			break;
+		}
 		}
 	}
 }

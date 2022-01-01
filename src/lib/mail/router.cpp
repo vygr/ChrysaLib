@@ -71,31 +71,31 @@ void Router::send(std::shared_ptr<Msg> &msg)
 bool Router::update_route(const std::string &body)
 {
 	//update our routing table based on this ping message body
-	auto event = (Kernel_Service::Event_directory*)&(*begin(body));
+	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
 	std::lock_guard<std::mutex> lock(m_mutex);
-	auto &route_struct = m_routes[event->m_src.m_device_id];
+	auto &route_struct = m_routes[event_body->m_src.m_device_id];
 	//ignore if it's from an old session !
-	if (event->m_src.m_mailbox_id.m_id < route_struct.m_session) return false;
-	if (event->m_src.m_mailbox_id.m_id != route_struct.m_session)
+	if (event_body->m_src.m_mailbox_id.m_id < route_struct.m_session) return false;
+	if (event_body->m_src.m_mailbox_id.m_id != route_struct.m_session)
 	{
 		//new session, so purge and create a new entry
-		route_struct.m_session = event->m_src.m_mailbox_id.m_id;
+		route_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
 		route_struct.m_time = std::chrono::high_resolution_clock::now();
-		route_struct.m_hops = event->m_hops;
+		route_struct.m_hops = event_body->m_hops;
 		route_struct.m_vias.clear();
-		route_struct.m_vias.insert(event->m_via);
+		route_struct.m_vias.insert(event_body->m_via);
 	}
-	else if (event->m_hops < route_struct.m_hops)
+	else if (event_body->m_hops < route_struct.m_hops)
 	{
 		//much better route, purge any existing routes and replace with this one
-		route_struct.m_hops = event->m_hops;
+		route_struct.m_hops = event_body->m_hops;
 		route_struct.m_vias.clear();
-		route_struct.m_vias.insert(event->m_via);
+		route_struct.m_vias.insert(event_body->m_via);
 	}
-	else if (event->m_hops == route_struct.m_hops)
+	else if (event_body->m_hops == route_struct.m_hops)
 	{
 		//equally good route, so add this as a viable route
-		route_struct.m_vias.insert(event->m_via);
+		route_struct.m_vias.insert(event_body->m_via);
 	}
 	return true;
 }

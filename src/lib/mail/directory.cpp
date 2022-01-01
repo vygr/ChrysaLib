@@ -22,11 +22,11 @@ void Directory_Manager::run()
 
 		//flood service directory to the network
 		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_directory), '\0');
-		auto body_struct = (Kernel_Service::Event_directory*)&*(body->begin());
-		body_struct->m_evt = Kernel_Service::evt_directory;
-		body_struct->m_src = m_router.alloc_src();
-		body_struct->m_via = m_router.get_dev_id();
-		body_struct->m_hops = 0;
+		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
+		event_body->m_evt = Kernel_Service::evt_directory;
+		event_body->m_src = m_router.alloc_src();
+		event_body->m_via = m_router.get_dev_id();
+		event_body->m_hops = 0;
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
 			auto &dir_struct = m_directory[m_router.get_dev_id()];
@@ -80,18 +80,18 @@ void Directory_Manager::forget(const std::string &entry)
 bool Directory_Manager::update(const std::string &body)
 {
 	//update our service directory based on this ping message body
-	auto event = (Kernel_Service::Event_directory*)&(*begin(body));
-	auto body_end = &(*begin(body)) + body.size();
+	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
+	auto event_body_end = &(*begin(body)) + body.size();
 	std::lock_guard<std::mutex> lock(m_mutex);
-	auto &dir_struct = m_directory[event->m_src.m_device_id];
+	auto &dir_struct = m_directory[event_body->m_src.m_device_id];
 	//not a new session, so ignore !
-	if (event->m_src.m_mailbox_id.m_id <= dir_struct.m_session) return false;
-	dir_struct.m_session = event->m_src.m_mailbox_id.m_id;
+	if (event_body->m_src.m_mailbox_id.m_id <= dir_struct.m_session) return false;
+	dir_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
 	dir_struct.m_time_modified = std::chrono::high_resolution_clock::now();
 	dir_struct.m_services.clear();
 	//split the body into separate service entry strings.
 	//insert them into the directory.
-	for (auto &entry : split_string(std::string((const char*)event->m_data, body_end), "\n"))
+	for (auto &entry : split_string(std::string((const char*)event_body, event_body_end), "\n"))
 	{
 		dir_struct.m_services.insert(entry);
 	}
