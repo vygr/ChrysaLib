@@ -35,6 +35,7 @@ enum
 	ev_key_mod_right_command = 0x800,
 	ev_key_mod_caps_lock = 0x2000,
 	ev_key_mod_control = 0x40,
+
 	ev_key_mod_shift = ev_key_mod_left_shift + ev_key_mod_right_shift,
 	ev_key_mod_option = ev_key_mod_left_option + ev_key_mod_right_option,
 	ev_key_mod_command = ev_key_mod_left_command +ev_key_mod_right_command,

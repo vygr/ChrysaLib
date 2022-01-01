@@ -8,10 +8,9 @@ enum
 {
 	scroll_flag_vertical = 1 << 0,
 	scroll_flag_horizontal = 1 << 1,
-};
 
-//scroll flag combos
-const auto scroll_flag_both = scroll_flag_vertical | scroll_flag_horizontal;
+	scroll_flag_both = scroll_flag_vertical | scroll_flag_horizontal,
+};
 
 class Scroll : public View
 {

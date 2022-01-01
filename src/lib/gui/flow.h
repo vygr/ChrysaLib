@@ -20,14 +20,13 @@ enum
 	flow_flag_align_vcenter = 1 << 11,
 	flow_flag_align_vtop = 1 << 12,
 	flow_flag_align_vbottom = 1 << 13,
-};
 
-//useful flow combos
-const auto flow_down_fill = flow_flag_down | flow_flag_fillw | flow_flag_lasth;
-const auto flow_up_fill = flow_flag_up | flow_flag_fillw | flow_flag_lasth;
-const auto flow_right_fill = flow_flag_right | flow_flag_fillh | flow_flag_lastw;
-const auto flow_left_fill = flow_flag_left | flow_flag_fillh | flow_flag_lastw;
-const auto flow_stack_fill = flow_flag_fillw | flow_flag_fillh | flow_flag_lastw | flow_flag_lasth;
+	flow_down_fill = flow_flag_down | flow_flag_fillw | flow_flag_lasth,
+	flow_up_fill = flow_flag_up | flow_flag_fillw | flow_flag_lasth,
+	flow_right_fill = flow_flag_right | flow_flag_fillh | flow_flag_lastw,
+	flow_left_fill = flow_flag_left | flow_flag_fillh | flow_flag_lastw,
+	flow_stack_fill = flow_flag_fillw | flow_flag_fillh | flow_flag_lastw | flow_flag_lasth,
+};
 
 class Flow : public View
 {
