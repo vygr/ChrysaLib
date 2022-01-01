@@ -178,9 +178,8 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		}
 		else if (type == ev_type_wheel)
 		{
-			auto event_body = (View::Event_wheel*)event->begin();
-			auto wheel = target->m_parent;
-			while (!wheel->got_prop("has_wheel")) { wheel = wheel->m_parent; }
+			auto wheel = target;
+			while (wheel && !wheel->got_prop("has_wheel")) { wheel = wheel->m_parent; }
 			if (wheel) wheel->mouse_wheel(event);
 		}
 		else if (type == ev_type_enter)
