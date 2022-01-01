@@ -91,7 +91,7 @@ bool Directory_Manager::update(const std::string &body)
 	dir_struct.m_services.clear();
 	//split the body into separate service entry strings.
 	//insert them into the directory.
-	for (auto &entry : split_string(std::string((const char*)event_body, event_body_end), "\n"))
+	for (auto &entry : split_string(std::string((const char*)event_body->m_data, event_body_end), "\n"))
 	{
 		dir_struct.m_services.insert(entry);
 	}
