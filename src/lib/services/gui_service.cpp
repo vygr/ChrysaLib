@@ -17,6 +17,7 @@ void GUI_Service::run()
 	auto mbox = m_router.validate(m_net_id);
 	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
 
+	View::m_router = &m_router;
 	m_screen = std::make_shared<Backdrop>();
 	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2))
 		->def_prop("ink_color", std::make_shared<Property>(argb_grey1))

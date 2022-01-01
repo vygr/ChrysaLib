@@ -8,6 +8,7 @@ std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
 uint32_t View::m_gui_flags = 0;
 std::vector<std::shared_ptr<View>> View::m_temps;
+Router *View::m_router = nullptr;
 
 View::View()
 	: m_id(--m_next_id)
@@ -394,18 +395,6 @@ Net_ID View::find_owner() const
 	return owner_id;
 }
 
-Router *View::find_router() const
-{
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto view = this;
-	while (view != nullptr)
-	{
-		if (view->m_router != nullptr) return view->m_router;
-		view = view->m_parent;
-	}
-	return nullptr;
-}
-
 bool View::hit(int32_t x, int32_t y) const
 {
 	if (x >= 0 && y >= 0 && x < m_w && y < m_h
@@ -462,8 +451,7 @@ View *View::find_id(int64_t id)
 View *View::emit()
 {
 	auto owner = find_owner();
-	auto router = find_router();
-	if (owner != Net_ID() && router)
+	if (owner != Net_ID() && m_router)
 	{
 		auto source_id = get_id();
 		for (auto &id : m_actions)
@@ -474,7 +462,7 @@ View *View::emit()
 			event_body->m_type = ev_type_action;
 			event_body->m_target_id = id;
 			event_body->m_source_id = source_id;
-			router->send(msg);
+			m_router->send(msg);
 		}
 	}
 	return this;

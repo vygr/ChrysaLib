@@ -161,7 +161,6 @@ public:
 	view_bounds get_bounds() const;
 	View *set_bounds(int32_t x, int32_t y, int32_t w, int32_t h);
 	Net_ID find_owner() const;
-	Router *find_router() const;
 	View *find_id(int64_t id);
 	bool hit(int32_t x, int32_t y) const;
 	View *hit_tree(int32_t x, int32_t y);
@@ -189,6 +188,7 @@ public:
 	static int64_t m_next_id;
 	static uint32_t m_gui_flags;
 	static std::vector<std::shared_ptr<View>> m_temps;
+	static Router *m_router;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
@@ -203,7 +203,6 @@ public:
 	std::vector<int64_t> m_actions;
 	Ctx m_ctx;
 	Net_ID m_owner;
-	Router *m_router = nullptr;
 };
 
 #endif
