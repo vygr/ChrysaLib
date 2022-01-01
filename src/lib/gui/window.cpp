@@ -100,17 +100,17 @@ drag_mode Window::get_drag_mode(int32_t rx, int32_t ry)
 Window *Window::mouse_down(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)event->begin();
-	m_mode = get_drag_mode(event_struct->m_rx, event_struct->m_ry);
+	auto event_body = (View::Event_mouse*)event->begin();
+	m_mode = get_drag_mode(event_body->m_rx, event_body->m_ry);
 	return this;
 }
 
 Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)event->begin();
-	auto ax = event_struct->m_x;
-	auto ay = event_struct->m_y;
+	auto event_body = (View::Event_mouse*)event->begin();
+	auto ax = event_body->m_x;
+	auto ay = event_body->m_y;
 	auto bounds = get_bounds();
 	auto size = pref_size();
 	bounds.m_w += bounds.m_x;
@@ -126,16 +126,16 @@ Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 
 Window *Window::event(const std::shared_ptr<Msg> &event)
 {
-	auto event_struct = (View::Event*)event->begin();
-	auto target = find_id(event_struct->m_target_id);
-	auto type = event_struct->m_type;
+	auto event_body = (View::Event*)event->begin();
+	auto target = find_id(event_body->m_target_id);
+	auto type = event_body->m_type;
 	if (target)
 	{
 		if (type == ev_type_mouse)
 		{
 			//so what state are we in ?
-			auto event_struct = (View::Event_mouse*)event->begin();
-			auto buttons = event_struct->m_buttons;
+			auto event_body = (View::Event_mouse*)event->begin();
+			auto buttons = event_body->m_buttons;
 			if (m_last_buttons)
 			{
 				//was down previously
@@ -169,8 +169,8 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		}
 		else if (type == ev_type_key)
 		{
-			auto event_struct = (View::Event_key*)event->begin();
-			if (event_struct->m_keycode >= 0)
+			auto event_body = (View::Event_key*)event->begin();
+			if (event_body->m_keycode >= 0)
 			{
 				target->key_down(event);
 				target->key_up(event);
@@ -178,7 +178,7 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		}
 		else if (type == ev_type_wheel)
 		{
-			auto event_struct = (View::Event_wheel*)event->begin();
+			auto event_body = (View::Event_wheel*)event->begin();
 			//find first wheel aceptor... TODO
 			target->mouse_wheel(event);
 		}

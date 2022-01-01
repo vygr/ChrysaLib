@@ -49,9 +49,9 @@ void Kernel_Service::run()
 			auto body_struct = (Event_start_task*)evt;
 			body_struct->m_task->start_thread();
 			auto reply = std::make_shared<Msg>(sizeof(start_task_reply));
-			auto reply_struct = (start_task_reply*)reply->begin();
+			auto reply_body = (start_task_reply*)reply->begin();
 			reply->set_dest(body_struct->m_reply);
-			reply_struct->m_task = body_struct->m_task->get_id();
+			reply_body->m_task = body_struct->m_task->get_id();
 			m_router.send(reply);
 			break;
 		}

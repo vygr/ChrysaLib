@@ -91,12 +91,12 @@ void File_Service::run()
 						auto chunk_msg = std::make_shared<Msg>(sizeof(send_file_chunk) + chunk_length);
 						chunk_msg->set_dest(event->m_reply);
 						//body
-						auto reply_struct = (send_file_chunk*)chunk_msg->begin();
-						reply_struct->m_ack = ack_id;
-						reply_struct->m_total = total;
-						reply_struct->m_length = chunk_length;
-						reply_struct->m_offset = offset;
-						fs.read(reply_struct->m_data, chunk_length);
+						auto reply_body = (send_file_chunk*)chunk_msg->begin();
+						reply_body->m_ack = ack_id;
+						reply_body->m_total = total;
+						reply_body->m_length = chunk_length;
+						reply_body->m_offset = offset;
+						fs.read(reply_body->m_data, chunk_length);
 						m_router.send(chunk_msg);
 						offset += chunk_length;
 						//do we need to consume an ack before moving on ?
@@ -126,8 +126,8 @@ void File_Service::run()
 					auto chunk_msg = std::make_shared<Msg>(sizeof(send_file_chunk));
 					chunk_msg->set_dest(event->m_reply);
 					//body
-					auto reply_struct = (send_file_chunk*)chunk_msg->begin();
-					reply_struct->m_total = 0;
+					auto reply_body = (send_file_chunk*)chunk_msg->begin();
+					reply_body->m_total = 0;
 					m_router.send(chunk_msg);
 				}
 
@@ -153,9 +153,9 @@ void File_Service::run()
 				auto files = split_string(std::string(event->m_data, evt_end), "\n");
 				auto msg = std::make_shared<Msg>(sizeof(Event_send_file));
 				msg->set_dest(event->m_src);
-				auto msg_struct = (Event_send_file*)msg->begin();
-				msg_struct->m_evt = evt_send_file;
-				msg_struct->m_reply = rep_id;
+				auto msg_body = (Event_send_file*)msg->begin();
+				msg_body->m_evt = evt_send_file;
+				msg_body->m_reply = rep_id;
 				msg->append(files[1]);
 				m_router.send(msg);
 
@@ -250,9 +250,9 @@ File_Service *File_Service::set_file_list(const Net_ID &net_id, const std::vecto
 {
 	auto msg = std::make_shared<Msg>(sizeof(Event_set_file_list));
 	msg->set_dest(net_id);
-	auto msg_struct = (Event_set_file_list*)msg->begin();
-	msg_struct->m_evt = evt_set_file_list;
-	msg_struct->m_src = m_net_id;
+	auto msg_body = (Event_set_file_list*)msg->begin();
+	msg_body->m_evt = evt_set_file_list;
+	msg_body->m_src = m_net_id;
 	for (auto &file : file_list) { msg->append(file)->append("\n"); }
 	m_router.send(msg);
 	return this;
@@ -264,9 +264,9 @@ File_Service *File_Service::get_file_list(const Net_ID &net_id)
 {
 	auto msg = std::make_shared<Msg>(sizeof(Event_get_file_list));
 	msg->set_dest(net_id);
-	auto msg_struct = (Event_get_file_list*)msg->begin();
-	msg_struct->m_evt = evt_get_file_list;
-	msg_struct->m_reply = m_net_id;
+	auto msg_body = (Event_get_file_list*)msg->begin();
+	msg_body->m_evt = evt_get_file_list;
+	msg_body->m_reply = m_net_id;
 	m_router.send(msg);
 	return this;
 }
@@ -285,10 +285,10 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 		//send off the transfer request
 		auto msg = std::make_shared<Msg>(sizeof(Event_transfer_file));
 		msg->set_dest(dst_id);
-		auto msg_struct = (Event_transfer_file*)msg->begin();
-		msg_struct->m_evt = evt_transfer_file;
-		msg_struct->m_src = src_id;
-		msg_struct->m_origin = origin_id;
+		auto msg_body = (Event_transfer_file*)msg->begin();
+		msg_body->m_evt = evt_transfer_file;
+		msg_body->m_src = src_id;
+		msg_body->m_origin = origin_id;
 		msg->append(dst_name)->append("\n")->append(src_name);
 		m_router.send(msg);
 		//wait for progress and confirmation

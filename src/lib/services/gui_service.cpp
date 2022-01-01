@@ -357,10 +357,10 @@ View *GUI_Service::set_mouse_id()
 			if (owner != Net_ID())
 			{
 				auto msg = std::make_shared<Msg>(sizeof(View::Event_exit));
-				auto msg_struct = (View::Event_exit*)msg->begin();
+				auto msg_body = (View::Event_exit*)msg->begin();
 				msg->set_dest(owner);
-				msg_struct->m_type = ev_type_exit;
-				msg_struct->m_target_id = m_mouse_id;
+				msg_body->m_type = ev_type_exit;
+				msg_body->m_target_id = m_mouse_id;
 				m_router.send(msg);
 			}
 		}
@@ -369,10 +369,10 @@ View *GUI_Service::set_mouse_id()
 		if (owner != Net_ID())
 		{
 			auto msg = std::make_shared<Msg>(sizeof(View::Event_enter));
-			auto msg_struct = (View::Event_enter*)msg->begin();
+			auto msg_body = (View::Event_enter*)msg->begin();
 			msg->set_dest(owner);
-			msg_struct->m_type = ev_type_enter;
-			msg_struct->m_target_id = m_mouse_id;
+			msg_body->m_type = ev_type_enter;
+			msg_body->m_target_id = m_mouse_id;
 			m_router.send(msg);
 		}
 	}
@@ -386,13 +386,13 @@ GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
 	if (owner != Net_ID())
 	{
 		auto msg = std::make_shared<Msg>(sizeof(View::Event_wheel));
-		auto msg_struct = (View::Event_wheel*)msg->begin();
+		auto msg_body = (View::Event_wheel*)msg->begin();
 		msg->set_dest(owner);
-		msg_struct->m_type = ev_type_wheel;
-		msg_struct->m_target_id = m_mouse_id;
-		msg_struct->m_x = e.x;
-		msg_struct->m_y = e.y;
-		msg_struct->m_direction = e.direction;
+		msg_body->m_type = ev_type_wheel;
+		msg_body->m_target_id = m_mouse_id;
+		msg_body->m_x = e.x;
+		msg_body->m_y = e.y;
+		msg_body->m_direction = e.direction;
 		m_router.send(msg);
 	}
 	return this;
@@ -408,16 +408,16 @@ GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
 	if (owner != Net_ID())
 	{
 		auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
-		auto msg_struct = (View::Event_mouse*)msg->begin();
+		auto msg_body = (View::Event_mouse*)msg->begin();
 		msg->set_dest(owner);
-		msg_struct->m_type = ev_type_mouse;
-		msg_struct->m_target_id = m_mouse_id;
-		msg_struct->m_x = m_mouse_x;
-		msg_struct->m_y = m_mouse_y;
-		msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
-		msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
-		msg_struct->m_buttons = m_mouse_buttons;
-		msg_struct->m_count = e.clicks;
+		msg_body->m_type = ev_type_mouse;
+		msg_body->m_target_id = m_mouse_id;
+		msg_body->m_x = m_mouse_x;
+		msg_body->m_y = m_mouse_y;
+		msg_body->m_rx = m_mouse_x - view->m_ctx.m_x;
+		msg_body->m_ry = m_mouse_y - view->m_ctx.m_y;
+		msg_body->m_buttons = m_mouse_buttons;
+		msg_body->m_count = e.clicks;
 		m_router.send(msg);
 	}
 	return this;
@@ -433,16 +433,16 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 	if (owner != Net_ID())
 	{
 		auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
-		auto msg_struct = (View::Event_mouse*)msg->begin();
+		auto msg_body = (View::Event_mouse*)msg->begin();
 		msg->set_dest(owner);
-		msg_struct->m_type = ev_type_mouse;
-		msg_struct->m_target_id = m_mouse_id;
-		msg_struct->m_x = m_mouse_x;
-		msg_struct->m_y = m_mouse_y;
-		msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
-		msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
-		msg_struct->m_buttons = m_mouse_buttons;
-		msg_struct->m_count = e.clicks;
+		msg_body->m_type = ev_type_mouse;
+		msg_body->m_target_id = m_mouse_id;
+		msg_body->m_x = m_mouse_x;
+		msg_body->m_y = m_mouse_y;
+		msg_body->m_rx = m_mouse_x - view->m_ctx.m_x;
+		msg_body->m_ry = m_mouse_y - view->m_ctx.m_y;
+		msg_body->m_buttons = m_mouse_buttons;
+		msg_body->m_count = e.clicks;
 		m_router.send(msg);
 	}
 	return this;
@@ -460,16 +460,16 @@ GUI_Service *GUI_Service::mouse_motion(SDL_MouseMotionEvent &e)
 		if (owner != Net_ID())
 		{
 			auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
-			auto msg_struct = (View::Event_mouse*)msg->begin();
+			auto msg_body = (View::Event_mouse*)msg->begin();
 			msg->set_dest(owner);
-			msg_struct->m_type = ev_type_mouse;
-			msg_struct->m_target_id = m_mouse_id;
-			msg_struct->m_x = m_mouse_x;
-			msg_struct->m_y = m_mouse_y;
-			msg_struct->m_rx = m_mouse_x - view->m_ctx.m_x;
-			msg_struct->m_ry = m_mouse_y - view->m_ctx.m_y;
-			msg_struct->m_buttons = m_mouse_buttons;
-			msg_struct->m_count = 0;
+			msg_body->m_type = ev_type_mouse;
+			msg_body->m_target_id = m_mouse_id;
+			msg_body->m_x = m_mouse_x;
+			msg_body->m_y = m_mouse_y;
+			msg_body->m_rx = m_mouse_x - view->m_ctx.m_x;
+			msg_body->m_ry = m_mouse_y - view->m_ctx.m_y;
+			msg_body->m_buttons = m_mouse_buttons;
+			msg_body->m_count = 0;
 			m_router.send(msg);
 		}
 	}
@@ -499,13 +499,13 @@ GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
 	if (owner != Net_ID())
 	{
 		auto msg = std::make_shared<Msg>(sizeof(View::Event_key));
-		auto msg_struct = (View::Event_key*)msg->begin();
+		auto msg_body = (View::Event_key*)msg->begin();
 		msg->set_dest(owner);
-		msg_struct->m_type = ev_type_key;
-		msg_struct->m_target_id = m_mouse_id;
-		msg_struct->m_keycode = key_code;
-		msg_struct->m_key = cook_key(key_code, key, mod);
-		msg_struct->m_mod = mod;
+		msg_body->m_type = ev_type_key;
+		msg_body->m_target_id = m_mouse_id;
+		msg_body->m_keycode = key_code;
+		msg_body->m_key = cook_key(key_code, key, mod);
+		msg_body->m_mod = mod;
 		m_router.send(msg);
 	}
 	return this;
@@ -524,10 +524,10 @@ GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 			if (owner != Net_ID())
 			{
 				auto msg = std::make_shared<Msg>(sizeof(View::Event_gui));
-				auto msg_struct = (View::Event_gui*)msg->begin();
+				auto msg_body = (View::Event_gui*)msg->begin();
 				msg->set_dest(owner);
-				msg_struct->m_type = ev_type_gui;
-				msg_struct->m_target_id = child->get_id();
+				msg_body->m_type = ev_type_gui;
+				msg_body->m_target_id = child->get_id();
 				m_router.send(msg);
 			}
 		}

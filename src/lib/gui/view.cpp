@@ -391,11 +391,11 @@ View *View::emit()
 		for (auto &id : m_actions)
 		{
 			auto msg = std::make_shared<Msg>(sizeof(View::Event_action));
-			auto msg_struct = (View::Event_action*)msg->begin();
+			auto msg_body = (View::Event_action*)msg->begin();
 			msg->set_dest(owner);
-			msg_struct->m_type = ev_type_action;
-			msg_struct->m_target_id = id;
-			msg_struct->m_source_id = source_id;
+			msg_body->m_type = ev_type_action;
+			msg_body->m_target_id = id;
+			msg_body->m_source_id = source_id;
 			router->send(msg);
 		}
 	}

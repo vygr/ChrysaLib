@@ -50,12 +50,12 @@ Button *Button::mouse_up(const std::shared_ptr<Msg> &event)
 Button *Button::mouse_move(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_mouse*)&*(event->begin());
+	auto event_body = (View::Event_mouse*)&*(event->begin());
 	auto state = 1;
-	if (event_struct->m_rx >= 0
-		&& event_struct->m_ry >= 0
-		&& event_struct->m_rx < m_w
-		&& event_struct->m_ry < m_h) state = -1;
+	if (event_body->m_rx >= 0
+		&& event_body->m_ry >= 0
+		&& event_body->m_rx < m_w
+		&& event_body->m_ry < m_h) state = -1;
 	if (state != m_state)
 	{
 		m_state = state;

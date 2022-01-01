@@ -93,16 +93,16 @@ Scroll *Scroll::action(const std::shared_ptr<Msg> &event)
 Scroll *Scroll::mouse_wheel(const std::shared_ptr<Msg> &event)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto event_struct = (View::Event_wheel*)&*(event->begin());
+	auto event_body = (View::Event_wheel*)&*(event->begin());
 	if (m_hslider)
 	{
 		auto value = m_hslider->get_long_prop("value");
-		m_hslider->def_prop("value", std::make_shared<Property>(value + 16 * event_struct->m_x));
+		m_hslider->def_prop("value", std::make_shared<Property>(value + 16 * event_body->m_x));
 	}
 	if (m_vslider)
 	{
 		auto value = m_vslider->get_long_prop("value");
-		m_vslider->def_prop("value", std::make_shared<Property>(value - 16 * event_struct->m_y));
+		m_vslider->def_prop("value", std::make_shared<Property>(value - 16 * event_body->m_y));
 	}
 	layout()->dirty_all();
 	return this;
