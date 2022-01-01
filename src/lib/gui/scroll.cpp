@@ -3,6 +3,7 @@
 Scroll::Scroll(int32_t flags)
 	: View()
 {
+	def_prop("has_wheel", std::make_shared<Property>(0));
 	if ((flags & scroll_flag_vertical) != 0)
 	{
 		m_vslider = std::make_shared<Slider>();
