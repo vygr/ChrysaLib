@@ -56,13 +56,88 @@ View *View::sub()
 	return this;
 }
 
+View *View::hide()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto parent = m_parent;
+	if (parent)
+	{
+		auto &child_list = parent->m_children;
+		//find me
+		auto my_itr = std::find_if(begin(child_list), end(child_list), [&] (auto &view)
+		{
+			return view.get() == this;
+		});
+		auto view = *my_itr;
+		auto hide_view = std::make_shared<View>();
+		hide_view->m_parent = parent;
+		hide_view->set_bounds(view->m_x, view->m_y, view->m_w, view->m_h);
+		hide_view->set_flags(view_flag_temp | view_flag_dirty_all, view_flag_temp | view_flag_dirty_all | view_flag_solid);
+		child_list.insert(my_itr, hide_view);
+		child_list.erase(my_itr);
+	}
+	return this;
+}
+
 View *View::to_back()
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto parent = m_parent;
+	if (parent)
+	{
+		auto &child_list = parent->m_children;
+		//find me
+		auto my_itr = std::find_if(begin(child_list), end(child_list), [&] (auto &view)
+		{
+			return view.get() == this;
+		});
+		//find back
+		auto itr = std::find_if(begin(child_list), end(child_list), [&] (auto &view)
+		{
+			return view->m_flags & view_flag_at_back;
+		});
+		//move me to here ?
+		if (my_itr != itr)
+		{
+			auto view = *my_itr;
+			auto hide_view = std::make_shared<View>();
+			hide_view->m_parent = parent;
+			hide_view->set_bounds(view->m_x, view->m_y, view->m_w, view->m_h);
+			hide_view->set_flags(view_flag_temp | view_flag_dirty_all, view_flag_temp | view_flag_dirty_all | view_flag_solid);
+			child_list.insert(my_itr, hide_view);
+			child_list.erase(my_itr);
+			child_list.insert(itr, view);
+		}
+	}
 	return this;
 }
 
 View *View::to_front()
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto parent = m_parent;
+	if (parent)
+	{
+		auto &child_list = parent->m_children;
+		//find me
+		auto my_itr = std::find_if(begin(child_list), end(child_list), [&] (auto &view)
+		{
+			return view.get() == this;
+		});
+		//find front
+		auto itr = std::find_if_not(begin(child_list), end(child_list), [&] (auto &view)
+		{
+			return view->m_flags & view_flag_at_front;
+		});
+		//move me to here ?
+		if (my_itr != itr)
+		{
+			auto view = *my_itr;
+			child_list.erase(my_itr);
+			child_list.insert(itr, view);
+			view->set_flags(view_flag_dirty_all, view_flag_dirty_all);
+		}
+	}
 	return this;
 }
 

@@ -120,6 +120,13 @@ void GUI_Service::run()
 				SDL_RenderPresent(m_renderer);
 				View::m_gui_flags &= ~view_flag_dirty_all;
 			}
+
+			//silent removal of temp views
+			auto &child_list = m_screen->m_children;
+			child_list.erase(std::remove_if(begin(child_list), end(child_list), [&] (auto &child)
+			{
+				return child->m_flags & view_flag_temp;
+			}), end(child_list));
 		}
 
 		//frame polling loop

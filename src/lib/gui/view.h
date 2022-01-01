@@ -51,6 +51,7 @@ enum
 	view_flag_at_back = 1 << 4,
 	view_flag_at_front = 1 << 5,
 	view_flag_screen = 1 << 6,
+	view_flag_temp = 1 << 7,
 };
 
 struct view_pos
@@ -138,6 +139,7 @@ public:
 	View *sub();
 	View *to_back();
 	View *to_front();
+	View *hide();
 	//tree iteration
 	View *forward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
 	View *backward_tree(std::function<bool(View&)>down, std::function<bool(View&)>up);
