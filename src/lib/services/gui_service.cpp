@@ -122,11 +122,8 @@ void GUI_Service::run()
 			}
 
 			//silent removal of temp views
-			auto &child_list = m_screen->m_children;
-			child_list.erase(std::remove_if(begin(child_list), end(child_list), [&] (auto &child)
-			{
-				return child->m_flags & view_flag_temp;
-			}), end(child_list));
+			for (auto &view : View::m_temps) view->sub();
+			View::m_temps.clear();
 		}
 
 		//frame polling loop
@@ -435,22 +432,24 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 	m_mouse_x = e.x;
 	m_mouse_y = e.y;
 	m_mouse_buttons ^= e.button;
-	auto view = set_mouse_id();
-	auto owner = view->find_owner();
-	if (owner != Net_ID())
+	if (auto view = m_screen->find_id(m_mouse_id))
 	{
-		auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
-		auto event_body = (View::Event_mouse*)msg->begin();
-		msg->set_dest(owner);
-		event_body->m_type = ev_type_mouse;
-		event_body->m_target_id = m_mouse_id;
-		event_body->m_x = m_mouse_x;
-		event_body->m_y = m_mouse_y;
-		event_body->m_rx = m_mouse_x - view->m_ctx.m_x;
-		event_body->m_ry = m_mouse_y - view->m_ctx.m_y;
-		event_body->m_buttons = m_mouse_buttons;
-		event_body->m_count = e.clicks;
-		m_router.send(msg);
+		auto owner = view->find_owner();
+		if (owner != Net_ID())
+		{
+			auto msg = std::make_shared<Msg>(sizeof(View::Event_mouse));
+			auto event_body = (View::Event_mouse*)msg->begin();
+			msg->set_dest(owner);
+			event_body->m_type = ev_type_mouse;
+			event_body->m_target_id = m_mouse_id;
+			event_body->m_x = m_mouse_x;
+			event_body->m_y = m_mouse_y;
+			event_body->m_rx = m_mouse_x - view->m_ctx.m_x;
+			event_body->m_ry = m_mouse_y - view->m_ctx.m_y;
+			event_body->m_buttons = m_mouse_buttons;
+			event_body->m_count = e.clicks;
+			m_router.send(msg);
+		}
 	}
 	return this;
 }

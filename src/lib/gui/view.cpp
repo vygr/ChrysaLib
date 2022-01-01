@@ -7,6 +7,7 @@
 std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
 uint32_t View::m_gui_flags = 0;
+std::vector<std::shared_ptr<View>> View::m_temps;
 
 View::View()
 	: m_id(--m_next_id)
@@ -72,9 +73,10 @@ View *View::hide()
 		auto hide_view = std::make_shared<View>();
 		hide_view->m_parent = parent;
 		hide_view->set_bounds(view->m_x, view->m_y, view->m_w, view->m_h);
-		hide_view->set_flags(view_flag_temp | view_flag_dirty_all, view_flag_temp | view_flag_dirty_all | view_flag_solid);
+		hide_view->set_flags(view_flag_dirty_all, view_flag_dirty_all | view_flag_solid);
 		child_list.insert(my_itr, hide_view);
 		child_list.erase(my_itr);
+		m_temps.push_back(hide_view);
 	}
 	return this;
 }
@@ -103,10 +105,11 @@ View *View::to_back()
 			auto hide_view = std::make_shared<View>();
 			hide_view->m_parent = parent;
 			hide_view->set_bounds(view->m_x, view->m_y, view->m_w, view->m_h);
-			hide_view->set_flags(view_flag_temp | view_flag_dirty_all, view_flag_temp | view_flag_dirty_all | view_flag_solid);
+			hide_view->set_flags(view_flag_dirty_all, view_flag_dirty_all | view_flag_solid);
 			child_list.insert(my_itr, hide_view);
 			child_list.erase(my_itr);
 			child_list.insert(itr, view);
+			m_temps.push_back(hide_view);
 		}
 	}
 	return this;

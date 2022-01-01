@@ -51,7 +51,6 @@ enum
 	view_flag_at_back = 1 << 4,
 	view_flag_at_front = 1 << 5,
 	view_flag_screen = 1 << 6,
-	view_flag_temp = 1 << 7,
 };
 
 struct view_pos
@@ -189,6 +188,7 @@ public:
 	static std::recursive_mutex m_mutex;
 	static int64_t m_next_id;
 	static uint32_t m_gui_flags;
+	static std::vector<std::shared_ptr<View>> m_temps;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;
