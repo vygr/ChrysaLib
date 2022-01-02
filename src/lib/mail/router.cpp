@@ -10,7 +10,7 @@
 
 Net_ID Router::alloc()
 {
-	//allocate a new mailbox id and enter the associated mailbox into the validation map.
+	//allocate a new net id and enter the associated mailbox into the validation map.
 	//it gets the next mailbox id that does not allready exist and which will not repeat
 	//for a very long time.
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -24,7 +24,7 @@ Net_ID Router::alloc()
 
 void Router::free(const Net_ID &id)
 {
-	//free the mailbox associated with this mailbox id
+	//free the mailbox associated with this net id
 	std::lock_guard<std::mutex> lock(m_mutex);
 	auto itr = m_mailboxes.find(id.m_mailbox_id);
 	if (itr != end(m_mailboxes)) m_mailboxes.erase(itr);
@@ -32,7 +32,7 @@ void Router::free(const Net_ID &id)
 
 Mbox<std::shared_ptr<Msg>> *Router::validate_no_lock(const Net_ID &id)
 {
-	//validate that this mailbox id has a mailbox associated with it.
+	//validate that this net id has a mailbox associated with it.
 	//return the mailbox if so, otherwise nullptr.
 	auto itr = m_mailboxes.find(id.m_mailbox_id);
 	return itr == end(m_mailboxes) ? nullptr : &itr->second;
@@ -40,7 +40,7 @@ Mbox<std::shared_ptr<Msg>> *Router::validate_no_lock(const Net_ID &id)
 
 int32_t Router::poll(const std::vector<Net_ID> &ids)
 {
-	//given a list of mailbox id's check to see if any of them contain mail.
+	//given a list of net id's check to see if any of them contain mail.
 	//return the index of the first one that does, else -1.
 	auto idx = 0;
 	for (auto &id : ids)
