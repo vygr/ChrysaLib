@@ -150,6 +150,16 @@ failure is easy to arrange with the timed message reading and selection lists.
 Discarding mailboxes and allocating fresh ones as you need allows you to
 silently ignore any in flight messages that may still be on route.
 
+### File_Service
+
+The `File_Service` standalone example app/service can be launched with:
+
+`files_node 127.0.0.1`
+
+This example is only a base class, you would provide a subclass overriding the
+virtual methods to provide an implementation for a specific OS or filesystem
+API etc.
+
 ### GUI_Service
 
 The `GUI_Service` can be launched with:
