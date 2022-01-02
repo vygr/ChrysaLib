@@ -1,7 +1,208 @@
 #include "router.h"
+#include "../settings.h"
 #include "../services/kernel_service.h"
 #include <algorithm>
 #include <cstring>
+
+/////////////////////
+// mailbox management
+/////////////////////
+
+Net_ID Router::alloc()
+{
+	//allocate a new mailbox id and enter the associated mailbox into the validation map.
+	//it gets the next mailbox id that does not allready exist and which will not repeat
+	//for a very long time.
+	std::lock_guard<std::mutex> lock(m_mutex);
+	while (m_next_mailbox_id.m_id == MAX_ID
+		|| m_mailboxes.find(m_next_mailbox_id) != end(m_mailboxes)) m_next_mailbox_id.m_id++;
+	auto id = m_next_mailbox_id;
+	m_mailboxes[id];
+	m_next_mailbox_id.m_id++;
+	return Net_ID(m_device_id, id);
+}
+
+void Router::free(const Net_ID &id)
+{
+	//free the mailbox associated with this mailbox id
+	std::lock_guard<std::mutex> lock(m_mutex);
+	auto itr = m_mailboxes.find(id.m_mailbox_id);
+	if (itr != end(m_mailboxes)) m_mailboxes.erase(itr);
+}
+
+Mbox<std::shared_ptr<Msg>> *Router::validate_no_lock(const Net_ID &id)
+{
+	//validate that this mailbox id has a mailbox associated with it.
+	//return the mailbox if so, otherwise nullptr.
+	auto itr = m_mailboxes.find(id.m_mailbox_id);
+	return itr == end(m_mailboxes) ? nullptr : &itr->second;
+}
+
+int32_t Router::poll(const std::vector<Net_ID> &ids)
+{
+	//given a list of mailbox id's check to see if any of them contain mail.
+	//return the index of the first one that does, else -1.
+	auto idx = 0;
+	for (auto &id : ids)
+	{
+		auto mbox = validate(id);
+		if (mbox && !mbox->empty()) return idx;
+		idx++;
+	}
+	return -1;
+}
+
+int32_t Router::select(const std::vector<Net_ID> &ids)
+{
+	//block until one of the list of mailboxes contains some mail.
+	//returns the index of the first mailbox that has mail.
+	for (;;)
+	{
+		auto idx = poll(ids);
+		if (idx != -1) return idx;
+		std::this_thread::sleep_for(std::chrono::milliseconds(SELECT_POLLING_RATE));
+	}
+}
+
+///////////////////////
+// directory management
+///////////////////////
+
+void Router::run()
+{
+	//distributed directory process.
+	//pings out the service directory for this device to the peers now and again.
+	//purge the messages and directory to clean up any ques and entires from
+	//devices and services that vanish unexpectedly.
+	while (m_running)
+	{
+		//wake every so often or if made to do so
+		m_wake_mbox.read(std::chrono::milliseconds(DIRECTORY_PING_RATE));
+		if (!m_running) break;
+
+		//flood service directory to the network
+		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_directory), '\0');
+		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
+		event_body->m_evt = Kernel_Service::evt_directory;
+		event_body->m_src = m_router->alloc_src();
+		event_body->m_via = m_router->get_dev_id();
+		event_body->m_hops = 0;
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			auto &dir_struct = m_directory[m_router->get_dev_id()];
+			for (auto &entry : dir_struct.m_services) body->append(entry).append("\n");
+		}
+		//broadcast to the list of known router peers
+		for (auto &peer : m_router->get_peers())
+		{
+			auto msg = std::make_shared<Msg>(body);
+			msg->set_dest(Net_ID(peer, Mailbox_ID{0}));
+			m_router->send(msg);
+		}
+
+		//purge old external directory entires and routes
+		purge_dir();
+		purge_routes();
+	}
+}
+
+void Router::stop_thread()
+{
+	if (!m_running) return;
+	m_running = false;
+	auto wake = this;
+	m_wake_mbox.post(wake);
+}
+
+std::string Router::declare(const Net_ID &id, const std::string &service, const std::string &params)
+{
+	//declare a new local service.
+	//create a new service entry in the directory.
+	//wake the manager thread to make it flood out the new state.
+	auto entry = service + "," + id.to_string() + "," + params;
+	auto wake = this;
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_directory[m_router->get_dev_id()].m_services.insert(entry);
+	m_wake_mbox.post(wake);
+	return entry;
+}
+
+void Router::forget(const std::string &entry)
+{
+	//remove a local directory entry.
+	//wake the manager thread to make it flood out the new state.
+	auto wake = this;
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_directory[m_router->get_dev_id()].m_services.erase(entry);
+	m_wake_mbox.post(wake);
+}
+
+bool Router::update_dir(const std::string &body)
+{
+	//update our service directory based on this ping message body
+	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
+	auto event_body_end = &(*begin(body)) + body.size();
+	std::lock_guard<std::mutex> lock(m_mutex);
+	auto &dir_struct = m_directory[event_body->m_src.m_device_id];
+	//not a new session, so ignore !
+	if (event_body->m_src.m_mailbox_id.m_id <= dir_struct.m_session) return false;
+	dir_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
+	dir_struct.m_time_modified = std::chrono::high_resolution_clock::now();
+	dir_struct.m_services.clear();
+	//split the body into separate service entry strings.
+	//insert them into the directory.
+	for (auto &entry : split_string(std::string((const char*)event_body->m_data, event_body_end), "\n"))
+	{
+		dir_struct.m_services.insert(entry);
+	}
+	return true;
+}
+
+void Router::purge_dir()
+{
+	//remove any entries that are too old
+	std::lock_guard<std::mutex> lock(m_mutex);
+	auto now = std::chrono::high_resolution_clock::now();
+	auto itr = begin(m_directory);
+	while (itr != end (m_directory))
+	{
+		if (m_router->get_dev_id() != itr->first
+			&& now - itr->second.m_time_modified >= std::chrono::milliseconds(MAX_DIRECTORY_AGE))
+		{
+			itr = m_directory.erase(itr);
+		}
+		else itr++;
+	}
+}
+
+std::vector<std::string> Router::enquire(const std::string &prefix)
+{
+	//return vector of all service entires with this prefix
+	auto services = std::vector<std::string>{};
+	std::lock_guard<std::mutex> lock(m_mutex);
+	for (auto &entry : m_directory)
+	{
+		auto &set = entry.second.m_services;
+		std::copy_if(cbegin(set), cend(set), std::inserter(services, services.end()), [&] (auto &&s)
+		{
+			return strncmp(s.c_str(), prefix.c_str(), prefix.size()) == 0;
+		});
+	}
+	return services;
+}
+
+std::vector<std::string> Router::enquire(const Dev_ID &dev_id, const std::string &prefix)
+{
+	//return vector of all service entires for given device with this prefix
+	auto services = std::vector<std::string>{};
+	std::lock_guard<std::mutex> lock(m_mutex);
+	auto &set = m_directory[dev_id].m_services;
+	std::copy_if(cbegin(set), cend(set), std::inserter(services, services.end()), [&] (auto &&s)
+	{
+		return strncmp(s.c_str(), prefix.c_str(), prefix.size()) == 0;
+	});
+	return services;
+}
 
 /////////
 // router
@@ -16,7 +217,7 @@ void Router::send(std::shared_ptr<Msg> &msg)
 	if (msg->m_header.m_dest.m_device_id == m_device_id)
 	{
 		//yes so validate the mbox id
-		auto mbox = m_mailbox_manager.validate(msg->m_header.m_dest.m_mailbox_id);
+		auto mbox = validate_no_lock(msg->m_header.m_dest.m_mailbox_id);
 		if (!mbox) return;
 		//is this only a fragment of parcel ?
 		if (msg->m_header.m_frag_length < msg->m_header.m_total_length)
@@ -50,7 +251,7 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		if (msg->m_header.m_frag_length > MAX_PACKET_SIZE)
 		{
 			//yes, ok que msgs that reference slices of the data buffer
-			auto src = _alloc_src();
+			auto src = alloc_src_no_lock();
 			for (auto frag_offset = 0u; frag_offset < msg->m_header.m_frag_length;)
 			{
 				auto frag_size = std::min(MAX_PACKET_SIZE, msg->m_header.m_frag_length - frag_offset);
@@ -100,7 +301,7 @@ bool Router::update_route(const std::string &body)
 	return true;
 }
 
-void Router::purge()
+void Router::purge_routes()
 {
 	//purge mail ques and routing tables of any old entries
 	std::lock_guard<std::mutex> lock(m_mutex);

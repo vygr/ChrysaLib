@@ -10,8 +10,6 @@
 #include <iterator>
 #include <condition_variable>
 
-class Msg;
-
 //local mailbox ID, Mailbox_ID 0 is reserved for the Kernel_Service mailbox !
 //when a mailbox id is freed its ID will not be reused for a long time.
 //this is to ensure that when a mailbox is destroyed any mail directed to that mailbox
@@ -110,26 +108,6 @@ private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 	std::list<T> m_mail;
-};
-
-//message mailbox management and validation.
-//manage the allocation and freeing of local mailboxes and the ability to
-//wait on or test the availability of messages.
-class Mbox_Manager
-{
-public:
-	Mbox_Manager() {}
-	//allocate or free mailboxes
-	Mailbox_ID alloc();
-	void free(Mailbox_ID id);
-	Mbox<std::shared_ptr<Msg>> *validate(Mailbox_ID id);
-	//poll and select
-	int32_t poll(const std::vector<Mailbox_ID> &ids);
-	int32_t select(const std::vector<Mailbox_ID> &ids);
-private:
-	std::mutex m_mutex;
-	Mailbox_ID m_next_mailbox_id;
-	std::map<Mailbox_ID, Mbox<std::shared_ptr<Msg>>> m_mailboxes;
 };
 
 #endif

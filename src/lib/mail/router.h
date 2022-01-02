@@ -1,12 +1,33 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
-#include "directory.h"
 #include "../links/link.h"
+#include "net.h"
 #include <thread>
 #include <list>
+#include <set>
 
-//router class, holds registered peer links and routes messages
+//router class, holds registered peer links and routes messages.
+
+//directory management.
+//maintain a set of services for each node, on each node.
+//a service entry is of the format: "service_name,dev_id:mbox_id,..."
+
+//message mailbox management and validation.
+//manage the allocation and freeing of local mailboxes and the ability to
+//wait on or test the availability of messages.
+
+//directory entry record
+struct Directory
+{
+	//session number will increment each time it changes
+	uint32_t m_session = 0;
+	//the last time our device saw it change
+	std::chrono::high_resolution_clock::time_point m_time_modified;
+	//the set of all services on that device
+	std::set<std::string> m_services;
+};
+
 struct Route
 {
 	//increments on each routing ping
@@ -36,21 +57,22 @@ public:
 	//constructed with some crypto true random Dev_ID !!!
 	Router()
 		: m_device_id(Dev_ID::alloc())
-		, m_directory_manager()
 	{
 		//start directory manager
-		m_directory_manager.m_running = true;
-		m_directory_thread = std::thread(&Directory_Manager::run, &m_directory_manager);
+		m_running = true;
+		m_thread = std::thread(&Router::run, this);
 	}
 	~Router()
 	{
 		//stop directory manager
-		m_directory_manager.stop_thread();
-		m_directory_thread.join();
+		stop_thread();
+		m_thread.join();
 	}
+	void run();
+	void stop_thread();
 	//message and parcel sending
 	void send(std::shared_ptr<Msg> &msg);
-	auto _alloc_src()
+	auto alloc_src_no_lock()
 	{
 		auto src = Net_ID(m_device_id, m_next_parcel_id);
 		m_next_parcel_id.m_id++;
@@ -59,24 +81,29 @@ public:
 	auto alloc_src()
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
-		return _alloc_src();
+		return alloc_src_no_lock();
 	}
 	//get router device id
 	auto const &get_dev_id() const { return m_device_id; }
 	//mailbox alloc, free and validation
-	auto alloc() { return Net_ID(m_device_id, m_mailbox_manager.alloc()); }
-	void free(Net_ID id) { m_mailbox_manager.free(id.m_mailbox_id); }
-	auto *validate(Net_ID id) { return m_mailbox_manager.validate(id.m_mailbox_id); }
+	Net_ID alloc();
+	void free(const Net_ID &id);
+	Mbox<std::shared_ptr<Msg>> *validate_no_lock(const Net_ID &id);
+	Mbox<std::shared_ptr<Msg>> *validate(const Net_ID &id)
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		return validate_no_lock(id);
+	}
+	//poll and select
+	int32_t poll(const std::vector<Net_ID> &ids);
+	int32_t select(const std::vector<Net_ID> &ids);
 	//directory management
-	auto declare(const Net_ID &id, const std::string &service, const std::string &params)
-		{ return m_directory_manager.declare(id, service, params); }
-	auto forget(const std::string &entry)
-		{ return m_directory_manager.forget(entry); }
-	auto enquire(const std::string &prefix)
-		{ return m_directory_manager.enquire(prefix); }
-	auto enquire(const Dev_ID &dev_id, const std::string &prefix)
-		{ return m_directory_manager.enquire(dev_id, prefix); }
-	auto update_dir(const std::string &body) { return m_directory_manager.update(body); }
+	std::string declare(const Net_ID &id, const std::string &service, const std::string &params);
+	void forget(const std::string &entry);
+	std::vector<std::string> enquire(const std::string &prefix);
+	std::vector<std::string> enquire(const Dev_ID &dev_id, const std::string &prefix);
+	bool update_dir(const std::string &body);
+	void purge_dir();
 	//service broadcast helper
 	void broadcast(const std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id = {{0}, 0});
 	//registered peer links
@@ -86,19 +113,22 @@ public:
 	//routing management
 	std::shared_ptr<Msg> get_next_msg(const Dev_ID &dest, std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
 	bool update_route(const std::string &body);
-	void purge();
+	void purge_routes();
+	bool m_running = false;
 private:
 	std::mutex m_mutex;
-	std::thread m_directory_thread;
+	std::thread m_thread;
 	std::condition_variable m_cv;
 	const Dev_ID m_device_id;
 	Mailbox_ID m_next_parcel_id;
-	Mbox_Manager m_mailbox_manager;
-	Directory_Manager m_directory_manager;
 	std::map<Net_ID, std::pair<uint32_t, Que_Item>> m_parcels;
 	std::list<Que_Item> m_outgoing_msg_que;
 	std::map<Link*, Dev_ID> m_links;
 	std::map<Dev_ID, Route> m_routes;
+	std::map<Dev_ID, Directory> m_directory;
+	Mbox<Router*> m_wake_mbox;
+	Mailbox_ID m_next_mailbox_id;
+	std::map<Mailbox_ID, Mbox<std::shared_ptr<Msg>>> m_mailboxes;
 };
 
 #endif
