@@ -33,8 +33,8 @@ public:
 		Net_ID m_reply;
 		std::shared_ptr<View> m_view;
 	};
-	GUI_Service(Router &router)
-		: Service(router)
+	GUI_Service()
+		: Service()
 	{}
 	void run() override;
 	void composit();

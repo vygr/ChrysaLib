@@ -15,7 +15,7 @@
 void Test_Task::run()
 {
 	//get my mailbox address, id was allocated in the constructor
-	auto mbox = m_router.validate(m_net_id);
+	auto mbox = m_router->validate(m_net_id);
 
 	//test UI app
 	auto window = std::make_shared<Window>();

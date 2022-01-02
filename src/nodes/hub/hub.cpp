@@ -8,6 +8,8 @@
 // hub
 //////
 
+std::unique_ptr<Router> m_router;
+
 void ss_reset(std::stringstream &ss, std::string s)
 {
 	ss.str(s);
@@ -57,25 +59,24 @@ int32_t main(int32_t argc, char *argv[])
 	}
 
 	//vars
-	std::unique_ptr<Router> m_router;
 	std::unique_ptr<Kernel_Service> m_kernel;
 	std::unique_ptr<USB_Link_Manager> m_usb_link_manager;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
 	m_router = std::make_unique<Router>();
-	m_kernel = std::make_unique<Kernel_Service>(*m_router);
+	m_kernel = std::make_unique<Kernel_Service>();
 	m_kernel->start_thread();
 	if (arg_usb != "")
 	{
 		std::cout << "Starting USB link manager" << std::endl;
-		m_usb_link_manager = std::make_unique<USB_Link_Manager>(*m_router);
+		m_usb_link_manager = std::make_unique<USB_Link_Manager>();
 		m_usb_link_manager->start_thread();
 	}
 	if (arg_ip != "" || !arg_dial.empty())
 	{
 		std::cout << "Starting IP link manager" << std::endl;
-		m_ip_link_manager = std::make_unique<IP_Link_Manager>(*m_router, arg_ip);
+		m_ip_link_manager = std::make_unique<IP_Link_Manager>(arg_ip);
 		m_ip_link_manager->start_thread();
 		for (auto &addr : arg_dial)
 		{

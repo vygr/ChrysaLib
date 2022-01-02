@@ -188,7 +188,6 @@ public:
 	static int64_t m_next_id;
 	static uint32_t m_gui_flags;
 	static std::vector<std::shared_ptr<View>> m_temps;
-	static Router *m_router;
 	View *m_parent = nullptr;
 	std::list<std::shared_ptr<View>> m_children;
 	std::map<std::string, std::shared_ptr<Property>> m_properties;

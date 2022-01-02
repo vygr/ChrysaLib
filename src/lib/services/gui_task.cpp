@@ -13,61 +13,61 @@ void GUI_Task::add_front(std::shared_ptr<View> view)
 {
 	//message to my GUI
 	view->m_owner = m_net_id;
-	auto services = m_router.enquire("gui");
+	auto services = m_router->enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
-	auto reply_id = m_router.alloc();
-	auto reply_mbox = m_router.validate(reply_id);
+	auto reply_id = m_router->alloc();
+	auto reply_mbox = m_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_add_front));
 	auto event_body = (GUI_Service::Event_add_front*)msg->begin();
 	msg->set_dest(service_id);
 	event_body->m_evt = GUI_Service::evt_add_front;
 	event_body->m_reply = reply_id;
 	event_body->m_view = view;
-	m_router.send(msg);
+	m_router->send(msg);
 	//wait for reply
 	reply_mbox->read();
-	m_router.free(reply_id);
+	m_router->free(reply_id);
 }
 
 void GUI_Task::add_back(std::shared_ptr<View> view)
 {
 	//message to my GUI
 	view->m_owner = m_net_id;
-	auto services = m_router.enquire("gui");
+	auto services = m_router->enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
-	auto reply_id = m_router.alloc();
-	auto reply_mbox = m_router.validate(reply_id);
+	auto reply_id = m_router->alloc();
+	auto reply_mbox = m_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_add_back));
 	auto event_body = (GUI_Service::Event_add_back*)msg->begin();
 	msg->set_dest(service_id);
 	event_body->m_evt = GUI_Service::evt_add_back;
 	event_body->m_reply = reply_id;
 	event_body->m_view = view;
-	m_router.send(msg);
+	m_router->send(msg);
 	//wait for reply
 	reply_mbox->read();
-	m_router.free(reply_id);
+	m_router->free(reply_id);
 }
 
 void GUI_Task::sub(std::shared_ptr<View> view)
 {
 	//message to my GUI
 	view->m_owner = m_net_id;
-	auto services = m_router.enquire("gui");
+	auto services = m_router->enquire("gui");
 	auto fields = split_string(services[0], ",");
 	auto service_id = Net_ID::from_string(fields[1]);
-	auto reply_id = m_router.alloc();
-	auto reply_mbox = m_router.validate(reply_id);
+	auto reply_id = m_router->alloc();
+	auto reply_mbox = m_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_sub));
 	auto event_body = (GUI_Service::Event_sub*)msg->begin();
 	msg->set_dest(service_id);
 	event_body->m_evt = GUI_Service::evt_sub;
 	event_body->m_reply = reply_id;
 	event_body->m_view = view;
-	m_router.send(msg);
+	m_router->send(msg);
 	//wait for reply
 	reply_mbox->read();
-	m_router.free(reply_id);
+	m_router->free(reply_id);
 }

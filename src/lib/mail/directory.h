@@ -24,9 +24,7 @@ struct Directory
 class Directory_Manager
 {
 public:
-	Directory_Manager(Router &router)
-		: m_router(router)
-	{}
+	Directory_Manager() {}
 	//thread runs this run method
 	void run();
 	void stop_thread();
@@ -41,7 +39,6 @@ public:
 private:
 	void purge();
 	std::mutex m_mutex;
-	Router &m_router;
 	std::map<Dev_ID, Directory> m_directory;
 	Mbox<Directory_Manager*> m_wake_mbox;
 };

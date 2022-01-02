@@ -7,8 +7,8 @@
 class IP_Link : public Link
 {
 public:
-	IP_Link(Router &router, std::shared_ptr<asio::ip::tcp::socket> socket)
-		: Link(router)
+	IP_Link(std::shared_ptr<asio::ip::tcp::socket> socket)
+		: Link()
 		, m_socket(socket)
 	{}
 	std::shared_ptr<asio::ip::tcp::socket> m_socket;
@@ -20,8 +20,8 @@ protected:
 class IP_Link_Manager : public Link_Manager
 {
 public:
-	IP_Link_Manager(Router &router, const std::string &ip_addr)
-		: Link_Manager(router)
+	IP_Link_Manager(const std::string &ip_addr)
+		: Link_Manager()
 		, m_ip_addr(ip_addr)
 		, m_io_context()
 		, m_acceptor(m_io_context)

@@ -53,8 +53,8 @@ public:
 	{
 		int32_t m_progress;
 	};
-	File_Service(Router &router)
-		: Service(router)
+	File_Service()
+		: Service()
 	{
 		//async task pools, where big or blocking requests run
 		m_thread_pool1 = std::make_unique<ThreadPool>(2);

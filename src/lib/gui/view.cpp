@@ -4,11 +4,12 @@
 #include <algorithm>
 #include <iterator>
 
+extern std::unique_ptr<Router> m_router;
+
 std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
 uint32_t View::m_gui_flags = 0;
 std::vector<std::shared_ptr<View>> View::m_temps;
-Router *View::m_router = nullptr;
 
 View::View()
 	: m_id(--m_next_id)

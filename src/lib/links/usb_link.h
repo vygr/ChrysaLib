@@ -32,8 +32,8 @@ struct USBDeviceInstance
 class USB_Link : public Link
 {
 public:
-	USB_Link(Router &router, const USBDeviceInstance &device)
-		: Link(router)
+	USB_Link(const USBDeviceInstance &device)
+		: Link()
 		, m_device_instance(device)
 	{
 		m_device_instance.m_flag = true;
@@ -53,8 +53,9 @@ private:
 class USB_Link_Manager : public Link_Manager
 {
 public:
-	USB_Link_Manager(Router &router)
-		: Link_Manager(router) {}
+	USB_Link_Manager()
+		: Link_Manager()
+	{}
 	void start_thread() override
 	{
 		m_running = true;

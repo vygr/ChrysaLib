@@ -40,8 +40,8 @@ public:
 	{
 		Task *m_task;
 	};
-	Kernel_Service(Router &router)
-		: Service(router)
+	Kernel_Service()
+		: Service()
 	{}
 private:
 	void run() override;

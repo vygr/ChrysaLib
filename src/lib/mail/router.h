@@ -36,7 +36,7 @@ public:
 	//constructed with some crypto true random Dev_ID !!!
 	Router()
 		: m_device_id(Dev_ID::alloc())
-		, m_directory_manager(*this)
+		, m_directory_manager()
 	{
 		//start directory manager
 		m_directory_manager.m_running = true;

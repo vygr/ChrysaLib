@@ -14,10 +14,9 @@
 void GUI_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor
-	auto mbox = m_router.validate(m_net_id);
-	auto entry = m_router.declare(m_net_id, "gui", "GUI_Service v0.1");
+	auto mbox = m_router->validate(m_net_id);
+	auto entry = m_router->declare(m_net_id, "gui", "GUI_Service v0.1");
 
-	View::m_router = &m_router;
 	m_screen = std::make_shared<Backdrop>();
 	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2))
 		->def_prop("ink_color", std::make_shared<Property>(argb_grey1))
@@ -37,9 +36,9 @@ void GUI_Service::run()
 	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
 	//start up test tasks
-	auto task1 = std::make_unique<Test_Task>(m_router);
+	auto task1 = std::make_unique<Test_Task>();
 	auto task1_id = task1->start_task(task1.get());
-	auto task2 = std::make_unique<Test_Task>(m_router);
+	auto task2 = std::make_unique<Test_Task>();
 	auto task2_id = task2->start_task(task2.get());
 
 	//event loop
@@ -54,24 +53,22 @@ void GUI_Service::run()
 			{
 				//add view to screen
 				auto event_body = (Event_add_front*)body;
-				event_body->m_view->m_router = &m_router;
 				m_screen->add_front(event_body->m_view);
 				event_body->m_view->dirty_all();
 				auto reply = std::make_shared<Msg>();
 				reply->set_dest(event_body->m_reply);
-				m_router.send(reply);
+				m_router->send(reply);
 				break;
 			}
 			case evt_add_back:
 			{
 				//add view to screen
 				auto event_body = (Event_add_back*)body;
-				event_body->m_view->m_router = &m_router;
 				m_screen->add_back(event_body->m_view);
 				event_body->m_view->dirty_all();
 				auto reply = std::make_shared<Msg>();
 				reply->set_dest(event_body->m_reply);
-				m_router.send(reply);
+				m_router->send(reply);
 				break;
 			}
 			case evt_sub:
@@ -82,7 +79,7 @@ void GUI_Service::run()
 				m_screen->dirty_all();
 				auto reply = std::make_shared<Msg>();
 				reply->set_dest(event_body->m_reply);
-				m_router.send(reply);
+				m_router->send(reply);
 				break;
 			}
 			default:
@@ -142,7 +139,7 @@ void GUI_Service::run()
 	task2->join_thread();
 
 	//forget myself
-	m_router.forget(entry);
+	m_router->forget(entry);
 }
 
 void GUI_Service::composit()
@@ -366,7 +363,7 @@ View *GUI_Service::set_mouse_id()
 				msg->set_dest(owner);
 				event_body->m_type = ev_type_exit;
 				event_body->m_target_id = m_mouse_id;
-				m_router.send(msg);
+				m_router->send(msg);
 			}
 		}
 		m_mouse_id = mouse_id;
@@ -378,7 +375,7 @@ View *GUI_Service::set_mouse_id()
 			msg->set_dest(owner);
 			event_body->m_type = ev_type_enter;
 			event_body->m_target_id = m_mouse_id;
-			m_router.send(msg);
+			m_router->send(msg);
 		}
 	}
 	return view;
@@ -398,7 +395,7 @@ GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
 		event_body->m_x = e.x;
 		event_body->m_y = e.y;
 		event_body->m_direction = e.direction;
-		m_router.send(msg);
+		m_router->send(msg);
 	}
 	return this;
 }
@@ -423,7 +420,7 @@ GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
 		event_body->m_ry = m_mouse_y - view->m_ctx.m_y;
 		event_body->m_buttons = m_mouse_buttons;
 		event_body->m_count = e.clicks;
-		m_router.send(msg);
+		m_router->send(msg);
 	}
 	return this;
 }
@@ -449,7 +446,7 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 			event_body->m_ry = m_mouse_y - view->m_ctx.m_y;
 			event_body->m_buttons = m_mouse_buttons;
 			event_body->m_count = e.clicks;
-			m_router.send(msg);
+			m_router->send(msg);
 		}
 	}
 	return this;
@@ -477,7 +474,7 @@ GUI_Service *GUI_Service::mouse_motion(SDL_MouseMotionEvent &e)
 			event_body->m_ry = m_mouse_y - view->m_ctx.m_y;
 			event_body->m_buttons = m_mouse_buttons;
 			event_body->m_count = 0;
-			m_router.send(msg);
+			m_router->send(msg);
 		}
 	}
 	return this;
@@ -513,7 +510,7 @@ GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
 		event_body->m_keycode = key_code;
 		event_body->m_key = cook_key(key_code, key, mod);
 		event_body->m_mod = mod;
-		m_router.send(msg);
+		m_router->send(msg);
 	}
 	return this;
 }
@@ -535,7 +532,7 @@ GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 				msg->set_dest(owner);
 				event_body->m_type = ev_type_gui;
 				event_body->m_target_id = child->get_id();
-				m_router.send(msg);
+				m_router->send(msg);
 			}
 		}
 		m_screen->set_flags(view_flag_dirty_all | view_flag_screen, view_flag_dirty_all | view_flag_screen);

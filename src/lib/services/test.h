@@ -7,8 +7,8 @@
 class Test_Task : public GUI_Task
 {
 public:
-	Test_Task(Router &router)
-		: GUI_Task(router)
+	Test_Task()
+		: GUI_Task()
 	{}
 	void run() override;
 };

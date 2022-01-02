@@ -7,8 +7,8 @@
 class Service : public Task
 {
 public:
-	Service(Router &router)
-		: Task(router)
+	Service()
+		: Task()
 	{}
 };
 

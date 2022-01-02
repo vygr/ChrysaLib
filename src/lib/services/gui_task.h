@@ -9,8 +9,8 @@ class View;
 class GUI_Task : public Task
 {
 public:
-	GUI_Task(Router &router)
-		: Task(router)
+	GUI_Task()
+		: Task()
 	{}
 	//helper methods
 	void add_front(std::shared_ptr<View> view);

@@ -23,9 +23,7 @@ struct Link_Buf
 class Link
 {
 public:
-	Link(Router &router)
-		: m_router(router)
-	{}
+	Link() {}
 	virtual ~Link() {}
 	virtual void start_threads()
 	{
@@ -46,7 +44,6 @@ protected:
 	//send/receive, override these for specific sub class
 	virtual bool send(const std::shared_ptr<Msg> &msg) = 0;
 	virtual std::shared_ptr<Msg> receive() = 0;
-	Router &m_router;
 	std::thread m_thread_send;
 	std::thread m_thread_receive;
 	Dev_ID m_remote_dev_id;
@@ -59,9 +56,7 @@ protected:
 class Link_Manager
 {
 public:
-	Link_Manager(Router &router)
-		: m_router(router)
-	{}
+	Link_Manager() {}
 	virtual ~Link_Manager() {}
 	virtual void start_thread() = 0;
 	virtual void stop_thread() { m_running = false; }
@@ -70,7 +65,6 @@ public:
 protected:
 	//thread executes this run method
 	virtual void run() = 0;
-	Router &m_router;
 };
 
 #endif
