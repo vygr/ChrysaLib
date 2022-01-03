@@ -14,6 +14,11 @@ public:
 	std::vector<uint32_t> m_data;
 	std::shared_ptr<Texture> m_texture;
 	void upload();
+	uint32_t to_premul(uint32_t col) const;
+	uint32_t to_argb(uint32_t col) const;
+	Pixmap *fill(uint32_t col);
+	Pixmap *as_argb();
+	Pixmap *as_premul();
 };
 
 #endif
