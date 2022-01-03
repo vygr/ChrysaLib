@@ -82,6 +82,46 @@ const Ctx &Ctx::filled_box(int32_t x, int32_t y, int32_t w, int32_t h) const
 	return *this;
 }
 
+const Ctx &Ctx::blit(SDL_Texture *texture, uint32_t col, int32_t x, int32_t y, int32_t w, int32_t h) const
+{
+	SDL_Rect drect;
+	SDL_Rect srect;
+	SDL_Rect clip_rect;
+	x += m_x;
+	y += m_y;
+	drect.x = x;
+	drect.y = y;
+	drect.w = w;
+	drect.h = h;
+	srect.x = 0;
+	srect.y = 0;
+	srect.w = w;
+	srect.h = h;
+
+	uint8_t r = (col >> 16) & 0xff;
+	uint8_t g = (col >> 8) & 0xff;
+	uint8_t b = col & 0xff;
+	SDL_SetTextureColorMod(texture, r, g, b);
+
+	for (auto &rect : m_region->m_region)
+	{
+		//continue if out of bounds
+		if (rect.m_x1 <= drect.x
+			|| rect.m_y1 <= drect.y
+			|| rect.m_x >= drect.x + drect.w
+			|| rect.m_y >= drect.y + drect.h) continue;
+		//set clip to this region
+		clip_rect.x = rect.m_x;
+		clip_rect.y = rect.m_y;
+		clip_rect.w = rect.m_x1 - rect.m_x;
+		clip_rect.h = rect.m_y1 - rect.m_y;
+		SDL_RenderSetClipRect(m_renderer, &clip_rect);
+		//and draw
+		SDL_RenderCopy(m_renderer, texture, &srect, &drect);
+	}
+	return *this;
+}
+
 const Ctx &Ctx::panel(uint32_t col, bool filled, int32_t depth, int32_t x, int32_t y, int32_t w, int32_t h) const
 {
 	auto dark_col = darker(col);

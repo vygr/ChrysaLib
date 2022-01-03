@@ -7,7 +7,7 @@
 class Texture
 {
 public:
-	Texture(uint64_t handle, int32_t w, int32_t h)
+	Texture(SDL_Texture *handle, int32_t w, int32_t h)
 		: m_handle(handle)
 		, m_w(w)
 		, m_h(h)
@@ -19,7 +19,7 @@ public:
 			SDL_Destroy_Texture(m_handle);
 		});
 	}
-	uint64_t m_handle;
+	SDL_Texture *m_handle;
 	int32_t m_w;
 	int32_t m_h;
 };
