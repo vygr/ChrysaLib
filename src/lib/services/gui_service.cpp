@@ -23,17 +23,20 @@ void GUI_Service::run()
 		->change(0, 0, 1280, 960)->dirty_all();
 
 	//init SDL
-	SDL_SetMainReady();
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-	//create window
-	SDL_Window *sdl_window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	//hide host cursor
-	//SDL_ShowCursor(0);
-	//renderer
-	m_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-	SDL_Texture *texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
-	//set blend mode
-	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+	callback([&]()
+	{
+		SDL_SetMainReady();
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+		//create window
+		m_sdl_window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+		//hide host cursor
+		//SDL_ShowCursor(0);
+		//renderer
+		m_renderer = SDL_CreateRenderer(m_sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+		m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
+		//set blend mode
+		SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+	});
 
 	//start up test tasks
 	auto task1 = std::make_unique<Test_Task>();
@@ -87,6 +90,7 @@ void GUI_Service::run()
 			}
 		}
 
+		callback([&]()
 		{
 			std::lock_guard<std::recursive_mutex> lock(View::m_mutex);
 			SDL_Event e;
@@ -104,17 +108,17 @@ void GUI_Service::run()
 			if ((View::m_gui_flags & view_flag_screen) != 0)
 			{
 				//resize back buffer and then do full redraw
-				SDL_DestroyTexture(texture);
-				texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
+				SDL_DestroyTexture(m_texture);
+				m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
 				m_screen->dirty_all();
 				View::m_gui_flags &= ~view_flag_screen;
 			}
 			if ((View::m_gui_flags & view_flag_dirty_all) != 0)
 			{
-				SDL_SetRenderTarget(m_renderer, texture);
+				SDL_SetRenderTarget(m_renderer, m_texture);
 				composit();
 				SDL_SetRenderTarget(m_renderer, 0);
-				SDL_RenderCopy(m_renderer, texture, 0, 0);
+				SDL_RenderCopy(m_renderer, m_texture, 0, 0);
 				SDL_RenderPresent(m_renderer);
 				View::m_gui_flags &= ~view_flag_dirty_all;
 			}
@@ -122,15 +126,18 @@ void GUI_Service::run()
 			//silent removal of temp views
 			for (auto &view : View::m_temps) view->sub();
 			View::m_temps.clear();
-		}
+		});
 
 		//frame polling loop
 		std::this_thread::sleep_for(std::chrono::milliseconds(GUI_FRAME_RATE));
 	}
 
-	//quit SDL
-	SDL_DestroyWindow(sdl_window);
-	SDL_Quit();
+	callback([&]()
+	{
+		//quit SDL
+		SDL_DestroyWindow(m_sdl_window);
+		SDL_Quit();
+	});
 
 	//stop test task
 	task1->stop_thread();
@@ -148,7 +155,6 @@ void GUI_Service::composit()
 	//create visible region at root
 	//setting abs cords of views
 	view_pos abs;
-	std::lock_guard<std::recursive_mutex> lock(m_screen->m_mutex);
 	m_screen->backward_tree(
 		[&](View &view)
 		{

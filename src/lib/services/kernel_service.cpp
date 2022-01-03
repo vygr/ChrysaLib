@@ -63,6 +63,16 @@ void Kernel_Service::run()
 			event_body->m_task->join_thread();
 			break;
 		}
+		case evt_callback:
+		{
+			//callback
+			auto event_body = (Event_callback*)body;
+			event_body->m_callback();
+			auto reply = std::make_shared<Msg>();
+			reply->set_dest(event_body->m_reply);
+			m_router->send(reply);
+			break;
+		}
 		default:
 			break;
 		}

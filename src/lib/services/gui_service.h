@@ -52,6 +52,8 @@ public:
 	int64_t m_mouse_id = 0;
 	std::shared_ptr<View> m_screen;
 	SDL_Renderer *m_renderer = nullptr;
+	SDL_Window *m_sdl_window = nullptr;
+	SDL_Texture *m_texture = nullptr;
 };
 
 #endif

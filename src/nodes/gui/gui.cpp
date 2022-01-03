@@ -61,7 +61,7 @@ int32_t main(int32_t argc, char *argv[])
 	m_router = std::make_unique<Router>();
 	m_kernel = std::make_unique<Kernel_Service>();
 	m_gui = std::make_unique<GUI_Service>();
-	m_kernel->start_thread();
+	m_gui->start_thread();
 	if (!arg_dial.empty())
 	{
 		std::cout << "Starting IP link manager" << std::endl;
@@ -74,16 +74,16 @@ int32_t main(int32_t argc, char *argv[])
 		}
 	}
 
-	//jump into GUI run method !!!
+	//jump into Kernel run method !!!
 	//it has to be the main thread, it's just forced on us !
-	m_gui->m_running = true;
-	m_gui->run();
+	m_kernel->m_running = true;
+	m_kernel->run();
 
 	//shutdown
 	if (m_ip_link_manager) m_ip_link_manager->stop_thread();
-	m_kernel->stop_thread();
+	m_gui->stop_thread();
 	if (m_ip_link_manager) m_ip_link_manager->join_thread();
-	m_kernel->join_thread();
+	m_gui->join_thread();
 
 	return 0;
 }

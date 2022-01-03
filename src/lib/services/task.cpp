@@ -50,3 +50,21 @@ void Task::stop_task()
 	event_body->m_evt = Kernel_Service::evt_stop_task;
 	m_router->send(msg);
 }
+
+void Task::callback(std::function<void()> callback)
+{
+	//send callback request
+	//kernel will call function in its thread
+	auto reply_id = m_router->alloc();
+	auto reply_mbox = m_router->validate(reply_id);
+	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_callback));
+	auto event_body = (Kernel_Service::Event_callback*)msg->begin();
+	msg->set_dest(Net_ID(m_router->get_dev_id(), Mailbox_ID{0}));
+	event_body->m_evt = Kernel_Service::evt_callback;
+	event_body->m_reply = reply_id;
+	event_body->m_callback = callback;
+	m_router->send(msg);
+	//wait for reply
+	auto reply = reply_mbox->read();
+	m_router->free(reply_id);
+}

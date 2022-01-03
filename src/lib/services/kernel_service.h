@@ -19,6 +19,7 @@ public:
 		evt_directory,
 		evt_start_task,
 		evt_stop_task,
+		evt_callback,
 	};
 	struct Event_directory : public Event
 	{
@@ -40,10 +41,14 @@ public:
 	{
 		Task *m_task;
 	};
+	struct Event_callback : public Event
+	{
+		Net_ID m_reply;
+		std::function<void()> m_callback;
+	};
 	Kernel_Service()
 		: Service()
 	{}
-private:
 	void run() override;
 };
 

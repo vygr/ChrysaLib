@@ -38,6 +38,7 @@ public:
 	//helper methods
 	Net_ID start_task(Task *task);
 	void stop_task();
+	void callback(std::function<void()> callback);
 protected:
 	virtual void run() = 0;
 	const Net_ID m_net_id;
