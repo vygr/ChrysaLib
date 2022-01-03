@@ -12,6 +12,8 @@
 // gui
 //////
 
+SDL_Renderer *GUI_Service::m_renderer = nullptr;
+
 void GUI_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor

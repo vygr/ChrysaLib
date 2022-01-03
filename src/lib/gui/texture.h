@@ -16,7 +16,7 @@ public:
 	{
 		Kernel_Service::callback([&]()
 		{
-			SDL_Destroy_Texture(m_handle);
+			SDL_DestroyTexture(m_handle);
 		});
 	}
 	SDL_Texture *m_handle;
