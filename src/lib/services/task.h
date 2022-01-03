@@ -35,11 +35,6 @@ public:
 	void stop_thread();
 	const Net_ID &get_id() const { return m_net_id; }
 	bool m_running = false;
-	//kernel service helper methods
-	void exit();
-	Net_ID start_task(Task *task);
-	void stop_task();
-	void callback(std::function<void()> callback);
 protected:
 	virtual void run() = 0;
 	const Net_ID m_net_id;

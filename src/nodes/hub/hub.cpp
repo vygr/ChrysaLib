@@ -59,14 +59,16 @@ int32_t main(int32_t argc, char *argv[])
 		}
 	}
 
+	//globals
+	global_kernel_thread_id = std::this_thread::get_id();
+	global_router = std::make_unique<Router>();
+
 	//vars
 	std::unique_ptr<Kernel_Service> m_kernel;
 	std::unique_ptr<USB_Link_Manager> m_usb_link_manager;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
-	global_kernel_thread_id = std::this_thread::get_id();
-	global_router = std::make_unique<Router>();
 	m_kernel = std::make_unique<Kernel_Service>();
 	m_kernel->start_thread();
 	if (arg_usb != "")

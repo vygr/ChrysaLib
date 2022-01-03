@@ -1,4 +1,5 @@
 #include "gui_service.h"
+#include "kernel_service.h"
 #include "test.h"
 #include "../gui/region.h"
 #include "../gui/ctx.h"
@@ -23,7 +24,7 @@ void GUI_Service::run()
 		->change(0, 0, 1280, 960)->dirty_all();
 
 	//init SDL
-	callback([&]()
+	Kernel_Service::callback([&]()
 	{
 		SDL_SetMainReady();
 		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
@@ -40,9 +41,9 @@ void GUI_Service::run()
 
 	//start up test tasks
 	auto task1 = std::make_unique<Test_Task>();
-	auto task1_id = task1->start_task(task1.get());
+	auto task1_id = Kernel_Service::start_task(task1.get());
 	auto task2 = std::make_unique<Test_Task>();
-	auto task2_id = task2->start_task(task2.get());
+	auto task2_id = Kernel_Service::start_task(task2.get());
 
 	//event loop
 	while (m_running)
@@ -90,7 +91,7 @@ void GUI_Service::run()
 			}
 		}
 
-		callback([&]()
+		Kernel_Service::callback([&]()
 		{
 			std::lock_guard<std::recursive_mutex> lock(View::m_mutex);
 			SDL_Event e;
@@ -132,7 +133,7 @@ void GUI_Service::run()
 		std::this_thread::sleep_for(std::chrono::milliseconds(GUI_FRAME_RATE));
 	}
 
-	callback([&]()
+	Kernel_Service::callback([&]()
 	{
 		//quit SDL
 		SDL_DestroyWindow(m_sdl_window);
@@ -149,7 +150,7 @@ void GUI_Service::run()
 	global_router->forget(entry);
 
 	//ask kernel to exit !!!
-	exit();
+	Kernel_Service::exit();
 }
 
 void GUI_Service::composit()

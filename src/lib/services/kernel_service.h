@@ -50,6 +50,10 @@ public:
 		: Service()
 	{}
 	void run() override;
+	static void callback(std::function<void()> callback);
+	static void exit();
+	static Net_ID start_task(Task *task);
+	static void stop_task();
 };
 
 #endif
