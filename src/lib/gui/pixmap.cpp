@@ -1,11 +1,12 @@
 #include "pixmap.h"
+#include "texture.h"
 #include "../services/gui_service.h"
 #include <algorithm>
 
 Pixmap::Pixmap(int32_t w, int32_t h)
 	: m_w(w)
 	, m_h(h)
-	, m_stride(w * h)
+	, m_stride(w * sizeof(uint32_t))
 {
 	m_data.resize(w * h);
 }
@@ -26,7 +27,7 @@ void Pixmap::upload()
 	});
 }
 
-uint32_t Pixmap::to_premul(uint32_t col) const
+uint32_t Pixmap::to_premul(uint32_t col)
 {
 	auto a = col >> 24;
 	auto rb = col & 0xff00ff;
@@ -37,7 +38,7 @@ uint32_t Pixmap::to_premul(uint32_t col) const
 	return a + rb + g;
 }
 
-uint32_t Pixmap::to_argb(uint32_t col) const
+uint32_t Pixmap::to_argb(uint32_t col)
 {
 	auto a = col >> 24;
 	if (a != 0 && a != 0xff)
