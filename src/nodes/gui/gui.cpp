@@ -8,7 +8,8 @@
 // gui app
 //////////
 
-std::unique_ptr<Router> m_router;
+std::unique_ptr<Router> global_router;
+std::thread::id global_kernel_thread_id;
 
 void ss_reset(std::stringstream &ss, std::string s)
 {
@@ -58,7 +59,8 @@ int32_t main(int32_t argc, char *argv[])
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
-	m_router = std::make_unique<Router>();
+	global_kernel_thread_id = std::this_thread::get_id();
+	global_router = std::make_unique<Router>();
 	m_kernel = std::make_unique<Kernel_Service>();
 	m_gui = std::make_unique<GUI_Service>();
 	m_gui->start_thread();

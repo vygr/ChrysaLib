@@ -43,7 +43,7 @@ public:
 	};
 	struct Event_callback : public Event
 	{
-		Mbox<void*> *m_mbox;
+		Mbox<void*> *m_wake_mbox;
 		std::function<void()> m_callback;
 	};
 	Kernel_Service()

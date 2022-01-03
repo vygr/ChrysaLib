@@ -17,8 +17,8 @@ void file_copy(const std::string &src, const std::string &dst);
 void File_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor
-	auto mbox = m_router->validate(m_net_id);
-	auto entry = m_router->declare(m_net_id, "file_service", "File Service v0.1");
+	auto mbox = global_router->validate(m_net_id);
+	auto entry = global_router->declare(m_net_id, "file_service", "File Service v0.1");
 
 	//event loop
 	while (m_running)
@@ -77,8 +77,8 @@ void File_Service::run()
 						goto nofile;
 					}
 					//temp Net_ID mailbox for acks
-					auto ack_id = m_router->alloc();
-					auto ack_mbox = m_router->validate(ack_id);
+					auto ack_id = global_router->alloc();
+					auto ack_mbox = global_router->validate(ack_id);
 					//read file and send as chunks over to the destination
 					//with an ack window based flow control
 					auto offset = uint64_t(0);
@@ -97,7 +97,7 @@ void File_Service::run()
 						reply_body->m_length = chunk_length;
 						reply_body->m_offset = offset;
 						fs.read(reply_body->m_data, chunk_length);
-						m_router->send(chunk_msg);
+						global_router->send(chunk_msg);
 						offset += chunk_length;
 						//do we need to consume an ack before moving on ?
 						if (++num_packets >= FILE_CHUNK_WINDOW_SIZE)
@@ -110,14 +110,14 @@ void File_Service::run()
 								log << "Send File Error: " << filename;
 								out_log(log.str());
 								fs.close();
-								m_router->free(ack_id);
+								global_router->free(ack_id);
 								return;
 							}
 						}
 					}
 					//close file and free the temp ack mailbox
 					fs.close();
-					m_router->free(ack_id);
+					global_router->free(ack_id);
 				}
 				else
 				{
@@ -128,7 +128,7 @@ void File_Service::run()
 					//body
 					auto reply_body = (send_file_chunk*)chunk_msg->begin();
 					reply_body->m_total = 0;
-					m_router->send(chunk_msg);
+					global_router->send(chunk_msg);
 				}
 
 				//log how long that took
@@ -147,8 +147,8 @@ void File_Service::run()
 			{
 				auto event = (Event_transfer_file*)body;
 				//temp mailbox to await reply chunks
-				auto rep_id = m_router->alloc();
-				auto mbox = m_router->validate(rep_id);
+				auto rep_id = global_router->alloc();
+				auto mbox = global_router->validate(rep_id);
 				//send off the file request
 				auto files = split_string(std::string(event->m_data, body_end), "\n");
 				auto msg = std::make_shared<Msg>(sizeof(Event_send_file));
@@ -157,7 +157,7 @@ void File_Service::run()
 				event_body->m_evt = evt_send_file;
 				event_body->m_reply = rep_id;
 				msg->append(files[1]);
-				m_router->send(msg);
+				global_router->send(msg);
 
 				//wait for all the reply chunks
 				auto tmpname = std::string{};
@@ -177,7 +177,7 @@ void File_Service::run()
 						log << "Transfer File Error: " << files[0] << " <- " << files[1];
 						out_log(log.str());
 						fs.close();
-						m_router->free(rep_id);
+						global_router->free(rep_id);
 						return;
 					}
 					auto chunk_body = (send_file_chunk*)chunk_msg->begin();
@@ -202,7 +202,7 @@ void File_Service::run()
 						static auto tag = std::make_shared<std::string>("ack");
 						auto ack = std::make_shared<Msg>(tag);
 						ack->set_dest(chunk_body->m_ack);
-						m_router->send(ack);
+						global_router->send(ack);
 					}
 					//send a progress report to origin every 10%
 					auto new_progress = (int32_t)(amount * 100 / total);
@@ -212,7 +212,7 @@ void File_Service::run()
 						msg->set_dest(event->m_origin);
 						auto ack_struct = (transfer_file_progress*)msg->begin();
 						ack_struct->m_progress = progress = new_progress;
-						m_router->send(msg);
+						global_router->send(msg);
 					}
 				} while (amount < total);
 				fs.close();
@@ -227,11 +227,11 @@ void File_Service::run()
 				{
 					auto ack_struct = (transfer_file_progress*)msg->begin();
 					ack_struct->m_progress = -1;
-					m_router->send(msg);
+					global_router->send(msg);
 				}
 			nofile1:
 				//free temp mailbox
-				m_router->free(rep_id);
+				global_router->free(rep_id);
 			});
 			break;
 		}
@@ -241,7 +241,7 @@ void File_Service::run()
 	}
 
 	//forget myself
-	m_router->forget(entry);
+	global_router->forget(entry);
 }
 
 //pushable events
@@ -254,7 +254,7 @@ File_Service *File_Service::set_file_list(const Net_ID &net_id, const std::vecto
 	event_body->m_evt = evt_set_file_list;
 	event_body->m_src = m_net_id;
 	for (auto &file : file_list) { msg->append(file)->append("\n"); }
-	m_router->send(msg);
+	global_router->send(msg);
 	return this;
 }
 
@@ -267,7 +267,7 @@ File_Service *File_Service::get_file_list(const Net_ID &net_id)
 	auto event_body = (Event_get_file_list*)msg->begin();
 	event_body->m_evt = evt_get_file_list;
 	event_body->m_reply = m_net_id;
-	m_router->send(msg);
+	global_router->send(msg);
 	return this;
 }
 
@@ -280,8 +280,8 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 	m_thread_pool2->enqueue([=]
 	{
 		//temp mailbox to await progress reports
-		auto origin_id = m_router->alloc();
-		auto mbox = m_router->validate(origin_id);
+		auto origin_id = global_router->alloc();
+		auto mbox = global_router->validate(origin_id);
 		//send off the transfer request
 		auto msg = std::make_shared<Msg>(sizeof(Event_transfer_file));
 		msg->set_dest(dst_id);
@@ -290,7 +290,7 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 		event_body->m_src = src_id;
 		event_body->m_origin = origin_id;
 		msg->append(dst_name)->append("\n")->append(src_name);
-		m_router->send(msg);
+		global_router->send(msg);
 		//wait for progress and confirmation
 		for (;;)
 		{
@@ -319,7 +319,7 @@ File_Service *File_Service::transfer_file(const Net_ID &dst_id, const Net_ID &sr
 			//call the subclass to update a progress bar etc
 			out_progress(dst_id, src_id, dst_name, src_name, ctx, prog_body->m_progress);
 		}
-		m_router->free(origin_id);
+		global_router->free(origin_id);
 	});
 	return this;
 }

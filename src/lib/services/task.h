@@ -3,7 +3,7 @@
 
 #include "../mail/router.h"
 
-extern std::unique_ptr<Router> m_router;
+extern std::unique_ptr<Router> global_router;
 
 //task class, thread executes the run method
 class Task
@@ -18,12 +18,12 @@ public:
 		uint32_t m_evt;
 	};
 	Task()
-		: m_net_id(m_router->alloc())
+		: m_net_id(global_router->alloc())
 	{}
 	virtual ~Task()
 	{
 		//free the task mailbox
-		m_router->free(m_net_id);
+		global_router->free(m_net_id);
 	}
 	//responce handling
 	void start_thread()

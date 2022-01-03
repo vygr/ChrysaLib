@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iterator>
 
-extern std::unique_ptr<Router> m_router;
+extern std::unique_ptr<Router> global_router;
 
 std::recursive_mutex View::m_mutex;
 int64_t View::m_next_id = 0;
@@ -452,7 +452,7 @@ View *View::find_id(int64_t id)
 View *View::emit()
 {
 	auto owner = find_owner();
-	if (owner != Net_ID() && m_router)
+	if (owner != Net_ID() && global_router)
 	{
 		auto source_id = get_id();
 		for (auto &id : m_actions)
@@ -463,7 +463,7 @@ View *View::emit()
 			event_body->m_type = ev_type_action;
 			event_body->m_target_id = id;
 			event_body->m_source_id = source_id;
-			m_router->send(msg);
+			global_router->send(msg);
 		}
 	}
 	return this;

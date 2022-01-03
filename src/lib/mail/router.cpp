@@ -84,20 +84,20 @@ void Router::run()
 		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_directory), '\0');
 		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
 		event_body->m_evt = Kernel_Service::evt_directory;
-		event_body->m_src = m_router->alloc_src();
-		event_body->m_via = m_router->get_dev_id();
+		event_body->m_src = global_router->alloc_src();
+		event_body->m_via = global_router->get_dev_id();
 		event_body->m_hops = 0;
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
-			auto &dir_struct = m_directory[m_router->get_dev_id()];
+			auto &dir_struct = m_directory[global_router->get_dev_id()];
 			for (auto &entry : dir_struct.m_services) body->append(entry).append("\n");
 		}
 		//broadcast to the list of known router peers
-		for (auto &peer : m_router->get_peers())
+		for (auto &peer : global_router->get_peers())
 		{
 			auto msg = std::make_shared<Msg>(body);
 			msg->set_dest(Net_ID(peer, Mailbox_ID{0}));
-			m_router->send(msg);
+			global_router->send(msg);
 		}
 
 		//purge old external directory entires and routes
@@ -122,7 +122,7 @@ std::string Router::declare(const Net_ID &id, const std::string &service, const 
 	auto entry = service + "," + id.to_string() + "," + params;
 	auto wake = this;
 	std::lock_guard<std::mutex> lock(m_mutex);
-	m_directory[m_router->get_dev_id()].m_services.insert(entry);
+	m_directory[global_router->get_dev_id()].m_services.insert(entry);
 	m_wake_mbox.post(wake);
 	return entry;
 }
@@ -133,7 +133,7 @@ void Router::forget(const std::string &entry)
 	//wake the manager thread to make it flood out the new state.
 	auto wake = this;
 	std::lock_guard<std::mutex> lock(m_mutex);
-	m_directory[m_router->get_dev_id()].m_services.erase(entry);
+	m_directory[global_router->get_dev_id()].m_services.erase(entry);
 	m_wake_mbox.post(wake);
 }
 
@@ -166,7 +166,7 @@ void Router::purge_dir()
 	auto itr = begin(m_directory);
 	while (itr != end (m_directory))
 	{
-		if (m_router->get_dev_id() != itr->first
+		if (global_router->get_dev_id() != itr->first
 			&& now - itr->second.m_time_modified >= std::chrono::milliseconds(MAX_DIRECTORY_AGE))
 		{
 			itr = m_directory.erase(itr);

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cstring>
 
-extern std::unique_ptr<Router> m_router;
+extern std::unique_ptr<Router> global_router;
 
 ///////////
 //utilities
@@ -166,7 +166,7 @@ void USB_Link::close()
 bool USB_Link::send(const std::shared_ptr<Msg> &msg)
 {
 	//pack msg into send buffer, calculate the hash and obfuscate
-	memcpy(&m_send_buf.m_dev_id, &m_router->get_dev_id(), sizeof(Dev_ID));
+	memcpy(&m_send_buf.m_dev_id, &global_router->get_dev_id(), sizeof(Dev_ID));
 	memcpy((uint8_t*)&m_send_buf.m_msg_header, &msg->m_header, sizeof(Msg_Header));
 	memcpy(m_send_buf.m_msg_body, msg->begin() + msg->m_header.m_data_offset, msg->m_header.m_frag_length);
 	m_send_buf.m_hash = jenkins_hash((uint8_t*)&m_send_buf.m_dev_id, offsetof(Link_Buf, m_msg_body) - offsetof(Link_Buf, m_dev_id) + msg->m_header.m_frag_length);
@@ -216,8 +216,8 @@ std::shared_ptr<Msg> USB_Link::receive()
 	if (m_receive_buf.m_dev_id != m_remote_dev_id)
 	{
 		m_remote_dev_id = m_receive_buf.m_dev_id;
-		m_router->sub_link(this);
-		m_router->add_link(this, m_remote_dev_id);
+		global_router->sub_link(this);
+		global_router->add_link(this, m_remote_dev_id);
 	}
 	return msg;
 }

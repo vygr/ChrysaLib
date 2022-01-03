@@ -1,7 +1,7 @@
 #include "link.h"
 #include "../mail/router.h"
 
-extern std::unique_ptr<Router> m_router;
+extern std::unique_ptr<Router> global_router;
 
 ////////
 // links
@@ -14,7 +14,7 @@ void Link::run_send()
 	while (m_running)
 	{
 		//do we have outgoing messages ?
-		out_msg = m_router->get_next_msg(m_remote_dev_id, std::chrono::milliseconds(LINK_PING_RATE));
+		out_msg = global_router->get_next_msg(m_remote_dev_id, std::chrono::milliseconds(LINK_PING_RATE));
 		if (!m_running) break;
 		if (out_msg)
 		{
@@ -29,7 +29,7 @@ void Link::run_send()
 		}
 	}
 	//post any not sent message back to the router
-	if (out_msg) m_router->send(out_msg);
+	if (out_msg) global_router->send(out_msg);
 }
 
 void Link::run_receive()
@@ -40,7 +40,7 @@ void Link::run_receive()
 		//get any msg from the link and send if not a ping
 		if (auto in_msg = receive())
 		{
-			if (in_msg->m_header.m_frag_length) m_router->send(in_msg);
+			if (in_msg->m_header.m_frag_length) global_router->send(in_msg);
 		}
 		else
 		{
@@ -48,5 +48,5 @@ void Link::run_receive()
 		}
 	}
 	//remove link entry from router
-	m_router->sub_link(this);
+	global_router->sub_link(this);
 }
