@@ -75,7 +75,8 @@ int32_t main(int32_t argc, char *argv[])
 	}
 
 	//jump into Kernel run method !!!
-	//it has to be the main thread, it's just forced on us !
+	//it has to be the main thread
+	//it's just forced on us by so many libs !
 	m_kernel->m_running = true;
 	m_kernel->run();
 

@@ -20,6 +20,11 @@ void Kernel_Service::run()
 		auto body = (Event*)msg->begin();
 		switch (body->m_evt)
 		{
+		case evt_exit:
+		{
+			m_running = false;
+			break;
+		}
 		case evt_directory:
 		{
 			//directory update, flood filling
@@ -67,10 +72,9 @@ void Kernel_Service::run()
 		{
 			//callback
 			auto event_body = (Event_callback*)body;
+			void *wake = nullptr;
 			event_body->m_callback();
-			auto reply = std::make_shared<Msg>();
-			reply->set_dest(event_body->m_reply);
-			m_router->send(reply);
+			event_body->m_mbox->post(wake);
 			break;
 		}
 		default:

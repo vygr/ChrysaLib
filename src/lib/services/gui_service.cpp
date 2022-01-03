@@ -147,6 +147,9 @@ void GUI_Service::run()
 
 	//forget myself
 	m_router->forget(entry);
+
+	//ask kernel to exit !!!
+	exit();
 }
 
 void GUI_Service::composit()

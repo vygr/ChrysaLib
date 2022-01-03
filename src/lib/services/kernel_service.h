@@ -43,7 +43,7 @@ public:
 	};
 	struct Event_callback : public Event
 	{
-		Net_ID m_reply;
+		Mbox<void*> *m_mbox;
 		std::function<void()> m_callback;
 	};
 	Kernel_Service()
