@@ -240,7 +240,7 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 		//setup active edge list, edge starts and coverage
 		if (m_edges_start.empty())
 		{
-			m_edges_start.resize(m_pixmap->m_h);
+			m_edges_start.resize(m_pixmap->m_h * 8);
 		}
 		if (m_flags & canvas_flag_antialias
 			&& m_coverage.empty())
@@ -300,7 +300,7 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 			{
 				//draw edges into coverage mask
 				auto node = (Edge*)&tracker_list;
-				auto xo = sample_offsets[((ys & 7) << 2)];
+				auto xo = sample_offsets[ys & 7];
 				auto xm = 1 << (ys & 7);
 				if (winding == winding_odd_even)
 				{
@@ -308,7 +308,7 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 					while (node->m_next)
 					{
 						node = node->m_next;
-						auto x = node->m_x + xo;
+						x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
 						x >>= FP_SHIFT;
@@ -323,7 +323,7 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 					while (node->m_next)
 					{
 						node = node->m_next;
-						auto x = node->m_x + xo;
+						x = node->m_x + xo;
 						auto w = node->m_w;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
