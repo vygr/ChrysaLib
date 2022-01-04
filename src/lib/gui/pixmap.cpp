@@ -98,6 +98,8 @@ Pixmap *Pixmap::resize(const Pixmap *src)
 		//scale down by 2
 		const auto dw = m_w;
 		const auto sw = src->m_w;
+		const auto agm = 0xff00ff00;
+		const auto rbm = 0x00ff00ff;
 		auto ddata = &m_data[0];
 		auto ddata_end = &ddata[dw * m_h];
 		auto sdata = &src->m_data[0];
@@ -106,25 +108,27 @@ Pixmap *Pixmap::resize(const Pixmap *src)
 			auto ddata_end_line = &ddata[dw];
 			while (ddata != ddata_end_line)
 			{
-				auto scol = sdata[0];
-				auto sag = (uint64_t)(scol & 0xff00ff00);
-				auto srb = scol & 0x00ff00ff;
-				scol = sdata[1];
+				auto col = sdata[0];
+				auto ag = (uint64_t)(col & agm);
+				auto rb = col & rbm;
+
+				col = sdata[1];
 				sdata += sw;
-				sag += scol & 0xff00ff00;
-				srb += scol & 0x00ff00ff;
-				scol = sdata[0];
-				sag += scol & 0xff00ff00;
-				srb += scol & 0x00ff00ff;
-				scol = sdata[1];
+				ag += col & agm;
+				rb += col & rbm;
+
+				col = sdata[0];
+				ag += col & agm;
+				rb += col & rbm;
+
+				col = sdata[1];
 				sdata -= sw - 2;
-				sag += scol & 0xff00ff00;
-				srb += scol & 0x00ff00ff;
-				sag >>= 2;
-				srb >>= 2;
-				sag &= 0xff00ff00;
-				srb &= 0x0ff00ff;
-				*ddata++ = sag + srb;
+				ag += col & agm;
+				rb += col & rbm;
+
+				ag = (ag >> 2) & agm;
+				rb = (rb >> 2) & rbm;
+				*ddata++ = ag + rb;
 			}
 			sdata += sw;
 		}
