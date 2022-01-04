@@ -7,6 +7,7 @@
 #include "../gui/title.h"
 #include "../gui/button.h"
 #include "../gui/scroll.h"
+#include "../gui/canvas.h"
 
 ////////////
 // test task
@@ -27,7 +28,7 @@ void Test_Task::run()
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
 	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Grid>();
+	auto main_widget = std::make_shared<Canvas>(256, 256, 1);
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
@@ -38,23 +39,24 @@ void Test_Task::run()
 	max_button->def_prop("text", std::make_shared<Property>("+"));
 	scroll->def_prop("min_width", std::make_shared<Property>(256))
 		->def_prop("min_height", std::make_shared<Property>(256));
-	main_widget->def_prop("min_width", std::make_shared<Property>(512))
-		->def_prop("min_height", std::make_shared<Property>(512))
-		->def_prop("grid_width", std::make_shared<Property>(4));
 
 	window->add_child(window_flow);
 	window_flow->add_child(title_flow)->add_child(scroll);
 	title_flow->add_child(button_grid)->add_child(title);
 	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
 	scroll->add_child(main_widget);
-	for (auto i = 0; i < 32; ++i)
-	{
-		auto button = std::make_shared<Button>();
-		main_widget->add_child(button);
-	}
-	main_widget->change(0, 0, 512, 512);
+	main_widget->change(0, 0, 256, 256);
 	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
+
+	//draw a polygon on the canvas !!!
+	auto path = std::vector<int32_t>{
+		10 << FP_SHIFT, 10 << FP_SHIFT,
+		200 << FP_SHIFT, 100 << FP_SHIFT,
+		100 << FP_SHIFT, 200 << FP_SHIFT};
+	auto polygon = std::vector<std::vector<int32_t>>{path};
+	main_widget->fpoly(polygon, 0, 0, winding_odd_even);
+	main_widget->swap();
 
 	//add to my GUI screen
 	add_front(window);

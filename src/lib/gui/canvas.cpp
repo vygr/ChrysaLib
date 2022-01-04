@@ -168,7 +168,6 @@ edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons,
 		auto len = path.size();
 		auto x2 = path[len - 2] + x;
 		auto y2 = (path[len - 1] + y) * scale >> FP_SHIFT;
-		len -= 2;
 		for (auto i = 0; i < len;)
 		{
 			auto x1 = x2;
@@ -181,7 +180,7 @@ edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons,
 			if (y1 <= y2)
 			{
 				if (y2 <= cy) continue;
-				auto dda = ((y2 - y1) << FP_SHIFT) / (x2 - x1);
+				auto dda = (x2 - x1) / (y2 - y1);
 				if (y1 < cy)
 				{
 					x1 += ((cy - y1) * dda);
@@ -189,12 +188,12 @@ edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons,
 				}
 				m_edges.emplace_back(Edge(x1, y1, y2, 1, dda));
 				bounds.m_min_y = std::min(bounds.m_min_y, y1);
-				bounds.m_max_y = std::max(bounds.m_max_y, y1);
+				bounds.m_max_y = std::max(bounds.m_max_y, y2);
 			}
 			else
 			{
 				if (y1 >= cy1) continue;
-				auto dda = ((y1 - y2) << FP_SHIFT) / (x1 - x2);
+				auto dda = (x1 - x2) / (y1 - y2);
 				if (y2 < cy)
 				{
 					x2 += ((cy - y2) * dda);
@@ -202,7 +201,7 @@ edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons,
 				}
 				m_edges.emplace_back(Edge(x2, y2, y1, -1, dda));
 				bounds.m_min_y = std::min(bounds.m_min_y, y2);
-				bounds.m_max_y = std::max(bounds.m_max_y, y2);
+				bounds.m_max_y = std::max(bounds.m_max_y, y1);
 			}
 		}
 	}
@@ -242,13 +241,11 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 		if (m_edges_start.empty())
 		{
 			m_edges_start.resize(m_pixmap->m_h);
-			std::fill(begin(m_edges_start), end(m_edges_start), nullptr);
 		}
 		if (m_flags & canvas_flag_antialias
 			&& m_coverage.empty())
 		{
 			m_coverage.resize(m_pixmap->m_w);
-			std::fill(begin(m_coverage), end(m_coverage), 0);
 		}
 
 		//edges into edge start lists
@@ -282,16 +279,17 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 			{
 				Edge *sorted_list = nullptr;
 				auto node = tracker_list;
-				while (auto next = node->m_next)
+				while (node)
 				{
-					auto insert = (Edge*)&sorted_list;
-					while (insert->m_next)
+					auto next = node->m_next;
+					auto last = (Edge*)&sorted_list;
+					while (auto insert_node = last->m_next)
 					{
-						insert = insert->m_next;
-						if (node->m_x <= insert->m_x) break;
+						if (node->m_x <= insert_node->m_x) break;
+						last = insert_node;
 					}
-					node->m_next = insert->m_next;
-					insert->m_next = node;
+					node->m_next = last->m_next;
+					last->m_next = node;
 					node = next;
 				}
 				tracker_list = sorted_list;
@@ -385,8 +383,8 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 						auto x1 = node->m_x;
 						node = node->m_next;
 						auto x2 = node->m_x;
-						x1 <<= FP_SHIFT;
-						x2 <<= FP_SHIFT;
+						x1 >>= FP_SHIFT;
+						x2 >>= FP_SHIFT;
 						span(0x80, x1, ys, x2);
 					}
 				}
@@ -405,8 +403,8 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 							x2 = node->m_x;
 							w += node->m_w;
 						} while (w != 0);
-						x1 <<= FP_SHIFT;
-						x2 <<= FP_SHIFT;
+						x1 >>= FP_SHIFT;
+						x2 >>= FP_SHIFT;
 						span(0x80, x1, ys, x2);
 					}
 				}
@@ -416,18 +414,17 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 			if (++ys >= cy1) break;
 
 			//step the edges and remove any dead ones
-			auto node = (Edge*)&tracker_list;
-			for (;;)
+			last = (Edge*)&tracker_list;
+			while (auto node = last->m_next)
 			{
-				auto last = node;
-				node = node->m_next;
 				if (node->m_ye != ys)
 				{
 					node->m_x += node->m_dda;
+					last = node;
 					continue;
 				}
-				last->m_next = node;
-				node = last;
+				last->m_next = node->m_next;
+				last = node;
 			}
 		}
 	}
