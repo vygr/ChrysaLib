@@ -244,8 +244,6 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 			m_edges_start.resize(m_pixmap->m_h);
 			std::fill(begin(m_edges_start), end(m_edges_start), nullptr);
 		}
-		auto min_x = INT32_MAX;
-		auto max_x = INT32_MIN;
 		if (m_flags & canvas_flag_antialias
 			&& m_coverage.empty())
 		{
@@ -262,6 +260,10 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 		}
 
 		//for each scan line
+		auto cx = m_cx << FP_SHIFT;
+		auto cx1 = (m_cx1 - 1) << FP_SHIFT;
+		auto min_x = INT32_MAX;
+		auto max_x = INT32_MIN;
 		while (ys < ye)
 		{
 			//include new edges that begin on this scanline
@@ -299,55 +301,48 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 			if (m_flags & canvas_flag_antialias)
 			{
 				//draw edges into coverage mask
-				auto tracker_node = (Edge*)&tracker_list;
-				auto mask = m_coverage;
+				auto node = (Edge*)&tracker_list;
 				auto xo = sample_offsets[((ys & 7) << 2)];
 				auto xm = 1 << (ys & 7);
-				auto cx = m_cx << FP_SHIFT;
-				auto cx1 = (m_cx1 - 1) << FP_SHIFT;
 				if (winding == winding_odd_even)
 				{
 					//odd even
-					while (tracker_node->m_next)
+					while (node->m_next)
 					{
-						tracker_node = tracker_node->m_next;
-						auto x = tracker_node->m_x + xo;
+						node = node->m_next;
+						auto x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
 						x >>= FP_SHIFT;
-						auto xb = m_coverage[x];
-						min_x = std::max(x, min_x);
-						max_x = std::min(x, max_x);
-						x = m_coverage[xb ^ xm];
+						min_x = std::min(x, min_x);
+						max_x = std::max(x, max_x);
+						m_coverage[x] ^= xm;
 					}
 				}
 				else
 				{
 					//non zero
-					while (tracker_node->m_next)
+					while (node->m_next)
 					{
-						tracker_node = tracker_node->m_next;
-						auto x = tracker_node->m_x + xo;
-						auto w = tracker_node->m_w;
+						node = node->m_next;
+						auto x = node->m_x + xo;
+						auto w = node->m_w;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
 						x >>= FP_SHIFT;
-						auto xb = m_coverage[x];
-						min_x = std::max(x, min_x);
-						max_x = std::min(x, max_x);
-						x = m_coverage[xb ^ xm];
+						min_x = std::min(x, min_x);
+						m_coverage[x] ^= xm;
 						do
 						{
-							tracker_node = tracker_node->m_next;
-							w += tracker_node->m_w;
+							node = node->m_next;
+							w += node->m_w;
 						} while (w != 0);
-						x = tracker_node->m_x + xo;
+						x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
 						x >>= FP_SHIFT;
-						xb = m_coverage[x];
-						max_x = std::min(x, max_x);
-						x = m_coverage[xb ^ xm];
+						max_x = std::max(x, max_x);
+						m_coverage[x] ^= xm;
 					}
 				}
 
@@ -356,35 +351,40 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 				if ((ys + 1) < cy1) goto next_subline;
 			flush_mask:
 				if (min_x > max_x) goto next_subline;
-				auto y = ys >> 3;
 				max_x++;
-				auto om = 0;
+				auto x = min_x;
+				auto y = ys >> 3;
+				auto m = 0;
 				do
 				{
 					auto x1 = x;
-					auto m = om;
+					auto m1 = m;
 					do
 					{
-						m ^= m_coverage[x1++];
+						m1 ^= m_coverage[x1++];
 						if (x1 >= max_x) break;
-					} while (m == om);
-					m_coverage[x1 -1] = 0;
-					span_noclip(mask_to_coverage[om], x, y, x1);
+					} while (m1 == m);
+					m_coverage[x1 - 1] = 0;
+					span_noclip(mask_to_coverage[m], x, y, x1);
+					x = x1;
+					m = m1;
 				} while (x < max_x);
+				min_x = INT32_MAX;
+				max_x = INT32_MIN;
 			}
 			else
 			{
 				//draw spans for mode
-				auto tracker_node = (Edge*)&tracker_list;
+				auto node = (Edge*)&tracker_list;
 				if (winding == winding_odd_even)
 				{
 					//odd even
-					while (tracker_node->m_next)
+					while (node->m_next)
 					{
-						tracker_node = tracker_node->m_next;
-						auto x1 = tracker_node->m_x;
-						tracker_node = tracker_node->m_next;
-						auto x2 = tracker_node->m_x;
+						node = node->m_next;
+						auto x1 = node->m_x;
+						node = node->m_next;
+						auto x2 = node->m_x;
 						x1 <<= FP_SHIFT;
 						x2 <<= FP_SHIFT;
 						span(0x80, x1, ys, x2);
@@ -393,17 +393,17 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 				else
 				{
 					//none zero
-					while (tracker_node->m_next)
+					while (node->m_next)
 					{
-						tracker_node = tracker_node->m_next;
-						auto x1 = tracker_node->m_x;
-						auto w = tracker_node->m_w;
+						node = node->m_next;
+						auto x1 = node->m_x;
+						auto w = node->m_w;
 						int32_t x2;
 						do
 						{
-							tracker_node = tracker_node->m_next;
-							x2 = tracker_node->m_x;
-							w += tracker_node->m_w;
+							node = node->m_next;
+							x2 = node->m_x;
+							w += node->m_w;
 						} while (w != 0);
 						x1 <<= FP_SHIFT;
 						x2 <<= FP_SHIFT;
