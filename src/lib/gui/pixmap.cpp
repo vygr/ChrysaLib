@@ -90,3 +90,35 @@ Pixmap *Pixmap::as_premul()
 	});
 	return this;
 }
+
+Pixmap *Pixmap::resize(const Pixmap *src)
+{
+	if ((m_w * 2 == src->m_w) && (m_h * 2 == src->m_h))
+	{
+		//scale down by 2
+		for (auto y = 0; y < m_h; ++y)
+		{
+			for (auto x = 0; x < m_w; ++x)
+			{
+				auto scol = src->m_data[(y * 2) * src->m_w + (x * 2)];
+				auto sag = (uint64_t)(scol & 0xff00ff00);
+				auto srb = scol & 0x00ff00ff;
+				scol = src->m_data[(y * 2) * src->m_w + (x * 2 + 1)];
+				sag += scol & 0xff00ff00;
+				srb += scol & 0x00ff00ff;
+				scol = src->m_data[(y * 2 + 1) * src->m_w + (x * 2)];
+				sag += scol & 0xff00ff00;
+				srb += scol & 0x00ff00ff;
+				scol = src->m_data[(y * 2 + 1) * src->m_w + (x * 2 + 1)];
+				sag += scol & 0xff00ff00;
+				srb += scol & 0x00ff00ff;
+				sag >>= 2;
+				srb >>= 2;
+				sag &= 0xff00ff00;
+				srb &= 0x0ff00ff;
+				m_data[y * m_w + x] = sag + srb;
+			}
+		}
+	}
+	return this;
+}

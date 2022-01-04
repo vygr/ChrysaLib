@@ -42,7 +42,7 @@ Canvas *Canvas::swap()
 	if (m_scale != 1)
 	{
 		pixmap = std::make_shared<Pixmap>(m_pixmap->m_w / m_scale, m_pixmap->m_h / m_scale);
-		//pixmap.resize(m_pixmap);
+		pixmap->resize(m_pixmap.get());
 	}
 
 	//upload then grab the texture

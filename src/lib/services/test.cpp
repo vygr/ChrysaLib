@@ -28,7 +28,7 @@ void Test_Task::run()
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
 	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Canvas>(256, 256, 1);
+	auto main_widget = std::make_shared<Canvas>(256, 256, 2);
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
@@ -45,7 +45,6 @@ void Test_Task::run()
 	title_flow->add_child(button_grid)->add_child(title);
 	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
 	scroll->add_child(main_widget);
-	main_widget->change(0, 0, 256, 256);
 	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 
