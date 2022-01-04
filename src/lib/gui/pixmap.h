@@ -14,7 +14,7 @@ public:
 	Pixmap *fill(uint32_t col);
 	Pixmap *as_argb();
 	Pixmap *as_premul();
-	Pixmap *resize(const Pixmap *src);
+	Pixmap *resize(const Pixmap *spix);
 	static uint32_t to_premul(uint32_t col);
 	static uint32_t to_argb(uint32_t col);
 	int32_t m_w;

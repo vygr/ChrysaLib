@@ -28,7 +28,7 @@ void Test_Task::run()
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
 	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Canvas>(256, 256, 2);
+	auto main_widget = std::make_shared<Canvas>(256, 256, 3);
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));

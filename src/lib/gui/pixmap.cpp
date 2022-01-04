@@ -91,46 +91,106 @@ Pixmap *Pixmap::as_premul()
 	return this;
 }
 
-Pixmap *Pixmap::resize(const Pixmap *src)
+Pixmap *Pixmap::resize(const Pixmap *spix)
 {
-	if ((m_w * 2 == src->m_w) && (m_h * 2 == src->m_h))
+	if ((m_w * 2 == spix->m_w) && (m_h * 2 == spix->m_h))
 	{
 		//scale down by 2
 		const auto dw = m_w;
-		const auto sw = src->m_w;
+		const auto sw = spix->m_w;
 		const auto agm = 0xff00ff00;
 		const auto rbm = 0x00ff00ff;
-		auto ddata = &m_data[0];
-		auto ddata_end = &ddata[dw * m_h];
-		auto sdata = &src->m_data[0];
-		while (ddata != ddata_end)
+		auto dst = &m_data[0];
+		auto dst_end = &dst[dw * m_h];
+		auto src = &spix->m_data[0];
+		while (dst != dst_end)
 		{
-			auto ddata_end_line = &ddata[dw];
-			while (ddata != ddata_end_line)
+			auto dst_end_line = &dst[dw];
+			while (dst != dst_end_line)
 			{
-				auto col = sdata[0];
+				auto col = src[0];
 				auto ag = (uint64_t)(col & agm);
 				auto rb = col & rbm;
-
-				col = sdata[1];
-				sdata += sw;
+				col = src[1];
+				src += sw;
 				ag += col & agm;
 				rb += col & rbm;
 
-				col = sdata[0];
+				col = src[0];
 				ag += col & agm;
 				rb += col & rbm;
-
-				col = sdata[1];
-				sdata -= sw - 2;
+				col = src[1];
+				src -= sw - 2;
 				ag += col & agm;
 				rb += col & rbm;
 
 				ag = (ag >> 2) & agm;
 				rb = (rb >> 2) & rbm;
-				*ddata++ = ag + rb;
+				*dst++ = ag + rb;
 			}
-			sdata += sw;
+			src += sw;
+		}
+	}
+	else if ((m_w * 3 == spix->m_w) && (m_h * 3 == spix->m_h))
+	{
+		//scale down by 3
+		const auto dw = m_w;
+		const auto sw = spix->m_w;
+		const auto agm = 0xff00ff00;
+		const auto rbm = 0x00ff00ff;
+		const auto q = ((1L << 32) / 9);
+		auto dst = &m_data[0];
+		auto dst_end = &dst[dw * m_h];
+		auto src = &spix->m_data[0];
+		while (dst != dst_end)
+		{
+			auto dst_end_line = &dst[dw];
+			while (dst != dst_end_line)
+			{
+				auto col = src[0];
+				auto ag = (uint64_t)(col & agm);
+				auto rb = col & rbm;
+				col = src[1];
+				ag += col & agm;
+				rb += col & rbm;
+				col = src[2];
+				src += sw;
+				ag += col & agm;
+				rb += col & rbm;
+
+				col = src[0];
+				ag += col & agm;
+				rb += col & rbm;
+				col = src[1];
+				ag += col & agm;
+				rb += col & rbm;
+				col = src[2];
+				src += sw;
+				ag += col & agm;
+				rb += col & rbm;
+
+				col = src[0];
+				ag += col & agm;
+				rb += col & rbm;
+				col = src[1];
+				ag += col & agm;
+				rb += col & rbm;
+				col = src[2];
+				src -= sw * 2 - 3;
+				ag += col & agm;
+				rb += col & rbm;
+
+				auto sga = ag;
+				auto srb = (uint64_t)rb;
+				auto rbl = (uint64_t)rb;
+				sga >>= 24, srb >>= 16, ag >>= 8;
+				rbl &= 0xfff, ag &= 0xfff;
+				sga *= q, srb *= q, ag *= q, rbl *= q;
+				sga >>= 32, srb >>= 32, ag >>= 32, rbl >>= 32;
+				ag <<= 8, srb <<= 16, sga <<= 24;
+				*dst++ = srb + sga + ag + rbl;
+			}
+			src += sw * 2;
 		}
 	}
 	return this;
