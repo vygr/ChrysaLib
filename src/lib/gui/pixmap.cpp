@@ -93,16 +93,16 @@ Pixmap *Pixmap::as_premul()
 
 Pixmap *Pixmap::resize(const Pixmap *spix)
 {
+	const auto dw = m_w;
+	const auto sw = spix->m_w;
+	const auto agm = 0xff00ff00;
+	const auto rbm = 0x00ff00ff;
+	auto dst = &m_data[0];
+	auto dst_end = &dst[dw * m_h];
+	auto src = &spix->m_data[0];
 	if ((m_w * 2 == spix->m_w) && (m_h * 2 == spix->m_h))
 	{
 		//scale down by 2
-		const auto dw = m_w;
-		const auto sw = spix->m_w;
-		const auto agm = 0xff00ff00;
-		const auto rbm = 0x00ff00ff;
-		auto dst = &m_data[0];
-		auto dst_end = &dst[dw * m_h];
-		auto src = &spix->m_data[0];
 		while (dst != dst_end)
 		{
 			auto dst_end_line = &dst[dw];
@@ -134,14 +134,7 @@ Pixmap *Pixmap::resize(const Pixmap *spix)
 	else if ((m_w * 3 == spix->m_w) && (m_h * 3 == spix->m_h))
 	{
 		//scale down by 3
-		const auto dw = m_w;
-		const auto sw = spix->m_w;
-		const auto agm = 0xff00ff00;
-		const auto rbm = 0x00ff00ff;
 		const auto q = ((1L << 32) / 9);
-		auto dst = &m_data[0];
-		auto dst_end = &dst[dw * m_h];
-		auto src = &spix->m_data[0];
 		while (dst != dst_end)
 		{
 			auto dst_end_line = &dst[dw];

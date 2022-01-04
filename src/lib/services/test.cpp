@@ -8,6 +8,7 @@
 #include "../gui/button.h"
 #include "../gui/scroll.h"
 #include "../gui/canvas.h"
+#include "../gui/path.h"
 
 ////////////
 // test task
@@ -28,7 +29,7 @@ void Test_Task::run()
 	auto max_button = std::make_shared<Button>();
 	auto close_button = std::make_shared<Button>();
 	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Canvas>(256, 256, 3);
+	auto main_widget = std::make_shared<Canvas>(256, 256, 1);
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
@@ -49,12 +50,12 @@ void Test_Task::run()
 	window->change(107, 107, s.m_w, s.m_h);
 
 	//draw a polygon on the canvas !!!
-	auto path = std::vector<int32_t>{
-		10 << FP_SHIFT, 10 << FP_SHIFT,
-		200 << FP_SHIFT, 100 << FP_SHIFT,
-		100 << FP_SHIFT, 200 << FP_SHIFT,
-		25 << FP_SHIFT, 80 << FP_SHIFT};
-	auto polygon = std::vector<std::vector<int32_t>>{path};
+	auto path = Path();
+	path.push_back(10 << FP_SHIFT, 10 << FP_SHIFT);
+	path.push_back(200 << FP_SHIFT, 100 << FP_SHIFT);
+	path.push_back(100 << FP_SHIFT, 200 << FP_SHIFT);
+	path.push_back(25 << FP_SHIFT, 80 << FP_SHIFT);
+	auto polygon = std::vector<Path>{path};
 	main_widget->set_canvas_flags(canvas_flag_antialias);
 	main_widget->set_col(argb_red);
 	main_widget->fbox(5, 5, 240, 240);

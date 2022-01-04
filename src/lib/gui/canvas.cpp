@@ -1,6 +1,7 @@
 #include "canvas.h"
 #include "pixmap.h"
 #include "texture.h"
+#include "path.h"
 #include "property.h"
 #include "ctx.h"
 #include "colors.h"
@@ -173,7 +174,7 @@ Canvas *Canvas::span(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 	return this;
 }
 
-edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int32_t scale)
+edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, int32_t x, int32_t y, int32_t scale)
 {
 	edge_bounds bounds;
 	m_edges.clear();
@@ -226,7 +227,7 @@ edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons,
 	return bounds;
 }
 
-Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int winding)
+Canvas *Canvas::fpoly(const std::vector<Path> &polygons, int32_t x, int32_t y, int winding)
 {
 	static auto sample_offsets = std::array<int32_t, 8>{
 		-16384, 24576, 0, -24576, 16384, -8192, -32768, 8192};
