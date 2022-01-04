@@ -2,6 +2,7 @@
 #define CANVAS_H
 
 #include "view.h"
+#include <cstdint>
 
 //load flags
 enum
@@ -26,11 +27,27 @@ enum
 
 struct Edge
 {
+	Edge(int32_t x, int32_t ys, int32_t ye, int32_t w, int32_t dda)
+		: m_x(x)
+		, m_ys(ys)
+		, m_ye(ye)
+		, m_w(w)
+		, m_dda(dda)
+	{}
+	Edge *m_next = 0;
 	int32_t m_x;
 	int32_t m_ys;
 	int32_t m_ye;
 	int32_t m_w;
 	int32_t m_dda;
+};
+
+struct edge_bounds
+{
+	int32_t m_min_x = INT32_MAX;
+	int32_t m_min_y = INT32_MAX;
+	int32_t m_max_x = INT32_MIN;
+	int32_t m_max_y = INT32_MIN;
 };
 
 class Pixmap;
@@ -51,10 +68,13 @@ public:
 	uint32_t pick(int32_t x, int32_t y);
 	Canvas *span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1);
 	Canvas *span(int32_t coverage, int32_t x, int32_t y, int32_t x1);
-
+	edge_bounds set_edges(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int32_t scale);
+	Canvas *fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int winding);
 	std::shared_ptr<Pixmap> m_pixmap;
 	std::shared_ptr<Texture> m_texture;
-	std::vector<std::forward_list<Edge>> m_edges;
+	std::vector<Edge> m_edges;
+	std::vector<Edge*> m_edges_start;
+	std::vector<uint8_t> m_coverage;
 	uint32_t m_col = 0;
 	uint32_t m_flags = 0;
 	int32_t m_scale = 0;

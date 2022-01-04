@@ -154,3 +154,282 @@ Canvas *Canvas::span(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 	}
 	return this;
 }
+
+edge_bounds Canvas::set_edges(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int32_t scale)
+{
+	edge_bounds bounds;
+	m_edges.clear();
+	x += 1 << (FP_SHIFT - 1);
+	y += 1 << (FP_SHIFT - 1);
+	auto cy = m_cy * scale;
+	auto cy1 = m_cy1 * scale;
+	for (const auto &path : polygons)
+	{
+		auto len = path.size();
+		auto x2 = path[len - 2] + x;
+		auto y2 = (path[len - 1] + y) * scale >> FP_SHIFT;
+		len -= 2;
+		for (auto i = 0; i < len;)
+		{
+			auto x1 = x2;
+			auto y1 = y2;
+			x2 = path[i++] + x;
+			y2 = (path[i++] + y) * scale >> FP_SHIFT;
+			bounds.m_min_x = std::min(bounds.m_min_x, x2 >> FP_SHIFT);
+			bounds.m_max_x = std::max(bounds.m_max_x, x2 >> FP_SHIFT);
+			if (y1 == y2) continue;
+			if (y1 <= y2)
+			{
+				if (y2 <= cy) continue;
+				auto dda = ((y2 - y1) << FP_SHIFT) / (x2 - x1);
+				if (y1 < cy)
+				{
+					x1 += ((cy - y1) * dda);
+					y1 = cy;
+				}
+				m_edges.emplace_back(Edge(x1, y1, y2, 1, dda));
+				bounds.m_min_y = std::min(bounds.m_min_y, y1);
+				bounds.m_max_y = std::max(bounds.m_max_y, y1);
+			}
+			else
+			{
+				if (y1 >= cy1) continue;
+				auto dda = ((y1 - y2) << FP_SHIFT) / (x1 - x2);
+				if (y2 < cy)
+				{
+					x2 += ((cy - y2) * dda);
+					y2 = cy;
+				}
+				m_edges.emplace_back(Edge(x2, y2, y1, -1, dda));
+				bounds.m_min_y = std::min(bounds.m_min_y, y2);
+				bounds.m_max_y = std::max(bounds.m_max_y, y2);
+			}
+		}
+	}
+	return bounds;
+}
+
+Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t x, int32_t y, int winding)
+{
+	static auto sample_offsets = std::array<int32_t, 8>{
+		-16384, 24576, 0, -24576, 16384, -8192, -32768, 8192};
+	static auto mask_to_coverage = std::array<uint8_t, 256>{
+		0, 16, 16, 32, 16, 32, 32, 48, 16, 32, 32, 48, 32, 48, 48, 64, 16, 32, 32, 48,
+		32, 48, 48, 64, 32, 48, 48, 64, 48, 64, 64, 80, 16, 32, 32, 48, 32, 48, 48, 64,
+		32, 48, 48, 64, 48, 64, 64, 80, 32, 48, 48, 64, 48, 64, 64, 80, 48, 64, 64, 80,
+		64, 80, 80, 96, 16, 32, 32, 48, 32, 48, 48, 64, 32, 48, 48, 64, 48, 64, 64, 80,
+		32, 48, 48, 64, 48, 64, 64, 80, 48, 64, 64, 80, 64, 80, 80, 96, 32, 48, 48, 64,
+		48, 64, 64, 80, 48, 64, 64, 80, 64, 80, 80, 96, 48, 64, 64, 80, 64, 80, 80, 96,
+		64, 80, 80, 96, 80, 96, 96, 112, 16, 32, 32, 48, 32, 48, 48, 64, 32, 48, 48,
+		64, 48, 64, 64, 80, 32, 48, 48, 64, 48, 64, 64, 80, 48, 64, 64, 80, 64, 80, 80,
+		96, 32, 48, 48, 64, 48, 64, 64, 80, 48, 64, 64, 80, 64, 80, 80, 96, 48, 64, 64,
+		80, 64, 80, 80, 96, 64, 80, 80, 96, 80, 96, 96, 112, 32, 48, 48, 64, 48, 64,
+		64, 80, 48, 64, 64, 80, 64, 80, 80, 96, 48, 64, 64, 80, 64, 80, 80, 96, 64, 80,
+		80, 96, 80, 96, 96, 112, 48, 64, 64, 80, 64, 80, 80, 96, 64, 80, 80, 96, 80,
+		96, 96, 112, 64, 80, 80, 96, 80, 96, 96, 112, 80, 96, 96, 112, 96, 112, 112,
+		128};
+	auto scale = (m_flags & canvas_flag_antialias) ? 8 : 1;
+	auto bounds = set_edges(polygons, x, y, scale);
+	auto xs = bounds.m_min_x;
+	auto ys = bounds.m_min_y;
+	auto xe = bounds.m_max_x;
+	auto ye = bounds.m_max_y;
+	auto cy = m_cy * scale;
+	auto cy1 = m_cy1 * scale;
+	if (xs < m_cx1 && ys < cy1 && xe > m_cx && ye > cy)
+	{
+		//setup active edge list, edge starts and coverage
+		if (m_edges_start.empty())
+		{
+			m_edges_start.resize(m_pixmap->m_h);
+			std::fill(begin(m_edges_start), end(m_edges_start), nullptr);
+		}
+		auto min_x = INT32_MAX;
+		auto max_x = INT32_MIN;
+		if (m_flags & canvas_flag_antialias
+			&& m_coverage.empty())
+		{
+			m_coverage.resize(m_pixmap->m_w);
+			std::fill(begin(m_coverage), end(m_coverage), 0);
+		}
+
+		//edges into edge start lists
+		Edge *tracker_list = nullptr;
+		for (auto &edge : m_edges)
+		{
+			edge.m_next = m_edges_start[edge.m_ys];
+			m_edges_start[edge.m_ys] = &edge;
+		}
+
+		//for each scan line
+		while (ys < ye)
+		{
+			//include new edges that begin on this scanline
+			auto last = m_edges_start[ys];
+			if (last)
+			{
+				auto first = last;
+				while (last->m_next) last = last->m_next;
+				last->m_next = tracker_list;
+				tracker_list = first;
+				m_edges_start[ys] = nullptr;
+			}
+
+			//sort active edges on x ?
+			if (!(m_flags & canvas_flag_antialias) || winding == winding_none_zero)
+			{
+				Edge *sorted_list = nullptr;
+				auto node = tracker_list;
+				while (auto next = node->m_next)
+				{
+					auto insert = (Edge*)&sorted_list;
+					while (insert->m_next)
+					{
+						insert = insert->m_next;
+						if (node->m_x <= insert->m_x) break;
+					}
+					node->m_next = insert->m_next;
+					insert->m_next = node;
+					node = next;
+				}
+				tracker_list = sorted_list;
+			}
+
+			//antialiased ?
+			if (m_flags & canvas_flag_antialias)
+			{
+				//draw edges into coverage mask
+				auto tracker_node = (Edge*)&tracker_list;
+				auto mask = m_coverage;
+				auto xo = sample_offsets[((ys & 7) << 2)];
+				auto xm = 1 << (ys & 7);
+				auto cx = m_cx << FP_SHIFT;
+				auto cx1 = (m_cx1 - 1) << FP_SHIFT;
+				if (winding == winding_odd_even)
+				{
+					//odd even
+					while (tracker_node->m_next)
+					{
+						tracker_node = tracker_node->m_next;
+						auto x = tracker_node->m_x + xo;
+						x = std::max(x, cx);
+						x = std::min(x, cx1);
+						x >>= FP_SHIFT;
+						auto xb = m_coverage[x];
+						min_x = std::max(x, min_x);
+						max_x = std::min(x, max_x);
+						x = m_coverage[xb ^ xm];
+					}
+				}
+				else
+				{
+					//non zero
+					while (tracker_node->m_next)
+					{
+						tracker_node = tracker_node->m_next;
+						auto x = tracker_node->m_x + xo;
+						auto w = tracker_node->m_w;
+						x = std::max(x, cx);
+						x = std::min(x, cx1);
+						x >>= FP_SHIFT;
+						auto xb = m_coverage[x];
+						min_x = std::max(x, min_x);
+						max_x = std::min(x, max_x);
+						x = m_coverage[xb ^ xm];
+						do
+						{
+							tracker_node = tracker_node->m_next;
+							w += tracker_node->m_w;
+						} while (w != 0);
+						x = tracker_node->m_x + xo;
+						x = std::max(x, cx);
+						x = std::min(x, cx1);
+						x >>= FP_SHIFT;
+						xb = m_coverage[x];
+						max_x = std::min(x, max_x);
+						x = m_coverage[xb ^ xm];
+					}
+				}
+
+				//flush coverage mask to scan line
+				if (((ys & 7) == 7) || ((ys + 1) == ye)) goto flush_mask;
+				if ((ys + 1) < cy1) goto next_subline;
+			flush_mask:
+				if (min_x > max_x) goto next_subline;
+				auto y = ys >> 3;
+				max_x++;
+				auto om = 0;
+				do
+				{
+					auto x1 = x;
+					auto m = om;
+					do
+					{
+						m ^= m_coverage[x1++];
+						if (x1 >= max_x) break;
+					} while (m == om);
+					m_coverage[x1 -1] = 0;
+					span_noclip(mask_to_coverage[om], x, y, x1);
+				} while (x < max_x);
+			}
+			else
+			{
+				//draw spans for mode
+				auto tracker_node = (Edge*)&tracker_list;
+				if (winding == winding_odd_even)
+				{
+					//odd even
+					while (tracker_node->m_next)
+					{
+						tracker_node = tracker_node->m_next;
+						auto x1 = tracker_node->m_x;
+						tracker_node = tracker_node->m_next;
+						auto x2 = tracker_node->m_x;
+						x1 <<= FP_SHIFT;
+						x2 <<= FP_SHIFT;
+						span(0x80, x1, ys, x2);
+					}
+				}
+				else
+				{
+					//none zero
+					while (tracker_node->m_next)
+					{
+						tracker_node = tracker_node->m_next;
+						auto x1 = tracker_node->m_x;
+						auto w = tracker_node->m_w;
+						int32_t x2;
+						do
+						{
+							tracker_node = tracker_node->m_next;
+							x2 = tracker_node->m_x;
+							w += tracker_node->m_w;
+						} while (w != 0);
+						x1 <<= FP_SHIFT;
+						x2 <<= FP_SHIFT;
+						span(0x80, x1, ys, x2);
+					}
+				}
+			}
+		next_subline:
+			//next sub scanline
+			if (++ys >= cy1) break;
+
+			//step the edges and remove any dead ones
+			auto node = (Edge*)&tracker_list;
+			for (;;)
+			{
+				auto last = node;
+				node = node->m_next;
+				if (node->m_ye != ys)
+				{
+					node->m_x += node->m_dda;
+					continue;
+				}
+				last->m_next = node;
+				node = last;
+			}
+		}
+	}
+	return this;
+}

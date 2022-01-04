@@ -2,6 +2,7 @@
 #define PIXMAP_H
 
 #include <vector>
+#include <memory>
 
 class Texture;
 
