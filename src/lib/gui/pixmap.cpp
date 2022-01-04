@@ -96,28 +96,37 @@ Pixmap *Pixmap::resize(const Pixmap *src)
 	if ((m_w * 2 == src->m_w) && (m_h * 2 == src->m_h))
 	{
 		//scale down by 2
-		for (auto y = 0; y < m_h; ++y)
+		const auto dw = m_w;
+		const auto sw = src->m_w;
+		auto ddata = &m_data[0];
+		auto ddata_end = &ddata[dw * m_h];
+		auto sdata = &src->m_data[0];
+		while (ddata != ddata_end)
 		{
-			for (auto x = 0; x < m_w; ++x)
+			auto ddata_end_line = &ddata[dw];
+			while (ddata != ddata_end_line)
 			{
-				auto scol = src->m_data[(y * 2) * src->m_w + (x * 2)];
+				auto scol = sdata[0];
 				auto sag = (uint64_t)(scol & 0xff00ff00);
 				auto srb = scol & 0x00ff00ff;
-				scol = src->m_data[(y * 2) * src->m_w + (x * 2 + 1)];
+				scol = sdata[1];
+				sdata += sw;
 				sag += scol & 0xff00ff00;
 				srb += scol & 0x00ff00ff;
-				scol = src->m_data[(y * 2 + 1) * src->m_w + (x * 2)];
+				scol = sdata[0];
 				sag += scol & 0xff00ff00;
 				srb += scol & 0x00ff00ff;
-				scol = src->m_data[(y * 2 + 1) * src->m_w + (x * 2 + 1)];
+				scol = sdata[1];
+				sdata -= sw - 2;
 				sag += scol & 0xff00ff00;
 				srb += scol & 0x00ff00ff;
 				sag >>= 2;
 				srb >>= 2;
 				sag &= 0xff00ff00;
 				srb &= 0x0ff00ff;
-				m_data[y * m_w + x] = sag + srb;
+				*ddata++ = sag + srb;
 			}
+			sdata += sw;
 		}
 	}
 	return this;
