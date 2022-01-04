@@ -57,6 +57,9 @@ void Test_Task::run()
 		25 << FP_SHIFT, 80 << FP_SHIFT};
 	auto polygon = std::vector<std::vector<int32_t>>{path};
 	main_widget->set_canvas_flags(canvas_flag_antialias);
+	main_widget->set_col(argb_red);
+	main_widget->fbox(5, 5, 240, 240);
+	main_widget->set_col(argb_black);
 	main_widget->fpoly(polygon, 0, 0, winding_none_zero);
 	main_widget->swap();
 

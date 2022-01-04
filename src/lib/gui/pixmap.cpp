@@ -32,8 +32,8 @@ uint32_t Pixmap::to_premul(uint32_t col)
 	auto a = col >> 24;
 	auto rb = col & 0xff00ff;
 	auto g = col & 0xff00;
-	rb = a * rb & 0xff00ff;
-	g = a * g & 0xff00;
+	rb = ((a * rb) >> 8) & 0xff00ff;
+	g = ((a * g) >> 8) & 0xff00;
 	a <<= 24;
 	return a + rb + g;
 }

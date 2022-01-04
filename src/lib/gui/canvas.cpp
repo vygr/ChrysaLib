@@ -93,9 +93,9 @@ Canvas *Canvas::plot(int32_t x, int32_t y)
 			{
 				alpha = 0xff - alpha;
 				auto dcol = *pixel;
-				auto dag = (((dcol & 0xff00ff00) * alpha) >> 8) & 0xff00ff00;
+				auto dag = (uint32_t)(((uint64_t)(dcol & 0xff00ff00) * alpha) >> 8) & 0xff00ff00;
 				auto drb = (((dcol & 0x00ff00ff) * alpha) >> 8) & 0x00ff00ff;
-				col = col + dag + dag;
+				col = col + dag + drb;
 			}
 			*pixel = col;
 		}
@@ -110,6 +110,24 @@ uint32_t Canvas::pick(int32_t x, int32_t y)
 		return Pixmap::to_argb(m_pixmap->m_data[y * m_pixmap->m_w + x]);
 	}
 	return 0;
+}
+
+Canvas *Canvas::fbox(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	if (w > 0 && h > 0)
+	{
+		w += x;
+		h += y;
+		if (w > m_cx && h > m_cy && x < m_cx1 && y < m_cy1)
+		{
+			x = std::max(x, m_cx);
+			y = std::max(y, m_cy);
+			w = std::min(w, m_cx1);
+			h = std::min(h, m_cy1);
+			do { span_noclip(0x80, x, y, w); } while (++y < h);
+		}
+	}
+	return this;
 }
 
 Canvas *Canvas::span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1)
@@ -133,9 +151,9 @@ Canvas *Canvas::span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 				do
 				{
 					auto dcol = *pix_begin;
-					auto dag = (((dcol & 0xff00ff00) * alpha) >> 8) & 0xff00ff00;
+					auto dag = (uint32_t)(((uint64_t)(dcol & 0xff00ff00) * alpha) >> 8) & 0xff00ff00;
 					auto drb = (((dcol & 0x00ff00ff) * alpha) >> 8) & 0x00ff00ff;
-					dcol = col + dag + dag;
+					dcol = col + dag + drb;
 					*pix_begin++ = dcol;
 				} while (pix_begin != pix_end);
 			}
