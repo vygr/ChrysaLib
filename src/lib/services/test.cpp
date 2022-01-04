@@ -53,10 +53,11 @@ void Test_Task::run()
 	auto path = std::vector<int32_t>{
 		10 << FP_SHIFT, 10 << FP_SHIFT,
 		200 << FP_SHIFT, 100 << FP_SHIFT,
-		100 << FP_SHIFT, 200 << FP_SHIFT};
+		100 << FP_SHIFT, 200 << FP_SHIFT,
+		25 << FP_SHIFT, 80 << FP_SHIFT};
 	auto polygon = std::vector<std::vector<int32_t>>{path};
 	main_widget->set_canvas_flags(canvas_flag_antialias);
-	main_widget->fpoly(polygon, 0, 0, winding_odd_even);
+	main_widget->fpoly(polygon, 0, 0, winding_none_zero);
 	main_widget->swap();
 
 	//add to my GUI screen

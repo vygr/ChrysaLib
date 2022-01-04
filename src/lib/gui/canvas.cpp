@@ -239,14 +239,9 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 	{
 		//setup active edge list, edge starts and coverage
 		if (m_edges_start.empty())
-		{
 			m_edges_start.resize(m_pixmap->m_h * 8);
-		}
-		if (m_flags & canvas_flag_antialias
-			&& m_coverage.empty())
-		{
+		if (m_flags & canvas_flag_antialias && m_coverage.empty())
 			m_coverage.resize(m_pixmap->m_w);
-		}
 
 		//edges into edge start lists
 		Edge *tracker_list = nullptr;
@@ -396,13 +391,12 @@ Canvas *Canvas::fpoly(const std::vector<std::vector<int32_t>> &polygons, int32_t
 						node = node->m_next;
 						auto x1 = node->m_x;
 						auto w = node->m_w;
-						int32_t x2;
 						do
 						{
 							node = node->m_next;
-							x2 = node->m_x;
 							w += node->m_w;
 						} while (w != 0);
+						auto x2 = node->m_x;
 						x1 >>= FP_SHIFT;
 						x2 >>= FP_SHIFT;
 						span(0x80, x1, ys, x2);
