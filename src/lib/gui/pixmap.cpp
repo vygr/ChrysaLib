@@ -180,15 +180,15 @@ Pixmap *Pixmap::resize(const Pixmap *spix)
 				ag += col & agm;
 				rb += col & rbm;
 
-				auto sga = ag;
+				auto sag = ag;
 				auto srb = (uint64_t)rb;
 				auto rbl = (uint64_t)rb;
-				sga >>= 24, srb >>= 16, ag >>= 8;
+				sag >>= 24, srb >>= 16, ag >>= 8;
 				rbl &= 0xfff, ag &= 0xfff;
-				sga *= q, srb *= q, ag *= q, rbl *= q;
-				sga >>= 32, srb >>= 32, ag >>= 32, rbl >>= 32;
-				ag <<= 8, srb <<= 16, sga <<= 24;
-				*dst++ = srb + sga + ag + rbl;
+				sag *= q, srb *= q, ag *= q, rbl *= q;
+				sag >>= 32, srb >>= 32, ag >>= 32, rbl >>= 32;
+				ag <<= 8, srb <<= 16, sag <<= 24;
+				*dst++ = srb + sag + ag + rbl;
 			}
 			src += sw * 2;
 		}
