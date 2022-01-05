@@ -6,9 +6,7 @@
 class Text : public View
 {
 public:
-    Text()
-        : View()
-	{}
+    Text();
 	view_size pref_size() override;
 	Text *draw(const Ctx &ctx) override;
 };

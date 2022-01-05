@@ -2,6 +2,12 @@
 #include "ctx.h"
 #include "colors.h"
 
+Text::Text()
+	: View()
+{
+	def_prop("color", std::make_shared<Property>(0));
+}
+
 view_size Text::pref_size()
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
