@@ -174,7 +174,7 @@ Canvas *Canvas::span(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 	return this;
 }
 
-edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, int32_t x, int32_t y, int32_t scale)
+edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int32_t scale)
 {
 	edge_bounds bounds;
 	m_edges.clear();
@@ -227,9 +227,9 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, int32_t x, int3
 	return bounds;
 }
 
-Canvas *Canvas::fpoly(const std::vector<Path> &polygons, int32_t x, int32_t y, int winding)
+Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int winding)
 {
-	static auto sample_offsets = std::array<int32_t, 8>{
+	static auto sample_offsets = std::array<fixed32_t, 8>{
 		-16384, 24576, 0, -24576, 16384, -8192, -32768, 8192};
 	static auto mask_to_coverage = std::array<uint8_t, 256>{
 		0, 16, 16, 32, 16, 32, 32, 48, 16, 32, 32, 48, 32, 48, 48, 64, 16, 32, 32, 48,

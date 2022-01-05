@@ -1,16 +1,16 @@
 #include "path.h"
 
-Path *Path::push_back(int32_t x, int32_t y)
+Path *Path::push_back(fixed32_t x, fixed32_t y)
 {
 	m_points.push_back(x);
 	m_points.push_back(y);
 	return this;
 }
 
-Path *Path::gen_quadratic(int32_t p1x, int32_t p1y, int32_t p2x, int32_t p2y,
-	int32_t p3x, int32_t p3y, int32_t tol)
+Path *Path::gen_quadratic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
+	fixed32_t p3x, fixed32_t p3y, fixed32_t tol)
 {
-	auto stack = std::vector<int32_t>{};
+	auto stack = std::vector<fixed32_t>{};
 
 	//output first point
 	push_back(p1x, p1y);
@@ -58,8 +58,8 @@ Path *Path::gen_quadratic(int32_t p1x, int32_t p1y, int32_t p2x, int32_t p2y,
 	return this;
 }
 
-Path *Path::gen_cubic(int32_t p1x, int32_t p1y, int32_t p2x, int32_t p2y,
-	int32_t p3x, int32_t p3y, int32_t p4x, int32_t p4y, int32_t tol)
+Path *Path::gen_cubic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
+	fixed32_t p3x, fixed32_t p3y, fixed32_t p4x, fixed32_t p4y, fixed32_t tol)
 {
 
 	return this;

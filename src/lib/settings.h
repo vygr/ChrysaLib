@@ -1,7 +1,10 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-//fixed point shift
+#include <stdint.h>
+
+//fixed point
+typedef int32_t fixed32_t;
 const uint32_t FP_SHIFT = 16;
 //max mailbox id
 const uint32_t MAX_ID = 4294967295;
