@@ -12,7 +12,7 @@ Window::Window()
 	->def_prop("ink_color", std::make_shared<Property>(argb_black))
 	->def_prop("border", std::make_shared<Property>(1))
 	->def_prop("shadow", std::make_shared<Property>(5))
-	->def_prop("font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 32)));
+	->def_prop("font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 16)));
 }
 
 Window *Window::add_child(std::shared_ptr<View> child)

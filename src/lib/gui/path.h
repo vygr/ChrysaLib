@@ -9,6 +9,7 @@ class Path
 public:
 	Path() {}
 	Path *push_back(fixed32_t x, fixed32_t y);
+	Path *pop_back();
 	fixed32_t &operator[](const fixed32_t &i) { return m_points[i]; }
 	const fixed32_t &operator[](const fixed32_t &i) const { return m_points[i]; }
 	size_t size() const { return m_points.size(); };

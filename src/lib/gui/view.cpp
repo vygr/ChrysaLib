@@ -205,6 +205,13 @@ const std::string View::got_string_prop(const std::string &prop)
 	return "";
 };
 
+const std::shared_ptr<Font> View::got_font_prop(const std::string &prop)
+{
+	auto p = got_prop(prop);
+	if (p) return p->get_font();
+	return nullptr;
+};
+
 int64_t View::get_long_prop(const std::string &prop)
 {
 	auto p = get_prop(prop);
@@ -217,6 +224,13 @@ const std::string View::get_string_prop(const std::string &prop)
 	auto p = get_prop(prop);
 	if (p) return p->get_string();
 	return "";
+};
+
+const std::shared_ptr<Font> View::get_font_prop(const std::string &prop)
+{
+	auto p = get_prop(prop);
+	if (p) return p->get_font();
+	return nullptr;
 };
 
 View *View::add_opaque(int32_t x, int32_t y, int32_t w, int32_t h)

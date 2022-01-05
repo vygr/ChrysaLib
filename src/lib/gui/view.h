@@ -4,6 +4,7 @@
 #include "property.h"
 #include "region.h"
 #include "ctx.h"
+#include "font.h"
 #include "../mail/msg.h"
 #include <list>
 #include <mutex>
@@ -129,8 +130,10 @@ public:
 	std::shared_ptr<Property> get_prop(const std::string &prop);
 	int64_t got_long_prop(const std::string &prop);
 	const std::string got_string_prop(const std::string &prop);
+	const std::shared_ptr<Font> got_font_prop(const std::string &prop);
 	int64_t get_long_prop(const std::string &prop);
 	const std::string get_string_prop(const std::string &prop);
+	const std::shared_ptr<Font> get_font_prop(const std::string &prop);
 	//children
 	std::vector<std::shared_ptr<View>> children();
 	View *add_front(std::shared_ptr<View> child);

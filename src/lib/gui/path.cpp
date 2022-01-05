@@ -7,6 +7,13 @@ Path *Path::push_back(fixed32_t x, fixed32_t y)
 	return this;
 }
 
+Path *Path::pop_back()
+{
+	m_points.pop_back();
+	m_points.pop_back();
+	return this;
+}
+
 Path *Path::gen_quadratic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
 	fixed32_t p3x, fixed32_t p3y, fixed32_t tol)
 {

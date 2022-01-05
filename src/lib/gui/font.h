@@ -2,6 +2,8 @@
 #define FONT_H
 
 #include "../settings.h"
+#include "path.h"
+#include "texture.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -47,8 +49,8 @@ struct font_curve_element : font_path_element
 
 struct glyph_size
 {
-	uint32_t m_w;
-	uint32_t m_h;
+	uint32_t m_w = 0;
+	uint32_t m_h = 0;
 };
 
 const uint32_t font_max_word_cache = 1024;
@@ -62,9 +64,12 @@ public:
 	std::vector<uint32_t> glyph_ranges();
 	std::vector<font_path*> glyph_info(const std::string &utf8);
 	glyph_size glyph_bounds(const std::vector<font_path*> &info);
+	std::vector<Path> glyph_paths(const std::vector<font_path*> &info, glyph_size &size);
+	std::shared_ptr<Texture> sym_texture(const std::string &utf8);
 	uint32_t m_pixels = 0;
 	std::string m_name;
 	std::vector<uint8_t> m_data;
+	std::map<std::string, std::shared_ptr<Texture>> m_sym_map;
 	static std::map<std::string, std::shared_ptr<Font>> m_cache;
 	static std::recursive_mutex m_mutex;
 };

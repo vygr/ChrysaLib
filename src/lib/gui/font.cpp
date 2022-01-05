@@ -1,4 +1,6 @@
 #include "font.h"
+#include "canvas.h"
+#include "colors.h"
 
 std::vector<uint8_t> gulp(const std::string &filename);
 
@@ -30,6 +32,7 @@ std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 
 font_path *Font::glyph_data(uint32_t code)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto data = &m_data[0] + sizeof(font_data);
 	for (;;)
 	{
@@ -49,6 +52,7 @@ font_path *Font::glyph_data(uint32_t code)
 
 std::vector<uint32_t> Font::glyph_ranges()
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto ranges = std::vector<uint32_t>{};
 	auto data = &m_data[0] + sizeof(font_data);
 	for (;;)
@@ -65,6 +69,7 @@ std::vector<uint32_t> Font::glyph_ranges()
 
 std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto info = std::vector<font_path*>{};
 	info.reserve(utf8.size());
 	auto data = (uint8_t*)&utf8[0];
@@ -79,10 +84,11 @@ std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 
 glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto ranges = std::vector<uint32_t>{};
-	auto data = &m_data[0];
-	auto h = ((font_data*)data)->m_ascent;
-	auto gap = ((font_data*)data)->m_descent;
+	auto data = (font_data*)&m_data[0];
+	auto h = data->m_ascent;
+	auto gap = data->m_descent;
 	h += gap;
 	gap = h;
 	gap >>= 4;
@@ -100,4 +106,110 @@ glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 	h >>= 24;
 	w++;
 	return glyph_size{w, h};
+}
+
+std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_size &size)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto paths = std::vector<Path>{};
+	auto data = (font_data*)&m_data[0];
+	auto height = data->m_ascent + data->m_descent;
+	auto gap = height >> 4;
+	auto ox = gap;
+	auto oy = 0;
+	Path *p;
+	auto eps = 1 << (FP_SHIFT - 2);
+	for (auto font_path : info)
+	{
+		if (font_path)
+		{
+			auto width = font_path->m_width;
+			auto font_data = ((uint8_t*)font_path) + sizeof(font_path);
+			auto font_data_end = font_data + font_path->m_len;
+			auto pos_x = ox;
+			auto pos_y = oy;
+			while (font_data != font_data_end)
+			{
+				auto font_line = (font_line_element*)font_data;
+				auto pixels = m_pixels;
+				auto element_type = font_line->m_type;
+				auto x = font_line->m_x;
+				auto y = font_line->m_y;
+				switch (element_type)
+				{
+				case 2:
+				{
+					//curve to
+					p->pop_back();
+					auto font_curve = (font_curve_element*)font_data;
+					auto x1 = font_curve->m_x1;
+					auto y1 = font_curve->m_y1;
+					auto x2 = font_curve->m_x2;
+					auto y2 = font_curve->m_y2;
+					x1 = ((x1 + ox) * pixels) >> 7;
+					y1 = ((y1 + oy) * pixels) >> 7;
+					x2 = ((x2 + ox) * pixels) >> 7;
+					y2 = ((y2 + oy) * pixels) >> 7;
+					p->gen_cubic(pos_x, pos_y, x, y, x1, y1, x2, y2, eps);
+					pos_x = x2;
+					pos_y = y2;
+					font_data += sizeof(font_curve_element);
+					break;
+				}
+				case 1:
+				{
+					//line to
+					p->push_back(x, y);
+					pos_x = x;
+					pos_y = y;
+					font_data += sizeof(font_line_element);
+					break;
+				}
+				case 0:
+				{
+					//move to
+					paths.emplace_back(Path());
+					p = &paths.back();
+					p->push_back(x, y);
+					pos_x = x;
+					pos_y = y;
+					font_data += sizeof(font_line_element);
+				}
+				}
+			}
+			ox += width + gap;
+		}
+		else
+		{
+			ox += (height >> 4) + gap;
+		}
+	}
+	size.m_w = (ox * m_pixels >> 24) + 1;
+	size.m_h = height * m_pixels >> 24;
+	return paths;
+}
+
+std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	//look up string in sym map
+	auto itr = m_sym_map.find(utf8);
+	if (itr != end(m_sym_map)) return itr->second;
+
+	//create sym canvas
+	// auto info = glyph_info(utf8);
+	glyph_size size;
+	size.m_w = 16;
+	size.m_h = 32;
+	// auto paths = glyph_paths(info, size);
+	auto sym_canvas = std::make_shared<Canvas>(size.m_w, size.m_h, 2);
+	sym_canvas->set_col(argb_white);
+	sym_canvas->set_canvas_flags(canvas_flag_antialias);
+	sym_canvas->fbox(0, 0, 16, 32);
+	// sym_canvas->fpoly(paths, 0, size.m_h << (FP_SHIFT + 1), winding_odd_even);
+
+	//take texture from canvas
+	sym_canvas->swap();
+	m_sym_map[utf8] = sym_canvas->m_texture;
+	return sym_canvas->m_texture;
 }
