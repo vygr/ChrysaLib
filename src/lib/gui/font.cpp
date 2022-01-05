@@ -212,7 +212,7 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	auto paths = glyph_paths(info, size);
 	auto sym_canvas = std::make_shared<Canvas>(size.m_w, size.m_h, 2);
 	sym_canvas->set_col(argb_white);
-//	sym_canvas->set_canvas_flags(canvas_flag_antialias);
+	sym_canvas->set_canvas_flags(canvas_flag_antialias);
 	auto metrics = get_metrics();
 	sym_canvas->fpoly(paths, 0, metrics.m_height << (FP_SHIFT + 1), winding_odd_even);
 
