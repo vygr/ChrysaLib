@@ -3,6 +3,7 @@
 #include <array>
 #include <fstream>
 #include <algorithm>
+#include <iterator>
 
 //////////////
 // files utils
