@@ -51,10 +51,14 @@ void Test_Task::run()
 
 	//draw a polygon on the canvas !!!
 	auto path = Path();
-	path.push_back(10 << FP_SHIFT, 10 << FP_SHIFT);
-	path.push_back(200 << FP_SHIFT, 100 << FP_SHIFT);
-	path.push_back(100 << FP_SHIFT, 200 << FP_SHIFT);
-	path.push_back(25 << FP_SHIFT, 80 << FP_SHIFT);
+	path.gen_quadratic(
+		10 << FP_SHIFT, 10 << FP_SHIFT,
+		250 << FP_SHIFT, 10 << FP_SHIFT,
+		250 << FP_SHIFT, 250 << FP_SHIFT, 1 << FP_SHIFT);
+	path.gen_quadratic(
+		250 << FP_SHIFT, 250 << FP_SHIFT,
+		10 << FP_SHIFT, 250 << FP_SHIFT,
+		10 << FP_SHIFT, 10 << FP_SHIFT, 1 << FP_SHIFT);
 	auto polygon = std::vector<Path>{path};
 	main_widget->set_canvas_flags(canvas_flag_antialias);
 	main_widget->set_col(argb_red);
