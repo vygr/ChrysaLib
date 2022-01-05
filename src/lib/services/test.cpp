@@ -51,12 +51,14 @@ void Test_Task::run()
 
 	//draw a polygon on the canvas !!!
 	auto path = Path();
-	path.gen_quadratic(
+	path.gen_cubic(
 		10 << FP_SHIFT, 10 << FP_SHIFT,
 		250 << FP_SHIFT, 10 << FP_SHIFT,
+		10 << FP_SHIFT, 250 << FP_SHIFT,
 		250 << FP_SHIFT, 250 << FP_SHIFT, 1 << FP_SHIFT);
-	path.gen_quadratic(
+	path.gen_cubic(
 		250 << FP_SHIFT, 250 << FP_SHIFT,
+		250 << FP_SHIFT, 10 << FP_SHIFT,
 		10 << FP_SHIFT, 250 << FP_SHIFT,
 		10 << FP_SHIFT, 10 << FP_SHIFT, 1 << FP_SHIFT);
 	auto polygon = std::vector<Path>{path};
@@ -64,7 +66,7 @@ void Test_Task::run()
 	main_widget->set_col(argb_red);
 	main_widget->fbox(5, 5, 240, 240);
 	main_widget->set_col(argb_black);
-	main_widget->fpoly(polygon, 0, 0, winding_none_zero);
+	main_widget->fpoly(polygon, 0, 0, winding_odd_even);
 	main_widget->swap();
 
 	//add to my GUI screen
