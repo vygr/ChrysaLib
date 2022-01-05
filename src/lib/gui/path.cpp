@@ -1,4 +1,5 @@
 #include "path.h"
+#include <cstdlib>
 
 Path *Path::push_back(fixed32_t x, fixed32_t y)
 {
