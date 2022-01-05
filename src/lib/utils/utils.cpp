@@ -22,6 +22,20 @@ void file_copy(const std::string &src, const std::string &dst)
 	out.close();
 }
 
+std::vector<uint8_t> gulp(const std::string &filename)
+{
+	std::ifstream file(filename, std::ios::binary);
+	file.unsetf(std::ios::skipws);
+	std::streampos file_size;
+	file.seekg(0, std::ios::end);
+	file_size = file.tellg();
+	file.seekg(0, std::ios::beg);
+	std::vector<uint8_t> vec;
+	vec.reserve(file_size);
+	vec.insert(vec.begin(), std::istream_iterator<uint8_t>(file), std::istream_iterator<uint8_t>());
+	return vec;
+}
+
 ///////////////
 // string utils
 ///////////////
