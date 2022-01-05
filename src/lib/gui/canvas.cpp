@@ -429,8 +429,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 			//step the edges and remove any dead ones
 			for (auto node = (Edge*)&tracker_list; auto last = node;)
 			{
-				node = node->m_next;
-				if (!node) break;
+				if (!(node = node->m_next)) break;
 				if (node->m_ye != ys)
 				{
 					node->m_x += node->m_dda;

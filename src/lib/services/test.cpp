@@ -63,7 +63,7 @@ void Test_Task::run()
 		10 << FP_SHIFT, 10 << FP_SHIFT, 1 << FP_SHIFT);
 	auto polygon = std::vector<Path>{path};
 	main_widget->set_canvas_flags(canvas_flag_antialias);
-	main_widget->set_col(argb_red);
+	main_widget->set_col(argb_green);
 	main_widget->fbox(5, 5, 240, 240);
 	main_widget->set_col(argb_black);
 	main_widget->fpoly(polygon, 0, 0, winding_odd_even);
