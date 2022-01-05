@@ -30,6 +30,15 @@ std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 	return font;
 }
 
+font_metrics Font::get_metrics()
+{
+	auto data = (font_data*)&m_data[0];
+	auto ascent = data->m_ascent * m_pixels;
+	auto descent = data->m_descent * m_pixels;
+	auto height = ascent + descent;
+	return font_metrics{ascent >> 24, descent >> 24, height >> 24};
+}
+
 font_path *Font::glyph_data(uint32_t code)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -105,7 +114,7 @@ glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 	w >>= 24;
 	h >>= 24;
 	w++;
-	return glyph_size{w, h};
+	return glyph_size{(uint32_t)w, (uint32_t)h};
 }
 
 std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_size &size)
@@ -174,6 +183,7 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 					pos_x = x;
 					pos_y = y;
 					font_data += sizeof(font_line_element);
+					break;
 				}
 				}
 			}
@@ -197,16 +207,14 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	if (itr != end(m_sym_map)) return itr->second;
 
 	//create sym canvas
-	// auto info = glyph_info(utf8);
+	auto info = glyph_info(utf8);
 	glyph_size size;
-	size.m_w = 16;
-	size.m_h = 32;
-	// auto paths = glyph_paths(info, size);
+	auto paths = glyph_paths(info, size);
 	auto sym_canvas = std::make_shared<Canvas>(size.m_w, size.m_h, 2);
 	sym_canvas->set_col(argb_white);
-	sym_canvas->set_canvas_flags(canvas_flag_antialias);
-	sym_canvas->fbox(0, 0, 16, 32);
-	// sym_canvas->fpoly(paths, 0, size.m_h << (FP_SHIFT + 1), winding_odd_even);
+//	sym_canvas->set_canvas_flags(canvas_flag_antialias);
+	auto metrics = get_metrics();
+	sym_canvas->fpoly(paths, 0, metrics.m_height << (FP_SHIFT + 1), winding_odd_even);
 
 	//take texture from canvas
 	sym_canvas->swap();

@@ -12,8 +12,8 @@
 
 struct font_data
 {
-	uint32_t m_ascent;
-	uint32_t m_descent;
+	fixed32_t m_ascent;
+	fixed32_t m_descent;
 };
 
 struct font_page
@@ -33,13 +33,13 @@ struct font_path_element
 	uint32_t m_type;
 };
 
-struct font_line_element : font_path_element
+struct font_line_element : public font_path_element
 {
 	fixed32_t m_x;
 	fixed32_t m_y;
 };
 
-struct font_curve_element : font_path_element
+struct font_curve_element : public font_line_element
 {
 	fixed32_t m_x1;
 	fixed32_t m_y1;
@@ -53,6 +53,13 @@ struct glyph_size
 	uint32_t m_h = 0;
 };
 
+struct font_metrics
+{
+	uint32_t m_ascent = 0;
+	uint32_t m_descent = 0;
+	uint32_t m_height = 0;
+};
+
 const uint32_t font_max_word_cache = 1024;
 
 class Font
@@ -60,6 +67,7 @@ class Font
 public:
 	Font(const std::string &name, uint32_t pixels);
 	static std::shared_ptr<Font> open(const std::string &name, uint32_t pixels);
+	font_metrics get_metrics();
 	font_path *glyph_data(uint32_t code);
 	std::vector<uint32_t> glyph_ranges();
 	std::vector<font_path*> glyph_info(const std::string &utf8);
