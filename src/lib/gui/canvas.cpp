@@ -246,7 +246,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 		80, 96, 80, 96, 96, 112, 48, 64, 64, 80, 64, 80, 80, 96, 64, 80, 80, 96, 80,
 		96, 96, 112, 64, 80, 80, 96, 80, 96, 96, 112, 80, 96, 96, 112, 96, 112, 112,
 		128};
-	auto scale = (m_flags & canvas_flag_antialias) ? 8 : 1;
+	auto scale = (m_canvas_flags & canvas_flag_antialias) ? 8 : 1;
 	auto bounds = set_edges(polygons, x, y, scale);
 	auto xs = bounds.m_min_x;
 	auto ys = bounds.m_min_y;
@@ -259,7 +259,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 		//setup active edge list, edge starts and coverage
 		if (m_edges_start.empty())
 			m_edges_start.resize(m_pixmap->m_h * 8);
-		if (m_flags & canvas_flag_antialias && m_coverage.empty())
+		if ((m_canvas_flags & canvas_flag_antialias) && m_coverage.empty())
 			m_coverage.resize(m_pixmap->m_w);
 
 		//edges into edge start lists
@@ -289,7 +289,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 			}
 
 			//sort active edges on x ?
-			if (!(m_flags & canvas_flag_antialias) || winding == winding_none_zero)
+			if (!(m_canvas_flags & canvas_flag_antialias) || winding == winding_none_zero)
 			{
 				Edge *sorted_list = nullptr;
 				auto node = tracker_list;
@@ -310,7 +310,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 			}
 
 			//antialiased ?
-			if (m_flags & canvas_flag_antialias)
+			if (m_canvas_flags & canvas_flag_antialias)
 			{
 				//draw edges into coverage mask
 				auto node = (Edge*)&tracker_list;

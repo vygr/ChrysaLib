@@ -64,7 +64,7 @@ public:
 	Canvas *swap();
 	Canvas *set_clip(int32_t x, int32_t y, int32_t x1, int32_t y1);
 	Canvas *set_col(uint32_t col) { m_col = col; return this; };
-	Canvas *set_canvas_flags(uint32_t flags) { m_flags = flags; return this; };
+	Canvas *set_canvas_flags(uint32_t flags) { m_canvas_flags = flags; return this; };
 	Canvas *plot(int32_t x, int32_t y);
 	uint32_t pick(int32_t x, int32_t y);
 	Canvas *fbox(int32_t x, int32_t y, int32_t w, int32_t h);
@@ -78,7 +78,7 @@ public:
 	std::vector<Edge*> m_edges_start;
 	std::vector<uint8_t> m_coverage;
 	uint32_t m_col = 0;
-	uint32_t m_flags = 0;
+	uint32_t m_canvas_flags = 0;
 	int32_t m_scale = 0;
 	int32_t m_cx = 0;
 	int32_t m_cy = 0;
