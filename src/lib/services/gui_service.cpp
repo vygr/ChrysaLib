@@ -496,7 +496,6 @@ int cook_key(uint32_t key_code, uint32_t key, uint32_t mod)
 {
 	if (mod & (ev_key_mod_caps_lock | ev_key_mod_shift))
 	{
-		auto idx = 0;
 		auto keys = "§1234567890-=qwertyuiop[]asdfghjkl;\\`zxcvbnm,./'";
 		auto cooked_keys = "±!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:|~ZXCVBNM<>?\"";
 		auto itr = strchr(keys, key_code);
