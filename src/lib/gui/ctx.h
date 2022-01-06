@@ -2,9 +2,8 @@
 #define CTX_H
 
 #include <stdint.h>
+#include <SDL.h>
 
-class SDL_Renderer;
-class SDL_Texture;
 class View;
 class Region;
 

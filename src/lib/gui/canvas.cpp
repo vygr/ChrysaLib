@@ -296,7 +296,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 				while (node)
 				{
 					auto next = node->m_next;
-					auto last = (Edge*)&sorted_list;
+					last = (Edge*)&sorted_list;
 					while (auto insert_node = last->m_next)
 					{
 						if (node->m_x <= insert_node->m_x) break;
@@ -364,8 +364,8 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 			flush_mask:
 				if (min_x > max_x) goto next_subline;
 				max_x++;
-				auto x = min_x;
-				auto y = ys >> 3;
+				x = min_x;
+				y = ys >> 3;
 				auto m = 0;
 				do
 				{

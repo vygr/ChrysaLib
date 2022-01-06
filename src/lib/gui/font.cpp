@@ -15,10 +15,8 @@ uint32_t read_utf8(uint8_t **data)
 Font::Font(const std::string &name, uint32_t pixels)
 	: m_name(name)
 	, m_pixels(pixels)
-{
-	//gulp font file into data vector
-	m_data = gulp(name);
-}
+	, m_data(gulp(name))
+{}
 
 std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 {

@@ -136,8 +136,8 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		if (type == ev_type_mouse)
 		{
 			//so what state are we in ?
-			auto event_body = (View::Event_mouse*)event->begin();
-			auto buttons = event_body->m_buttons;
+			auto button_event_body = (View::Event_mouse*)event->begin();
+			auto buttons = button_event_body->m_buttons;
 			if (m_last_buttons)
 			{
 				//was down previously
@@ -171,7 +171,6 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		}
 		else if (type == ev_type_key)
 		{
-			auto event_body = (View::Event_key*)event->begin();
 			target->key_down(event);
 			target->key_up(event);
 		}
