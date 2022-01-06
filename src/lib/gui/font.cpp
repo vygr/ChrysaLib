@@ -121,11 +121,12 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto paths = std::vector<Path>{};
 	auto data = (font_data*)&m_data[0];
-	fixed64_t height = data->m_ascent + data->m_descent;
-	fixed64_t gap = height >> 4;
+	const fixed64_t height = data->m_ascent + data->m_descent;
+	const fixed64_t gap = height >> 4;
+	const fixed32_t eps = 1 << (FP_SHIFT - 2);
+	const auto pixels = m_pixels;
 	fixed64_t ox = gap;
 	fixed64_t oy = 0;
-	const fixed64_t eps = 1 << (FP_SHIFT - 2);
 	Path *p;
 	for (auto font_path : info)
 	{
@@ -139,7 +140,6 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 			while (font_data != font_data_end)
 			{
 				auto font_line = (font_line_element*)font_data;
-				auto pixels = m_pixels;
 				auto element_type = font_line->m_type;
 				fixed64_t x = font_line->m_x;
 				fixed64_t y = font_line->m_y;
@@ -195,8 +195,8 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 			ox += (height >> 4) + gap;
 		}
 	}
-	size.m_w = (ox * m_pixels >> 24) + 1;
-	size.m_h = height * m_pixels >> 24;
+	size.m_w = (ox * pixels >> 24) + 1;
+	size.m_h = height * pixels >> 24;
 	return paths;
 }
 
@@ -215,7 +215,7 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	sym_canvas->set_col(argb_white);
 	sym_canvas->set_canvas_flags(canvas_flag_antialias);
 	auto metrics = get_metrics();
-	sym_canvas->fpoly(paths, 0, metrics.m_height << (FP_SHIFT + 1), winding_odd_even);
+	sym_canvas->fpoly(paths, 0, metrics.m_ascent << (FP_SHIFT + 1), winding_odd_even);
 
 	//take texture from canvas
 	sym_canvas->swap();
