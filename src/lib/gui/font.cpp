@@ -9,27 +9,14 @@ std::recursive_mutex Font::m_mutex;
 std::map<std::pair<std::string, uint32_t>, std::shared_ptr<Font>> Font::m_cache_font;
 std::map<std::string, std::vector<uint8_t>> Font::m_cache_data;
 
-Font::Font(std::vector<uint8_t> &data, uint32_t pixels)
+Font::Font(uint8_t *data, uint32_t pixels)
 	: m_data(data)
 	, m_pixels(pixels)
 {}
 
-std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
-{
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto key = std::make_pair<>(name, pixels);
-	auto itr_font = m_cache_font.find(key);
-	if (itr_font != end(m_cache_font)) return itr_font->second;
-	auto itr_data = m_cache_data.find(name);
-	if (itr_data == end(m_cache_data)) m_cache_data[name] = gulp(name);
-	auto font = std::make_shared<Font>(m_cache_data[name], pixels);
-	m_cache_font[key] = font;
-	return font;
-}
-
 font_metrics Font::get_metrics()
 {
-	auto data = (font_data*)&m_data[0];
+	auto data = (font_data*)m_data;
 	fixed64_t ascent = data->m_ascent * m_pixels;
 	fixed64_t descent = data->m_descent * m_pixels;
 	fixed64_t height = ascent + descent;
@@ -38,8 +25,7 @@ font_metrics Font::get_metrics()
 
 font_path *Font::glyph_data(uint32_t code)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto data = &m_data[0] + sizeof(font_data);
+	auto data = m_data + sizeof(font_data);
 	for (;;)
 	{
 		auto end = ((font_page*)data)->m_end;
@@ -48,7 +34,7 @@ font_path *Font::glyph_data(uint32_t code)
 		data += sizeof(font_page);
 		if (code >= start && code <= end)
 		{
-			data = &m_data[0] + ((uint32_t*)data)[code - start];
+			data = m_data + ((uint32_t*)data)[code - start];
 			return (font_path*)data;
 		}
 		data += (end - start + 1) * sizeof(int32_t);
@@ -58,9 +44,8 @@ font_path *Font::glyph_data(uint32_t code)
 
 std::vector<uint32_t> Font::glyph_ranges()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto ranges = std::vector<uint32_t>{};
-	auto data = &m_data[0] + sizeof(font_data);
+	auto data = m_data + sizeof(font_data);
 	for (;;)
 	{
 		auto end = ((font_page*)data)->m_end;
@@ -75,7 +60,6 @@ std::vector<uint32_t> Font::glyph_ranges()
 
 std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto info = std::vector<font_path*>{};
 	info.reserve(utf8.size());
 	auto data = (uint8_t*)&utf8[0];
@@ -90,8 +74,7 @@ std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 
 glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto data = (font_data*)&m_data[0];
+	auto data = (font_data*)m_data;
 	fixed64_t h = data->m_ascent;
 	fixed64_t gap = data->m_descent;
 	h += gap;
@@ -115,9 +98,8 @@ glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 
 std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_size &size)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto paths = std::vector<Path>{};
-	auto data = (font_data*)&m_data[0];
+	auto data = (font_data*)m_data;
 	const fixed64_t height = data->m_ascent + data->m_descent;
 	const fixed64_t gap = height >> 4;
 	const fixed32_t eps = 1 << (FP_SHIFT - 2);
@@ -195,6 +177,19 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 	size.m_w = (ox * pixels >> 24) + 1;
 	size.m_h = height * pixels >> 24;
 	return paths;
+}
+
+std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	auto key = std::make_pair<>(name, pixels);
+	auto itr_font = m_cache_font.find(key);
+	if (itr_font != end(m_cache_font)) return itr_font->second;
+	auto itr_data = m_cache_data.find(name);
+	if (itr_data == end(m_cache_data)) m_cache_data[name] = gulp(name);
+	auto font = std::make_shared<Font>(&m_cache_data[name][0], pixels);
+	m_cache_font[key] = font;
+	return font;
 }
 
 std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
