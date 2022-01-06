@@ -14,10 +14,10 @@ class Router;
 //the Dev_ID of the peer who sent it.
 struct Link_Buf
 {
-	uint32_t m_hash;
+	uint32_t m_hash = 0;
 	Dev_ID m_dev_id;
 	Msg_Header m_msg_header;
-	uint8_t m_msg_body[MAX_PACKET_SIZE];
+	uint8_t m_msg_body[MAX_PACKET_SIZE] = {0};
 };
 
 class Link
