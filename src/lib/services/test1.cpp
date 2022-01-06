@@ -1,4 +1,4 @@
-#include "test.h"
+#include "test1.h"
 #include "../gui/colors.h"
 #include "../gui/backdrop.h"
 #include "../gui/window.h"
@@ -17,7 +17,7 @@ uint32_t from_utf8(uint8_t **data);
 // test task
 ////////////
 
-void Test_Task::run()
+void Test_1::run()
 {
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);

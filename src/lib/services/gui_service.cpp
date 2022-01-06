@@ -1,6 +1,7 @@
 #include "gui_service.h"
 #include "kernel_service.h"
-#include "test.h"
+#include "test1.h"
+#include "test2.h"
 #include "../gui/region.h"
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
@@ -42,9 +43,9 @@ void GUI_Service::run()
 	});
 
 	//start up test tasks
-	auto task1 = std::make_unique<Test_Task>();
+	auto task1 = std::make_unique<Test_1>();
 	auto task1_id = Kernel_Service::start_task(task1.get());
-	auto task2 = std::make_unique<Test_Task>();
+	auto task2 = std::make_unique<Test_2>();
 	auto task2_id = Kernel_Service::start_task(task2.get());
 
 	//event loop
