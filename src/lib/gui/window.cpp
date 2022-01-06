@@ -172,11 +172,8 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		else if (type == ev_type_key)
 		{
 			auto event_body = (View::Event_key*)event->begin();
-			if (event_body->m_keycode >= 0)
-			{
-				target->key_down(event);
-				target->key_up(event);
-			}
+			target->key_down(event);
+			target->key_up(event);
 		}
 		else if (type == ev_type_wheel)
 		{
