@@ -21,7 +21,7 @@ OS := $(shell uname)
 CPPFLAGS := -std=c++14 -D ASIO_STANDALONE
 CXXFLAGS += -MMD
 
-all:	CXXFLAGS += -O3
+all:	CXXFLAGS += -O2
 all:	hub_node files_node gui_node
 debug:	CXXFLAGS += -DDEBUG -g -O0
 debug:	hub_node files_node gui_node
