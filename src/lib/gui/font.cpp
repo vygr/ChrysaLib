@@ -33,10 +33,10 @@ std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 font_metrics Font::get_metrics()
 {
 	auto data = (font_data*)&m_data[0];
-	auto ascent = data->m_ascent * m_pixels;
-	auto descent = data->m_descent * m_pixels;
-	auto height = ascent + descent;
-	return font_metrics{ascent >> 24, descent >> 24, height >> 24};
+	fixed64_t ascent = data->m_ascent * m_pixels;
+	fixed64_t descent = data->m_descent * m_pixels;
+	fixed64_t height = ascent + descent;
+	return font_metrics{(uint32_t)(ascent >> 24), (uint32_t)(descent >> 24), (uint32_t)(height >> 24)};
 }
 
 font_path *Font::glyph_data(uint32_t code)
@@ -94,17 +94,16 @@ std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto ranges = std::vector<uint32_t>{};
 	auto data = (font_data*)&m_data[0];
-	auto h = data->m_ascent;
-	auto gap = data->m_descent;
+	fixed64_t h = data->m_ascent;
+	fixed64_t gap = data->m_descent;
 	h += gap;
 	gap = h;
 	gap >>= 4;
-	auto w = gap;
+	fixed64_t w = gap;
 	for (auto font_path : info)
 	{
-		int32_t gw;
+		fixed64_t gw;
 		if (font_path) gw = font_path->m_width;
 		else gw = h >> 4;
 		w += gw + gap;
@@ -122,17 +121,17 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	auto paths = std::vector<Path>{};
 	auto data = (font_data*)&m_data[0];
-	auto height = data->m_ascent + data->m_descent;
-	auto gap = height >> 4;
-	auto ox = gap;
-	auto oy = 0;
+	fixed64_t height = data->m_ascent + data->m_descent;
+	fixed64_t gap = height >> 4;
+	fixed64_t ox = gap;
+	fixed64_t oy = 0;
+	const fixed64_t eps = 1 << (FP_SHIFT - 2);
 	Path *p;
-	auto eps = 1 << (FP_SHIFT - 2);
 	for (auto font_path : info)
 	{
 		if (font_path)
 		{
-			auto width = font_path->m_width;
+			fixed64_t width = font_path->m_width;
 			auto font_data = ((uint8_t*)font_path) + sizeof(font_path);
 			auto font_data_end = font_data + font_path->m_len;
 			auto pos_x = ox;
@@ -142,8 +141,10 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 				auto font_line = (font_line_element*)font_data;
 				auto pixels = m_pixels;
 				auto element_type = font_line->m_type;
-				auto x = font_line->m_x;
-				auto y = font_line->m_y;
+				fixed64_t x = font_line->m_x;
+				fixed64_t y = font_line->m_y;
+				x = ((x + ox) * pixels) >> 7;
+				y = ((y + oy) * pixels) >> 7;
 				switch (element_type)
 				{
 				case 2:
@@ -151,10 +152,10 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 					//curve to
 					p->pop_back();
 					auto font_curve = (font_curve_element*)font_data;
-					auto x1 = font_curve->m_x1;
-					auto y1 = font_curve->m_y1;
-					auto x2 = font_curve->m_x2;
-					auto y2 = font_curve->m_y2;
+					fixed64_t x1 = font_curve->m_x1;
+					fixed64_t y1 = font_curve->m_y1;
+					fixed64_t x2 = font_curve->m_x2;
+					fixed64_t y2 = font_curve->m_y2;
 					x1 = ((x1 + ox) * pixels) >> 7;
 					y1 = ((y1 + oy) * pixels) >> 7;
 					x2 = ((x2 + ox) * pixels) >> 7;
