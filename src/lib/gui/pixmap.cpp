@@ -134,7 +134,7 @@ Pixmap *Pixmap::resize(const Pixmap *spix)
 	else if ((m_w * 3 == spix->m_w) && (m_h * 3 == spix->m_h))
 	{
 		//scale down by 3
-		const auto q = ((1L << 32) / 9);
+		const auto q = ((1UL << 32) / 9);
 		while (dst != dst_end)
 		{
 			auto dst_end_line = &dst[dw];
