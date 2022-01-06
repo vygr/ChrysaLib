@@ -110,9 +110,12 @@ void Test_2::run()
 					old_labels.push_back(label1);
 					old_labels.push_back(label2);
 					old_labels.push_back(label3);
-					label1->def_prop("text", std::make_shared<Property>(fields[0]));
-					label2->def_prop("text", std::make_shared<Property>(fields[1]));
-					label3->def_prop("text", std::make_shared<Property>(fields[2]));
+					label1->def_prop("text", std::make_shared<Property>(fields[0]))
+						->def_prop("border", std::make_shared<Property>(1));
+					label2->def_prop("text", std::make_shared<Property>(fields[1]))
+						->def_prop("border", std::make_shared<Property>(1));
+					label3->def_prop("text", std::make_shared<Property>(fields[2]))
+						->def_prop("border", std::make_shared<Property>(1));
 					flow1->add_child(label1);
 					flow2->add_child(label2);
 					flow3->add_child(label3);
