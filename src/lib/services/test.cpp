@@ -66,7 +66,7 @@ void Test_Task::run()
 	main_widget->set_col(argb_green);
 	main_widget->fbox(5, 5, 240, 240);
 	main_widget->set_col(argb_black);
-	main_widget->fpoly(polygon, 0, 0, winding_odd_even);
+	main_widget->fpoly(polygon, 0 << FP_SHIFT, 0 << FP_SHIFT, winding_odd_even);
 	main_widget->swap();
 
 	//add to my GUI screen

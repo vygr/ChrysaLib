@@ -198,7 +198,7 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 			if (y1 == y2) continue;
 			if (y1 <= y2)
 			{
-				if (y2 <= cy) continue;
+				if (y2 <= cy || y1 >= cy1) continue;
 				auto dda = (x2 - x1) / (y2 - y1);
 				if (y1 < cy)
 				{
@@ -211,7 +211,7 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 			}
 			else
 			{
-				if (y2 >= cy1) continue;
+				if (y1 <= cy || y2 >= cy1) continue;
 				auto dda = (x1 - x2) / (y1 - y2);
 				if (y2 < cy)
 				{
