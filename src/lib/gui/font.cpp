@@ -6,21 +6,24 @@ std::vector<uint8_t> gulp(const std::string &filename);
 uint32_t from_utf8(uint8_t **data);
 
 std::recursive_mutex Font::m_mutex;
-std::map<std::string, std::shared_ptr<Font>> Font::m_cache;
+std::map<std::pair<std::string, uint32_t>, std::shared_ptr<Font>> Font::m_cache_font;
+std::map<std::string, std::vector<uint8_t>> Font::m_cache_data;
 
-Font::Font(const std::string &name, uint32_t pixels)
-	: m_name(name)
+Font::Font(std::vector<uint8_t> &data, uint32_t pixels)
+	: m_data(data)
 	, m_pixels(pixels)
-	, m_data(gulp(name))
 {}
 
 std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto itr = m_cache.find(name);
-	if (itr != end(m_cache)) return itr->second;
-	auto font = std::make_shared<Font>(name, pixels);
-	m_cache[name] = font;
+	auto key = std::make_pair<>(name, pixels);
+	auto itr_font = m_cache_font.find(key);
+	if (itr_font != end(m_cache_font)) return itr_font->second;
+	auto itr_data = m_cache_data.find(name);
+	if (itr_data == end(m_cache_data)) m_cache_data[name] = gulp(name);
+	auto font = std::make_shared<Font>(m_cache_data[name], pixels);
+	m_cache_font[key] = font;
 	return font;
 }
 
