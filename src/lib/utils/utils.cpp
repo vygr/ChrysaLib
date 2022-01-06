@@ -106,6 +106,101 @@ std::vector<std::string> trim_strings(std::vector<std::string> &strings)
 	return strings;
 }
 
+std::string to_utf8(uint32_t c)
+{
+	std::string utf8;
+	if (c >= 0x10000)
+	{
+		c = 0x808080f0 + (c >> 18)
+			+ ((c >> 4) & 0x3f00)
+			+ ((c << 10) & 0x3f0000)
+			+ ((c << 24) & 0x3f000000);
+		utf8.push_back((c >> 0) & 0xff);
+		utf8.push_back((c >> 8) & 0xff);
+		utf8.push_back((c >> 16) & 0xff);
+		utf8.push_back((c >> 24) & 0xff);
+		return utf8;
+	}
+	else if (c >= 0x800)
+	{
+		c = 0x8080e0 + (c >> 12)
+			+ ((c << 2) & 0x3f00)
+			+ ((c << 16) & 0x3f0000);
+		utf8.push_back((c >> 0) & 0xff);
+		utf8.push_back((c >> 8) & 0xff);
+		utf8.push_back((c >> 16) & 0xff);
+		return utf8;
+	}
+	else if (c >= 0x80)
+	{
+		c = 0x80c0 + (c >> 6)
+			+ ((c << 8) & 0x3f00);
+		utf8.push_back((c >> 0) & 0xff);
+		utf8.push_back((c >> 8) & 0xff);
+		return utf8;
+	}
+	utf8.push_back(c);
+	return utf8;
+}
+
+// (defun num-to-utf8 (_)
+// 	; (num-to-utf8 num) -> str
+// 	(cond
+// 		((>= _ 0x10000)
+// 			(char (+ 0x808080f0 (>> _ 18) (logand (>> _ 4) 0x3f00)
+// 				(logand (<< _ 10) 0x3f0000) (logand (<< _ 24) 0x3f000000)) 4))
+// 		((>= _ 0x800)
+// 			(char (+ 0x8080e0 (>> _ 12) (logand (<< _ 2) 0x3f00)
+// 				(logand (<< _ 16) 0x3f0000)) 3))
+// 		((>= _ 0x80)
+// 			(char (+ 0x80c0 (>> _ 6) (logand (<< _ 8) 0x3f00)) 2))
+// 		(t  (char _))))
+
+uint32_t from_utf8(uint8_t **data)
+{
+	auto next_utf8 = [=] (uint8_t **data, int cnt, int c) -> int
+	{
+		c &= (0b00111111 >> cnt);
+		for (auto i = 0; i != cnt; ++i)
+		{
+			auto m = *(*data)++;
+			c <<= 6;
+			m &= 0b00111111;
+			c += m;
+		}
+		return c;
+	};
+	auto c = *(*data)++;
+	auto m = c & 0b10000000;
+	if (m != 0)
+	{
+		//not 1 byte
+		m = c & 0b11100000;
+		if (m != 0b11000000)
+		{
+			//not 2 byte
+			m = c & 0b11110000;
+			if (m != 0b11100000)
+			{
+				//not 3 byte
+				m = c & 0b11111000;
+				if (m != 0b11110000)
+				{
+					//not 4 byte
+					return 0;
+				}
+				//4 byte
+				return next_utf8(data, 3, c);
+			}
+			//3 byte
+			return next_utf8(data, 2, c);
+		}
+		//2 byte
+		return next_utf8(data, 1, c);
+	}
+	return c;
+}
+
 //////////
 // hashing
 //////////

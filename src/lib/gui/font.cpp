@@ -3,14 +3,10 @@
 #include "colors.h"
 
 std::vector<uint8_t> gulp(const std::string &filename);
+uint32_t from_utf8(uint8_t **data);
 
 std::recursive_mutex Font::m_mutex;
 std::map<std::string, std::shared_ptr<Font>> Font::m_cache;
-
-uint32_t read_utf8(uint8_t **data)
-{
-	return *(*data)++;
-}
 
 Font::Font(const std::string &name, uint32_t pixels)
 	: m_name(name)
@@ -82,7 +78,7 @@ std::vector<font_path*> Font::glyph_info(const std::string &utf8)
 	auto data = (uint8_t*)&utf8[0];
 	for (;;)
 	{
-		auto code = read_utf8(&data);
+		auto code = from_utf8(&data);
 		if (!code) break;
 		info.push_back(glyph_data(code));
 	}

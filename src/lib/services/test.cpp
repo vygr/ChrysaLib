@@ -10,6 +10,9 @@
 #include "../gui/canvas.h"
 #include "../gui/path.h"
 
+std::string to_utf8(uint32_t c);
+uint32_t from_utf8(uint8_t **data);
+
 ////////////
 // test task
 ////////////
@@ -33,11 +36,12 @@ void Test_Task::run()
 
 	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
 	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
-	button_grid->def_prop("grid_height", std::make_shared<Property>(1));
+	button_grid->def_prop("grid_height", std::make_shared<Property>(1))
+		->def_prop("font", std::make_shared<Property>(Font::open("fonts/Entypo.ctf", 22)));
 	title->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	close_button->def_prop("text", std::make_shared<Property>("X"));
-	min_button->def_prop("text", std::make_shared<Property>("-"));
-	max_button->def_prop("text", std::make_shared<Property>("+"));
+	close_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea19)));
+	min_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea1a)));
+	max_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea1b)));
 	scroll->def_prop("min_width", std::make_shared<Property>(256))
 		->def_prop("min_height", std::make_shared<Property>(256));
 
