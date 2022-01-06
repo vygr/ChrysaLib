@@ -142,10 +142,7 @@ Canvas *Canvas::span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 			auto pix_begin = &m_pixmap->m_data[y * m_pixmap->m_w];
 			auto pix_end = pix_begin + x1;
 			pix_begin += x;
-			if (alpha == 0xff)
-			{
-				std::fill(pix_begin, pix_end, col);
-			}
+			if (alpha == 0xff) std::fill(pix_begin, pix_end, col);
 			else
 			{
 				alpha = 0xff - alpha;
@@ -200,11 +197,7 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 			{
 				if (y2 <= cy || y1 >= cy1) continue;
 				auto dda = (x2 - x1) / (y2 - y1);
-				if (y1 < cy)
-				{
-					x1 += ((cy - y1) * dda);
-					y1 = cy;
-				}
+				if (y1 < cy) x1 += ((cy - y1) * dda), y1 = cy;
 				m_edges.emplace_back(Edge(x1, y1, y2, 1, dda));
 				bounds.m_min_y = std::min(bounds.m_min_y, y1);
 				bounds.m_max_y = std::max(bounds.m_max_y, y2);
@@ -213,11 +206,7 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 			{
 				if (y1 <= cy || y2 >= cy1) continue;
 				auto dda = (x1 - x2) / (y1 - y2);
-				if (y2 < cy)
-				{
-					x2 += ((cy - y2) * dda);
-					y2 = cy;
-				}
+				if (y2 < cy) x2 += ((cy - y2) * dda), y2 = cy;
 				m_edges.emplace_back(Edge(x2, y2, y1, -1, dda));
 				bounds.m_min_y = std::min(bounds.m_min_y, y2);
 				bounds.m_max_y = std::max(bounds.m_max_y, y1);
