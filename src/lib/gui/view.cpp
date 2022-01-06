@@ -27,8 +27,12 @@ View *View::add_front(std::shared_ptr<View> child)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (child->m_parent) child->sub();
+	auto itr = std::find_if_not(begin(m_children), end(m_children), [&] (const auto &view)
+	{
+		return view->m_flags & view_flag_at_front;
+	});
 	child->m_parent = this;
-	m_children.push_front(child);
+	m_children.insert(itr, child);
 	return this;
 }
 
@@ -36,8 +40,12 @@ View *View::add_back(std::shared_ptr<View> child)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 	if (child->m_parent) child->sub();
+	auto itr = std::find_if(begin(m_children), end(m_children), [&] (const auto &view)
+	{
+		return view->m_flags & view_flag_at_back;
+	});
 	child->m_parent = this;
-	m_children.push_back(child);
+	m_children.insert(itr, child);
 	return this;
 }
 
@@ -96,12 +104,12 @@ View *View::to_back()
 			return view.get() == this;
 		});
 		//find back
-		auto itr = std::find_if(begin(child_list), end(child_list), [&] (const auto &view)
+		auto itr = std::find_if(my_itr, end(child_list), [&] (const auto &view)
 		{
 			return view->m_flags & view_flag_at_back;
 		});
 		//move me to here ?
-		if (my_itr != itr)
+		if (my_itr != itr && (std::next(my_itr)) != itr)
 		{
 			auto view = *my_itr;
 			auto hide_view = std::make_shared<View>();
@@ -130,7 +138,7 @@ View *View::to_front()
 			return view.get() == this;
 		});
 		//find front
-		auto itr = std::find_if_not(begin(child_list), end(child_list), [&] (const auto &view)
+		auto itr = std::find_if_not(begin(child_list), my_itr, [&] (const auto &view)
 		{
 			return view->m_flags & view_flag_at_front;
 		});
