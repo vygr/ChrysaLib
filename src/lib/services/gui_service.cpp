@@ -442,7 +442,7 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 {
 	m_mouse_x = e.x;
 	m_mouse_y = e.y;
-	m_mouse_buttons ^= e.button;
+	m_mouse_buttons &= ~e.button;
 	if (auto view = m_screen->find_id(m_mouse_id))
 	{
 		auto owner = view->find_owner();
