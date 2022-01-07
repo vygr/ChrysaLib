@@ -2,13 +2,7 @@
 
 Title::Title()
 	: Label()
-{
-	def_props({
-		{"flow_flags", flow_flag_align_hleft | flow_flag_align_vcenter},
-		{"border", 1},
-		{"font", Font::open("fonts/OpenSans-Regular.ctf", 20)},
-		});
-}
+{}
 
 Title *Title::mouse_down(const std::shared_ptr<Msg> &event)
 {

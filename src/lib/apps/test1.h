@@ -1,7 +1,7 @@
 #ifndef TEST_TASK1_H
 #define TEST_TASK1_H
 
-#include "gui_task.h"
+#include "../services/gui_task.h"
 
 //task
 class Test_1 : public GUI_Task

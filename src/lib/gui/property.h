@@ -19,6 +19,7 @@ public:
 	Property(const std::shared_ptr<Font> &font)
 		: m_font(font)
 	{}
+	static std::shared_ptr<Property> get_default(const char *prop);
 	int64_t get_long() { return m_long; }
 	const std::string &get_string() { return m_string; }
 	const std::shared_ptr<Font> get_font() { return m_font; }

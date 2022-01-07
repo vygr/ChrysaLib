@@ -9,11 +9,6 @@ Window::Window()
 {
 	def_props({
 		{"is_window", 0},
-		{"color", argb_grey12},
-		{"ink_color", argb_black},
-		{"border", 1},
-		{"shadow", 5},
-		{"font", Font::open("fonts/OpenSans-Regular.ctf", 18)},
 		});
 }
 

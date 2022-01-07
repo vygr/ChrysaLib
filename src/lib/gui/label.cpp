@@ -6,10 +6,7 @@ Label::Label()
 	, m_flow(std::make_shared<Flow>())
 	, m_text(std::make_shared<Text>())
 {
-	add_back(m_flow)->def_props({
-		{"flow_flags", flow_flag_right | flow_flag_align_vcenter},
-		{"border", 0},
-		});
+	add_back(m_flow);
 	m_flow->set_flags(0, -1)->add_child(m_text);
 }
 

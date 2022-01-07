@@ -3,12 +3,7 @@
 
 Button::Button()
 	: Label()
-{
-	def_props({
-		{"flow_flags", flow_flag_align_vcenter | flow_flag_align_hcenter},
-		{"border", 1},
-		});
-}
+{}
 
 Button *Button::layout()
 {

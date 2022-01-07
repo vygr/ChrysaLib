@@ -1,13 +1,14 @@
 #include "gui_service.h"
 #include "kernel_service.h"
-#include "test1.h"
-#include "test2.h"
 #include "../gui/region.h"
 #include "../gui/ctx.h"
 #include "../gui/backdrop.h"
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
+
+#include "../apps/test1.h"
+#include "../apps/test2.h"
 
 //////
 // gui

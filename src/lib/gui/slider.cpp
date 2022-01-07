@@ -4,14 +4,7 @@
 
 Slider::Slider()
 	: View()
-{
-	def_props({
-		{"value", 0},
-		{"maximum", 0},
-		{"minimum", 0},
-		{"portion", 0},
-		});
-}
+{}
 
 view_size Slider::pref_size()
 {
