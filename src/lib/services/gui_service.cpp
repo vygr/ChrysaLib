@@ -22,9 +22,10 @@ void GUI_Service::run()
 	auto entry = global_router->declare(m_net_id, "gui", "GUI_Service v0.1");
 
 	m_screen = std::make_shared<Backdrop>();
-	m_screen->def_prop("color", std::make_shared<Property>(argb_grey2))
-		->def_prop("ink_color", std::make_shared<Property>(argb_grey1))
-		->change(0, 0, 1280, 960)->dirty_all();
+	m_screen->change(0, 0, 1280, 960)->dirty_all()->def_props({
+		{"color", argb_grey2},
+		{"ink_color", argb_grey1},
+		});
 
 	//init SDL
 	Kernel_Service::callback([&]()

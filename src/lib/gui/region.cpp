@@ -42,8 +42,7 @@ Rect Region::bounds()
 Region *Region::clip_rect(const Rect &clip)
 {
 	//clip region to rect
-	assert(clip.m_x1 > clip.m_x);
-	assert(clip.m_y1 > clip.m_y);
+	if (clip.m_x1 <= clip.m_x || clip.m_y1 <= clip.m_y) return this;
 	auto itr = m_region.before_begin();
 	for (;;)
 	{
@@ -74,8 +73,7 @@ Region *Region::clip_rect(const Rect &clip)
 
 Region *Region::copy_rect(Region &dest, const Rect &clip)
 {
-	assert(clip.m_x1 > clip.m_x);
-	assert(clip.m_y1 > clip.m_y);
+	if (clip.m_x1 <= clip.m_x || clip.m_y1 <= clip.m_y) return this;
 	Rect *new_rect;
 	auto itr = m_region.before_begin();
 	for (;;)
@@ -266,8 +264,7 @@ Region *Region::copy_rect(Region &dest, const Rect &clip)
 
 Region *Region::cut_rect(Region &dest, const Rect &r)
 {
-	assert(r.m_x1 > r.m_x);
-	assert(r.m_y1 > r.m_y);
+	if (r.m_x1 <= r.m_x || r.m_y1 <= r.m_y) return this;
 	Rect *new_rect;
 	Rect clip = r;
 	auto itr = m_region.before_begin();
@@ -652,8 +649,7 @@ Region *Region::cut_rect(Region &dest, const Rect &r)
 
 Region *Region::remove_rect(const Rect &clip)
 {
-	assert(clip.m_x1 > clip.m_x);
-	assert(clip.m_y1 > clip.m_y);
+	if (clip.m_x1 <= clip.m_x || clip.m_y1 <= clip.m_y) return this;
 	Rect *new_rect;
 	auto itr = m_region.before_begin();
 	for (;;)
@@ -931,8 +927,7 @@ Region *Region::remove_rect(const Rect &clip)
 
 Region *Region::paste_rect(const Rect &r)
 {
-	assert(r.m_x1 > r.m_x);
-	assert(r.m_y1 > r.m_y);
+	if (r.m_x1 <= r.m_x || r.m_y1 <= r.m_y) return this;
 	Rect *new_rect;
 	Rect clip = r;
 	auto itr = m_region.before_begin();

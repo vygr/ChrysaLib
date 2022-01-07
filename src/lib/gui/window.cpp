@@ -7,12 +7,14 @@
 Window::Window()
 	: View()
 {
-	def_prop("is_window", std::make_shared<Property>(0))
-	->def_prop("color", std::make_shared<Property>(argb_grey12))
-	->def_prop("ink_color", std::make_shared<Property>(argb_black))
-	->def_prop("border", std::make_shared<Property>(1))
-	->def_prop("shadow", std::make_shared<Property>(5))
-	->def_prop("font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 18)));
+	def_props({
+		{"is_window", 0},
+		{"color", argb_grey12},
+		{"ink_color", argb_black},
+		{"border", 1},
+		{"shadow", 5},
+		{"font", Font::open("fonts/OpenSans-Regular.ctf", 18)},
+		});
 }
 
 Window *Window::add_child(std::shared_ptr<View> child)

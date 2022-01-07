@@ -22,50 +22,114 @@ void Test_2::run()
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 
-	//test UI app
-	auto window = std::make_shared<Window>();
-	auto window_flow = std::make_shared<Flow>();
-	auto title_flow = std::make_shared<Flow>();
-	auto button_grid = std::make_shared<Grid>();
-	auto title = std::make_shared<Title>();
-	auto close_button = std::make_shared<Button>();
-	auto main_widget = std::make_shared<Flow>();
-	auto flow1 = std::make_shared<Flow>();
-	auto flow2 = std::make_shared<Flow>();
-	auto flow3 = std::make_shared<Flow>();
+	auto ui_root = std::vector<std::shared_ptr<View>>{};
 
-	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
-	button_grid->def_prop("grid_height", std::make_shared<Property>(1))
-		->def_prop("font", std::make_shared<Property>(Font::open("fonts/Entypo.ctf", 22)));
-	title->def_prop("text", std::make_shared<Property>("Services"));
-	close_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea19)));
-	main_widget->def_prop("flow_flags", std::make_shared<Property>(flow_right_fill));
+		auto window = std::make_shared<Window>();
+		ui_root.push_back(window);
 
-	flow1->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	flow2->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	flow3->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	auto label1 = std::make_shared<Label>();
-	auto label2 = std::make_shared<Label>();
-	auto label3 = std::make_shared<Label>();
-	label1->def_prop("text", std::make_shared<Property>("Service"))
-		->def_prop("color", std::make_shared<Property>(argb_white))
-		->def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_hcenter));
-	label2->def_prop("text", std::make_shared<Property>("Mailbox"))
-		->def_prop("color", std::make_shared<Property>(argb_white))
-		->def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_hcenter));
-	label3->def_prop("text", std::make_shared<Property>("Info"))
-		->def_prop("color", std::make_shared<Property>(argb_white))
-		->def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_hcenter));
+			auto window_flow = std::make_shared<Flow>();
+			ui_root.push_back(window_flow);
+			ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+			ui_root.back()->def_props({
+				{"flow_flags", flow_down_fill}
+				});
 
-	window->add_child(window_flow);
-	window_flow->add_child(title_flow)->add_child(main_widget);
-	title_flow->add_child(button_grid)->add_child(title);
-	button_grid->add_child(close_button);
-	main_widget->add_child(flow1)->add_child(flow2)->add_child(flow3);
-	flow1->add_child(label1);
-	flow2->add_child(label2);
-	flow3->add_child(label3);
+				auto title_flow = std::make_shared<Flow>();
+				ui_root.push_back(title_flow);
+				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+				ui_root.back()->def_props({
+					{"flow_flags", flow_left_fill}
+					});
+
+					auto button_grid = std::make_shared<Grid>();
+					ui_root.push_back(button_grid);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"grid_height", 1},
+						{"font", Font::open("fonts/Entypo.ctf", 22)},
+						});
+
+						auto close_button = std::make_shared<Button>();
+						ui_root.push_back(close_button);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", to_utf8(0xea19)},
+							});
+						ui_root.pop_back();
+					ui_root.pop_back();
+
+					auto title = std::make_shared<Title>();
+					ui_root.push_back(title);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"text", "Services"},
+						});
+					ui_root.pop_back();
+				ui_root.pop_back();
+
+				auto main_widget = std::make_shared<Flow>();
+				ui_root.push_back(main_widget);
+				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+				ui_root.back()->def_props({
+					{"flow_flags", flow_right_fill},
+					});
+
+					auto flow1 = std::make_shared<Flow>();
+					ui_root.push_back(flow1);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"flow_flags", flow_down_fill},
+						});
+
+						auto label1 = std::make_shared<Label>();
+						ui_root.push_back(label1);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", "Service"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter},
+							});
+						ui_root.pop_back();
+					ui_root.pop_back();
+
+					auto flow2 = std::make_shared<Flow>();
+					ui_root.push_back(flow2);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"flow_flags", flow_down_fill},
+						});
+
+						auto label2 = std::make_shared<Label>();
+						ui_root.push_back(label2);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", "Mailbox"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter},
+							});
+						ui_root.pop_back();
+					ui_root.pop_back();
+
+					auto flow3 = std::make_shared<Flow>();
+					ui_root.push_back(flow3);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"flow_flags", flow_down_fill},
+						});
+
+						auto label3 = std::make_shared<Label>();
+						ui_root.push_back(label3);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", "Info"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter},
+							});
+						ui_root.pop_back();
+					ui_root.pop_back();
+				ui_root.pop_back();
+			ui_root.pop_back();
+		ui_root.pop_back();
 
 	auto s = window->pref_size();
 	window->change(150, 150, s.m_w, s.m_h);
@@ -110,12 +174,18 @@ void Test_2::run()
 					old_labels.push_back(label1);
 					old_labels.push_back(label2);
 					old_labels.push_back(label3);
-					label1->def_prop("text", std::make_shared<Property>(fields[0]))
-						->def_prop("border", std::make_shared<Property>(-1));
-					label2->def_prop("text", std::make_shared<Property>(fields[1]))
-						->def_prop("border", std::make_shared<Property>(-1));
-					label3->def_prop("text", std::make_shared<Property>(fields[2]))
-						->def_prop("border", std::make_shared<Property>(-1));
+					label1->def_props({
+						{"text", fields[0]},
+						{"border", -1}
+						});
+					label2->def_props({
+						{"text", fields[1]},
+						{"border", -1},
+						});
+					label3->def_props({
+						{"text", fields[2]},
+						{"border", -1},
+						});
 					flow1->add_child(label1);
 					flow2->add_child(label2);
 					flow3->add_child(label3);

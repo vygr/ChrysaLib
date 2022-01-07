@@ -5,7 +5,9 @@
 Text::Text()
 	: View()
 {
-	def_prop("color", std::make_shared<Property>(0));
+	def_props({
+		{"color", 0},
+		});
 }
 
 view_size Text::pref_size()

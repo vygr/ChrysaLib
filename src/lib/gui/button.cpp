@@ -4,8 +4,10 @@
 Button::Button()
 	: Label()
 {
-	def_prop("flow_flags", std::make_shared<Property>(flow_flag_align_vcenter | flow_flag_align_hcenter))
-	->def_prop("border", std::make_shared<Property>(1));
+	def_props({
+		{"flow_flags", flow_flag_align_vcenter | flow_flag_align_hcenter},
+		{"border", 1},
+		});
 }
 
 Button *Button::layout()

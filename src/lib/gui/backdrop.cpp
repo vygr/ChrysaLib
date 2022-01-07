@@ -6,10 +6,12 @@
 Backdrop::Backdrop()
 	: View()
 {
-	def_prop("color", std::make_shared<Property>(argb_black))
-	->def_prop("ink_color", std::make_shared<Property>(argb_white))
-	->def_prop("spaceing", std::make_shared<Property>(32))
-	->def_prop("style", std::make_shared<Property>("grid"));
+	def_props({
+		{"color", argb_black},
+		{"ink_color", argb_white},
+		{"spaceing", 32},
+		{"style", "grid"},
+		});
 }
 
 Backdrop *Backdrop::draw(const Ctx &ctx)

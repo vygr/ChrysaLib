@@ -13,6 +13,9 @@ public:
 	Property(const std::string &str)
 		: m_string(str)
 	{}
+	Property(const char *str)
+		: m_string(std::string(str))
+	{}
 	Property(const std::shared_ptr<Font> &font)
 		: m_font(font)
 	{}

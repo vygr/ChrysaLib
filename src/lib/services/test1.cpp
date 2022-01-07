@@ -22,34 +22,86 @@ void Test_1::run()
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 
-	//test UI app
-	auto window = std::make_shared<Window>();
-	auto window_flow = std::make_shared<Flow>();
-	auto title_flow = std::make_shared<Flow>();
-	auto button_grid = std::make_shared<Grid>();
-	auto title = std::make_shared<Title>();
-	auto min_button = std::make_shared<Button>();
-	auto max_button = std::make_shared<Button>();
-	auto close_button = std::make_shared<Button>();
-	auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-	auto main_widget = std::make_shared<Canvas>(256, 256, 1);
+	auto ui_root = std::vector<std::shared_ptr<View>>{};
 
-	window_flow->def_prop("flow_flags", std::make_shared<Property>(flow_down_fill));
-	title_flow->def_prop("flow_flags", std::make_shared<Property>(flow_left_fill));
-	button_grid->def_prop("grid_height", std::make_shared<Property>(1))
-		->def_prop("font", std::make_shared<Property>(Font::open("fonts/Entypo.ctf", 22)));
-	title->def_prop("text", std::make_shared<Property>("Some Test Text"));
-	close_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea19)));
-	min_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea1a)));
-	max_button->def_prop("text", std::make_shared<Property>(to_utf8(0xea1b)));
-	scroll->def_prop("min_width", std::make_shared<Property>(256))
-		->def_prop("min_height", std::make_shared<Property>(256));
+		auto window = std::make_shared<Window>();
+		ui_root.push_back(window);
 
-	window->add_child(window_flow);
-	window_flow->add_child(title_flow)->add_child(scroll);
-	title_flow->add_child(button_grid)->add_child(title);
-	button_grid->add_child(min_button)->add_child(max_button)->add_child(close_button);
-	scroll->add_child(main_widget);
+			auto window_flow = std::make_shared<Flow>();
+			ui_root.push_back(window_flow);
+			ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+			ui_root.back()->def_props({
+				{"flow_flags", flow_down_fill}
+				});
+
+				auto title_flow = std::make_shared<Flow>();
+				ui_root.push_back(title_flow);
+				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+				ui_root.back()->def_props({
+					{"flow_flags", flow_left_fill}
+					});
+
+					auto button_grid = std::make_shared<Grid>();
+					ui_root.push_back(button_grid);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"grid_height", 1},
+						{"font", Font::open("fonts/Entypo.ctf", 22)},
+						});
+
+						auto min_button = std::make_shared<Button>();
+						ui_root.push_back(min_button);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", to_utf8(0xea1a)},
+							});
+						ui_root.pop_back();
+
+						auto max_button = std::make_shared<Button>();
+						ui_root.push_back(max_button);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", to_utf8(0xea1b)},
+							});
+						ui_root.pop_back();
+
+						auto close_button = std::make_shared<Button>();
+						ui_root.push_back(close_button);
+						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+						ui_root.back()->def_props({
+							{"text", to_utf8(0xea19)},
+							});
+						ui_root.pop_back();
+					ui_root.pop_back();
+
+					auto title = std::make_shared<Title>();
+					ui_root.push_back(title);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"text", "Some Test Text"},
+						});
+					ui_root.pop_back();
+				ui_root.pop_back();
+
+				auto scroll = std::make_shared<Scroll>(scroll_flag_both);
+				ui_root.push_back(scroll);
+				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+				ui_root.back()->def_props({
+					{"min_width", 256},
+					{"min_height", 256},
+					});
+
+					auto main_widget = std::make_shared<Canvas>(256, 256, 1);
+					ui_root.push_back(main_widget);
+					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
+					ui_root.back()->def_props({
+						{"flow_flags", flow_right_fill},
+						});
+					ui_root.pop_back();
+				ui_root.pop_back();
+			ui_root.pop_back();
+		ui_root.pop_back();
+
 	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
 

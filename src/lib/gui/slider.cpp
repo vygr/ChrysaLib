@@ -5,10 +5,12 @@
 Slider::Slider()
 	: View()
 {
-	def_prop("value", std::make_shared<Property>(0))
-	->def_prop("maximum", std::make_shared<Property>(0))
-	->def_prop("minimum", std::make_shared<Property>(0))
-	->def_prop("portion", std::make_shared<Property>(0));
+	def_props({
+		{"value", 0},
+		{"maximum", 0},
+		{"minimum", 0},
+		{"portion", 0},
+		});
 }
 
 view_size Slider::pref_size()
@@ -104,7 +106,9 @@ Slider *Slider::mouse_move(const std::shared_ptr<Msg> &event)
 	new_value = std::max((int64_t)0, std::min(max, (new_value + m_old_value)));
 	if (new_value != value)
 	{
-		def_prop("value", std::make_shared<Property>(new_value));
+		def_props({
+			{"value", new_value},
+			});
 		dirty_all()->emit();
 	}
 	if (state != m_state)

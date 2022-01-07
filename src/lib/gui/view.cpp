@@ -12,8 +12,10 @@ uint32_t View::m_gui_flags = 0;
 std::vector<std::shared_ptr<View>> View::m_temps;
 
 View::View()
-	: m_id(--m_next_id)
-{}
+{
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	m_id = --m_next_id;
+}
 
 std::vector<std::shared_ptr<View>> View::children()
 {
@@ -154,26 +156,29 @@ View *View::to_front()
 	return this;
 }
 
-View *View::def_prop(const std::string &prop, std::shared_ptr<Property> value)
+View *View::def_props(const std::map<const char*, Property> &props)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	m_properties[prop] = value;
+	for (auto &prop : props) m_properties[prop.first] = std::make_shared<Property>(prop.second);
 	return this;
 }
 
-View *View::set_prop(const std::string &prop, std::shared_ptr<Property> value)
+View *View::set_props(const std::map<const char*, Property> &props)
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-	auto view = this;
-	while (view != nullptr)
+	for (auto &prop : props)
 	{
-		auto itr = view->m_properties.find(prop);
-		if (itr != end(view->m_properties))
+		auto view = this;
+		while (view != nullptr)
 		{
-			itr->second = value;
-			break;
+			auto itr = view->m_properties.find(prop.first);
+			if (itr != end(view->m_properties))
+			{
+				itr->second = std::make_shared<Property>(prop.second);
+				break;
+			}
+			view = view->m_parent;
 		}
-		view = view->m_parent;
 	}
 	return this;
 }

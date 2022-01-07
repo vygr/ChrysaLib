@@ -3,7 +3,9 @@
 Scroll::Scroll(int32_t flags)
 	: View()
 {
-	def_prop("has_wheel", std::make_shared<Property>(0));
+	def_props({
+		{"has_wheel", 0},
+		});
 	if ((flags & scroll_flag_vertical) != 0)
 	{
 		m_vslider = std::make_shared<Slider>();
@@ -64,18 +66,18 @@ Scroll *Scroll::layout()
 			auto mo = (int64_t)std::max(0, cs.m_h - (m_h - sh));
 			vval = m_vslider->get_long_prop("value");
 			vval = std::max((int64_t)0, std::min(vval, mo));
-			m_vslider->def_prop("value", std::make_shared<Property>(vval));
-			m_vslider->def_prop("maximum", std::make_shared<Property>(mo));
-			m_vslider->def_prop("portion", std::make_shared<Property>(m_h - sh));
+			m_vslider->def_props({{"value", vval}});
+			m_vslider->def_props({{"maximum", mo}});
+			m_vslider->def_props({{"portion", m_h - sh}});
 		}
 		if (m_hslider)
 		{
 			auto mo = (int64_t)std::max(0, cs.m_w - (m_w - sw));
 			hval = m_hslider->get_long_prop("value");
 			hval = std::max((int64_t)0, std::min(hval, mo));
-			m_hslider->def_prop("value", std::make_shared<Property>(hval));
-			m_hslider->def_prop("maximum", std::make_shared<Property>(mo));
-			m_hslider->def_prop("portion", std::make_shared<Property>(m_w - sw));
+			m_hslider->def_props({{"value", hval}});
+			m_hslider->def_props({{"maximum", mo}});
+			m_hslider->def_props({{"portion", m_w - sw}});
 		}
 		m_child->m_x = -hval;
 		m_child->m_y = -vval;
@@ -98,12 +100,12 @@ Scroll *Scroll::mouse_wheel(const std::shared_ptr<Msg> &event)
 	if (m_hslider)
 	{
 		auto value = m_hslider->get_long_prop("value");
-		m_hslider->def_prop("value", std::make_shared<Property>(value + 16 * event_body->m_x));
+		m_hslider->def_props({{"value", value + 16 * event_body->m_x}});
 	}
 	if (m_vslider)
 	{
 		auto value = m_vslider->get_long_prop("value");
-		m_vslider->def_prop("value", std::make_shared<Property>(value - 16 * event_body->m_y));
+		m_vslider->def_props({{"value", value - 16 * event_body->m_y}});
 	}
 	layout()->dirty_all();
 	return this;
