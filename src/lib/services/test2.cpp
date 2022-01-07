@@ -1,14 +1,5 @@
 #include "test2.h"
-#include "../gui/colors.h"
-#include "../gui/backdrop.h"
-#include "../gui/window.h"
-#include "../gui/flow.h"
-#include "../gui/grid.h"
-#include "../gui/title.h"
-#include "../gui/button.h"
-#include "../gui/scroll.h"
-#include "../gui/canvas.h"
-#include "../gui/path.h"
+#include "../gui/ui.h"
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
@@ -22,114 +13,51 @@ void Test_2::run()
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 
-	auto ui_root = std::vector<std::shared_ptr<View>>{};
-
-		auto window = std::make_shared<Window>();
-		ui_root.push_back(window);
-
-			auto window_flow = std::make_shared<Flow>();
-			ui_root.push_back(window_flow);
-			ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-			ui_root.back()->def_props({
-				{"flow_flags", flow_down_fill}
-				});
-
-				auto title_flow = std::make_shared<Flow>();
-				ui_root.push_back(title_flow);
-				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-				ui_root.back()->def_props({
-					{"flow_flags", flow_left_fill}
-					});
-
-					auto button_grid = std::make_shared<Grid>();
-					ui_root.push_back(button_grid);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"grid_height", 1},
-						{"font", Font::open("fonts/Entypo.ctf", 22)},
-						});
-
-						auto close_button = std::make_shared<Button>();
-						ui_root.push_back(close_button);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", to_utf8(0xea19)},
-							});
-						ui_root.pop_back();
-					ui_root.pop_back();
-
-					auto title = std::make_shared<Title>();
-					ui_root.push_back(title);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"text", "Services"},
-						});
-					ui_root.pop_back();
-				ui_root.pop_back();
-
-				auto main_widget = std::make_shared<Flow>();
-				ui_root.push_back(main_widget);
-				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-				ui_root.back()->def_props({
-					{"flow_flags", flow_right_fill},
-					});
-
-					auto flow1 = std::make_shared<Flow>();
-					ui_root.push_back(flow1);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"flow_flags", flow_down_fill},
-						});
-
-						auto label1 = std::make_shared<Label>();
-						ui_root.push_back(label1);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", "Service"},
-							{"color", argb_white},
-							{"flow_flags", flow_flag_align_hcenter},
-							});
-						ui_root.pop_back();
-					ui_root.pop_back();
-
-					auto flow2 = std::make_shared<Flow>();
-					ui_root.push_back(flow2);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"flow_flags", flow_down_fill},
-						});
-
-						auto label2 = std::make_shared<Label>();
-						ui_root.push_back(label2);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", "Mailbox"},
-							{"color", argb_white},
-							{"flow_flags", flow_flag_align_hcenter},
-							});
-						ui_root.pop_back();
-					ui_root.pop_back();
-
-					auto flow3 = std::make_shared<Flow>();
-					ui_root.push_back(flow3);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"flow_flags", flow_down_fill},
-						});
-
-						auto label3 = std::make_shared<Label>();
-						ui_root.push_back(label3);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", "Info"},
-							{"color", argb_white},
-							{"flow_flags", flow_flag_align_hcenter},
-							});
-						ui_root.pop_back();
-					ui_root.pop_back();
-				ui_root.pop_back();
-			ui_root.pop_back();
-		ui_root.pop_back();
+	ui_window(window, ({}))
+		ui_flow(window_flow, ({
+			{"flow_flags", flow_down_fill}}))
+			ui_flow(title_flow, ({
+				{"flow_flags", flow_left_fill}}))
+				ui_flow(button_grid, ({
+					{"grid_height", 1},
+					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
+					ui_button(close_button, ({
+						{"text", to_utf8(0xea19)}}))
+					ui_end
+				ui_end
+				ui_title(title, ({
+					{"text", "Services"}}));
+				ui_end
+			ui_end
+			ui_flow(main_widget, ({
+				{"flow_flags", flow_right_fill}}))
+				ui_flow(flow1, ({
+					{"flow_flags", flow_down_fill}}))
+					ui_label(labe1, ({
+						{"text", "Service"},
+						{"color", argb_white},
+						{"flow_flags", flow_flag_align_hcenter}}))
+					ui_end
+				ui_end
+				ui_flow(flow2, ({
+					{"flow_flags", flow_down_fill}}))
+					ui_label(labe2, ({
+						{"text", "Mailbox"},
+						{"color", argb_white},
+						{"flow_flags", flow_flag_align_hcenter}}))
+					ui_end
+				ui_end
+				ui_flow(flow3, ({
+					{"flow_flags", flow_down_fill}}))
+					ui_label(labe3, ({
+						{"text", "Info"},
+						{"color", argb_white},
+						{"flow_flags", flow_flag_align_hcenter}}))
+					ui_end
+				ui_end
+			ui_end
+		ui_end
+	ui_end
 
 	auto s = window->pref_size();
 	window->change(150, 150, s.m_w, s.m_h);

@@ -1,14 +1,5 @@
 #include "test1.h"
-#include "../gui/colors.h"
-#include "../gui/backdrop.h"
-#include "../gui/window.h"
-#include "../gui/flow.h"
-#include "../gui/grid.h"
-#include "../gui/title.h"
-#include "../gui/button.h"
-#include "../gui/scroll.h"
-#include "../gui/canvas.h"
-#include "../gui/path.h"
+#include "../gui/ui.h"
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
@@ -22,85 +13,36 @@ void Test_1::run()
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 
-	auto ui_root = std::vector<std::shared_ptr<View>>{};
-
-		auto window = std::make_shared<Window>();
-		ui_root.push_back(window);
-
-			auto window_flow = std::make_shared<Flow>();
-			ui_root.push_back(window_flow);
-			ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-			ui_root.back()->def_props({
-				{"flow_flags", flow_down_fill}
-				});
-
-				auto title_flow = std::make_shared<Flow>();
-				ui_root.push_back(title_flow);
-				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-				ui_root.back()->def_props({
-					{"flow_flags", flow_left_fill}
-					});
-
-					auto button_grid = std::make_shared<Grid>();
-					ui_root.push_back(button_grid);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"grid_height", 1},
-						{"font", Font::open("fonts/Entypo.ctf", 22)},
-						});
-
-						auto min_button = std::make_shared<Button>();
-						ui_root.push_back(min_button);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", to_utf8(0xea1a)},
-							});
-						ui_root.pop_back();
-
-						auto max_button = std::make_shared<Button>();
-						ui_root.push_back(max_button);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", to_utf8(0xea1b)},
-							});
-						ui_root.pop_back();
-
-						auto close_button = std::make_shared<Button>();
-						ui_root.push_back(close_button);
-						ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-						ui_root.back()->def_props({
-							{"text", to_utf8(0xea19)},
-							});
-						ui_root.pop_back();
-					ui_root.pop_back();
-
-					auto title = std::make_shared<Title>();
-					ui_root.push_back(title);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"text", "Some Test Text"},
-						});
-					ui_root.pop_back();
-				ui_root.pop_back();
-
-				auto scroll = std::make_shared<Scroll>(scroll_flag_both);
-				ui_root.push_back(scroll);
-				ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-				ui_root.back()->def_props({
-					{"min_width", 256},
-					{"min_height", 256},
-					});
-
-					auto main_widget = std::make_shared<Canvas>(256, 256, 1);
-					ui_root.push_back(main_widget);
-					ui_root[ui_root.size() - 2]->add_child(ui_root.back());
-					ui_root.back()->def_props({
-						{"flow_flags", flow_right_fill},
-						});
-					ui_root.pop_back();
-				ui_root.pop_back();
-			ui_root.pop_back();
-		ui_root.pop_back();
+	ui_window(window, ({}))
+		ui_flow(window_flow, ({
+			{"flow_flags", flow_down_fill}}))
+			ui_flow(title_flow, ({
+				{"flow_flags", flow_left_fill}}))
+				ui_grid(button_grid, ({
+					{"grid_height", 1},
+					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
+					ui_button(min_button, ({
+						{"text", to_utf8(0xea1a)}}))
+					ui_end
+					ui_button(max_button, ({
+						{"text", to_utf8(0xea1b)}}))
+					ui_end
+					ui_button(close_button, ({
+						{"text", to_utf8(0xea19)}}))
+					ui_end
+				ui_end
+				ui_title(title, ({
+					{"text", "Some Test Text"}}))
+				ui_end
+			ui_end
+			ui_scroll(scroll, scroll_flag_both, ({
+				{"min_width", 256},
+				{"min_height", 256}}))
+				ui_canvas(main_widget, 256, 256, 1, ({}))
+				ui_end
+			ui_end
+		ui_end
+	ui_end
 
 	auto s = window->pref_size();
 	window->change(107, 107, s.m_w, s.m_h);
