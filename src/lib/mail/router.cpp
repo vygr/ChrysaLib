@@ -38,30 +38,57 @@ Mbox<std::shared_ptr<Msg>> *Router::validate_no_lock(const Net_ID &id)
 	return itr == end(m_mailboxes) ? nullptr : &itr->second;
 }
 
+Mbox<std::shared_ptr<Msg>> *Router::validate(const Net_ID &id)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	return validate_no_lock(id);
+}
+
 int32_t Router::poll(const std::vector<Net_ID> &ids)
 {
 	//given a list of net id's check to see if any of them contain mail.
 	//return the index of the first one that does, else -1.
-	auto idx = 0;
-	for (auto &id : ids)
-	{
-		auto mbox = validate(id);
-		if (mbox && !mbox->empty()) return idx;
-		idx++;
-	}
-	return -1;
+	std::lock_guard<std::mutex> lock(m_mutex);
+	std::vector<Mbox<std::shared_ptr<Msg>>*> mailboxes;
+	mailboxes.reserve(ids.size());
+	for (auto &id : ids) mailboxes.push_back(validate_no_lock(id));
+	auto itr = std::find_if(begin(mailboxes), end(mailboxes),
+		[&] (auto &mbox) { return !mbox->empty(); });
+	if (itr == end(mailboxes)) return -1;
+	return itr - begin(mailboxes);
 }
 
 int32_t Router::select(const std::vector<Net_ID> &ids)
 {
 	//block until one of the list of mailboxes contains some mail.
 	//returns the index of the first mailbox that has mail.
-	for (;;)
+	std::vector<Mbox<std::shared_ptr<Msg>>*> mailboxes;
+	mailboxes.reserve(ids.size());
 	{
-		auto idx = poll(ids);
-		if (idx != -1) return idx;
-		std::this_thread::sleep_for(std::chrono::milliseconds(SELECT_POLLING_RATE));
+		std::lock_guard<std::mutex> lock(m_mutex);
+		for (auto &id : ids) mailboxes.push_back(validate_no_lock(id));
 	}
+	auto itr = std::find_if(begin(mailboxes), end(mailboxes),
+		[&] (auto &mbox) { return !mbox->empty(); });
+	if (itr != end(mailboxes)) return itr - begin(mailboxes);
+	//no mailbox has mail
+	Sync select;
+	for (auto &mbox : mailboxes)
+	{
+		mbox->lock();
+		mbox->set_select(&select);
+	}
+	for (auto &mbox : mailboxes) mbox->unlock();
+	select.wait();
+	for (auto &mbox : mailboxes)
+	{
+		mbox->lock();
+		mbox->set_select(nullptr);
+	}
+	itr = std::find_if(begin(mailboxes), end(mailboxes),
+		[&] (auto &mbox) { return !mbox->empty(); });
+	for (auto &mbox : mailboxes) mbox->unlock();
+	return itr - begin(mailboxes);
 }
 
 ///////////////////////
@@ -267,6 +294,25 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		//wake the links to get them sending
 		m_cv.notify_all();
 	}
+}
+
+std::shared_ptr<Msg> Router::read(const Net_ID &id)
+{
+	auto mbox = global_router->validate(id);
+	return mbox->read();
+}
+
+Net_ID Router::alloc_src_no_lock()
+{
+	auto src = Net_ID(m_device_id, m_next_parcel_id);
+	m_next_parcel_id.m_id++;
+	return src;
+}
+
+Net_ID Router::alloc_src()
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	return alloc_src_no_lock();
 }
 
 bool Router::update_route(const std::string &body)

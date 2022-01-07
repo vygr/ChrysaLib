@@ -74,9 +74,8 @@ void Kernel_Service::run()
 		{
 			//callback
 			auto event_body = (Event_callback*)body;
-			void *wake = nullptr;
 			event_body->m_callback();
-			event_body->m_wake_mbox->post(wake);
+			event_body->m_sync->wake();
 			break;
 		}
 		default:
@@ -141,15 +140,15 @@ void Kernel_Service::callback(std::function<void()> callback)
 	else
 	{
 		//send callback request
-		Mbox<void*> wake_mbox;
+		Sync sync;
 		auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_callback));
 		auto event_body = (Kernel_Service::Event_callback*)msg->begin();
 		msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
 		event_body->m_evt = Kernel_Service::evt_callback;
-		event_body->m_wake_mbox = &wake_mbox;
+		event_body->m_sync = &sync;
 		event_body->m_callback = callback;
 		global_router->send(msg);
 		//wait for wake
-		wake_mbox.read();
+		sync.wait();
 	}
 }

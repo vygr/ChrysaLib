@@ -10,9 +10,6 @@ uint32_t from_utf8(uint8_t **data);
 
 void Test_1::run()
 {
-	//get my mailbox address, id was allocated in the constructor
-	auto mbox = global_router->validate(m_net_id);
-
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -71,9 +68,12 @@ void Test_1::run()
 	add_front(window);
 
 	//event loop
+	const auto select = std::vector<Net_ID>{m_net_id};
 	while (m_running)
 	{
-		auto msg = mbox->read();
+		auto idx = global_router->select(select);
+		assert(idx == 0);
+		auto msg = global_router->read(select[idx]);
 		auto body = (Event*)msg->begin();
 		switch (body->m_evt)
 		{

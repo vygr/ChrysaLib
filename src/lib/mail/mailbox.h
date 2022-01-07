@@ -42,6 +42,31 @@ struct Mailbox_ID
 	uint32_t m_id = 0;
 };
 
+//thread sync.
+class Sync
+{
+public:
+	Sync() {}
+	void wait()
+	{
+		//suspend caller until notified
+		std::unique_lock<std::mutex> lock(m_mutex);
+		m_state = true;
+		while (m_state) m_cv.wait(lock);
+	}
+	void wake()
+	{
+		//wake any suspended caller
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_state = false;
+		m_cv.notify_one();
+	}
+private:
+	std::mutex m_mutex;
+	std::condition_variable m_cv;
+	bool m_state = false;
+};
+
 //mailbox for thread data exchange.
 //abilty for a thread to post an object into a receiver thread que.
 //the sending thread does not block and the receiver can read or filter the que
@@ -100,14 +125,19 @@ public:
 	{
 		//wake any suspended caller
 		std::lock_guard<std::mutex> lock(m_mutex);
+		if (m_select) m_select->wake();
 		m_mail.emplace_back(std::move(msg));
 		m_cv.notify_one();
 	}
 	auto empty() const { return m_mail.empty(); }
+	void lock() { m_mutex.lock(); }
+	void unlock() { m_mutex.unlock(); }
+	void set_select(Sync *select) { m_select = select; }
 private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 	std::list<T> m_mail;
+	Sync *m_select = nullptr;
 };
 
 #endif

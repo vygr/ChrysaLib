@@ -72,29 +72,14 @@ public:
 	void stop_thread();
 	//message and parcel sending
 	void send(std::shared_ptr<Msg> &msg);
-	auto alloc_src_no_lock()
-	{
-		auto src = Net_ID(m_device_id, m_next_parcel_id);
-		m_next_parcel_id.m_id++;
-		return src;
-	}
-	auto alloc_src()
-	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		return alloc_src_no_lock();
-	}
 	//get router device id
 	auto const &get_dev_id() const { return m_device_id; }
 	//mailbox alloc, free and validation
 	Net_ID alloc();
 	void free(const Net_ID &id);
-	Mbox<std::shared_ptr<Msg>> *validate_no_lock(const Net_ID &id);
-	Mbox<std::shared_ptr<Msg>> *validate(const Net_ID &id)
-	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		return validate_no_lock(id);
-	}
-	//poll and select
+	Mbox<std::shared_ptr<Msg>> *validate(const Net_ID &id);
+	//read, poll and select
+	std::shared_ptr<Msg> read(const Net_ID &id);
 	int32_t poll(const std::vector<Net_ID> &ids);
 	int32_t select(const std::vector<Net_ID> &ids);
 	//directory management
@@ -103,7 +88,6 @@ public:
 	std::vector<std::string> enquire(const std::string &prefix);
 	std::vector<std::string> enquire(const Dev_ID &dev_id, const std::string &prefix);
 	bool update_dir(const std::string &body);
-	void purge_dir();
 	//service broadcast helper
 	void broadcast(const std::vector<std::string> &services, std::shared_ptr<std::string> &body, const Net_ID &id = {{0}, 0});
 	//registered peer links
@@ -113,9 +97,13 @@ public:
 	//routing management
 	std::shared_ptr<Msg> get_next_msg(const Dev_ID &dest, std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
 	bool update_route(const std::string &body);
-	void purge_routes();
 	bool m_running = false;
 private:
+	void purge_routes();
+	void purge_dir();
+	Mbox<std::shared_ptr<Msg>> *validate_no_lock(const Net_ID &id);
+	Net_ID alloc_src_no_lock();
+	Net_ID alloc_src();
 	std::mutex m_mutex;
 	std::thread m_thread;
 	std::condition_variable m_cv;
