@@ -11,6 +11,8 @@
 #include "scroll.h"
 #include "canvas.h"
 #include "path.h"
+#include "slider.h"
+#include "progress.h"
 
 #define ui_end ui_root.pop_back();
 
@@ -80,6 +82,21 @@
 		}); \
 	ui_root.back()->def_props _props_;
 
+#define ui_slider(_name_, _props_) \
+	auto _name_ = std::make_shared<Slider>(); \
+	ui_root.push_back(_name_); \
+	ui_root[ui_root.size() - 2]->add_child(ui_root.back()); \
+	ui_root.back()->def_props({ \
+		{"color", Property::get_default("env_slider_col")->get_long()}, \
+		}); \
+	ui_root.back()->def_props _props_;
+
+#define ui_progress(_name_, _props_) \
+	auto _name_ = std::make_shared<Progress>(); \
+	ui_root.push_back(_name_); \
+	ui_root[ui_root.size() - 2]->add_child(ui_root.back()); \
+	ui_root.back()->def_props _props_;
+
 #define ui_canvas(_name_, _width_, _height_, _scale_, _props_) \
 	auto _name_ = std::make_shared<Canvas>(_width_, _height_, _scale_); \
 	ui_root.push_back(_name_); \
@@ -87,6 +104,33 @@
 	ui_root.back()->def_props({ \
 		{"color", 0}, \
 		}); \
+	ui_root.back()->def_props _props_;
+
+#define ui_backdrop(_name_, _width_, _height_, _scale_, _props_) \
+	auto _name_ = std::make_shared<Backdrop>(_width_, _height_, _scale_); \
+	ui_root.push_back(_name_); \
+	ui_root[ui_root.size() - 2]->add_child(ui_root.back()); \
+	ui_root.back()->def_props({ \
+		{"color", Property::get_default("env_backdrop_col")->get_long()}, \
+		{"ink_color", Property::get_default("env_backdrop_ink_col")->get_long()}, \
+		}); \
+	ui_root.back()->def_props _props_;
+
+#define ui_tool_bar(_name_, _props_) \
+	auto _name_ = std::make_shared<Flow>(); \
+	ui_root.push_back(_name_); \
+	ui_root[ui_root.size() - 2]->add_child(ui_root.back()); \
+	ui_root.back()->def_props({ \
+		{"color", Property::get_default("env_backdrop_col")->get_long()}, \
+		{"flow_flags", flow_flag_right | flow_flag_fillh}, \
+		{"font", Property::get_default("env_toolbar_font")->get_font()}, \
+		}); \
+	ui_root.back()->def_props _props_;
+
+#define ui_view(_name_, _props_) \
+	auto _name_ = std::make_shared<View>(); \
+	ui_root.push_back(_name_); \
+	ui_root[ui_root.size() - 2]->add_child(ui_root.back()); \
 	ui_root.back()->def_props _props_;
 
 #endif
