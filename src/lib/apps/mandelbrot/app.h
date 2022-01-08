@@ -35,7 +35,7 @@ public:
 	{}
 	void run() override;
 private:
-	uint8_t depth(double x0, double y0);
+	uint8_t depth(double x0, double y0) const;
 	std::unique_ptr<ThreadPool> m_thread_pool;
 };
 

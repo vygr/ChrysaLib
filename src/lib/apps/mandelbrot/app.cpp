@@ -7,7 +7,7 @@ uint32_t from_utf8(uint8_t **data);
 
 const uint32_t CANVAS_WIDTH = 640;
 const uint32_t CANVAS_HEIGHT = 640;
-const uint32_t CANVAS_SCALE = 1;
+const uint32_t CANVAS_SCALE = 2;
 
 void Mandelbrot_App::run()
 {
@@ -168,7 +168,7 @@ void Mandelbrot_App::run()
 	free_select(select);
 }
 
-uint8_t Mandelbrot_App::depth(double x0, double y0)
+uint8_t Mandelbrot_App::depth(double x0, double y0) const
 {
 	double xc = 0;
 	double yc = 0;
