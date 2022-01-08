@@ -51,8 +51,8 @@ public:
 	{
 		//suspend caller until notified
 		std::unique_lock<std::mutex> l(m_mutex);
-		m_state = true;
 		while (m_state) m_cv.wait(l);
+		m_state = true;
 	}
 	void wake()
 	{
@@ -64,7 +64,7 @@ public:
 private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
-	bool m_state = false;
+	bool m_state = true;
 };
 
 //mailbox for thread data exchange.
