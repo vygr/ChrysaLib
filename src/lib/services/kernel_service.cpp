@@ -28,6 +28,7 @@ void Kernel_Service::run()
 		{
 			auto time = ((Event_timed_mail*)m_timer.front()->begin())->m_time;
 			delay = std::chrono::duration_cast<std::chrono::milliseconds>(time - now);
+			delay = std::min(delay, std::chrono::milliseconds(1));
 		}
 		auto msg = mbox->read(delay);
 		if (msg)

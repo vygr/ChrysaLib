@@ -102,9 +102,11 @@ void GUI_Service::run()
 		Kernel_Service::callback([&]()
 		{
 			std::lock_guard<std::recursive_mutex> lock(View::m_mutex);
+//std::cout << "+" << std::flush;
 			SDL_Event e;
 			while (SDL_PollEvent(&e))
 			{
+//std::cout << "." << std::flush;
 				if (e.type == SDL_QUIT) quit(e);
 				else if (e.type == SDL_KEYDOWN) key_down((SDL_KeyboardEvent&)e);
 				else if (e.type == SDL_MOUSEWHEEL) mouse_wheel((SDL_MouseWheelEvent&)e);
@@ -113,6 +115,7 @@ void GUI_Service::run()
 				else if (e.type == SDL_MOUSEMOTION) mouse_motion((SDL_MouseMotionEvent&)e);
 				else if (e.type == SDL_WINDOWEVENT) window_event((SDL_WindowEvent&)e);
 			}
+//std::cout << "-" << std::flush;
 
 			if ((View::m_gui_flags & view_flag_screen) != 0)
 			{

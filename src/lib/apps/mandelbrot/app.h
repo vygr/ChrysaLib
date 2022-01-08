@@ -11,6 +11,8 @@ public:
 	struct Job
 	{
 		Net_ID m_reply;
+		std::chrono::high_resolution_clock::time_point m_time;
+		uint32_t m_key;
 		uint32_t m_x;
 		uint32_t m_y;
 		uint32_t m_x1;
@@ -23,6 +25,7 @@ public:
 	};
 	struct Job_reply
 	{
+		uint32_t m_key;
 		uint32_t m_x;
 		uint32_t m_y;
 		uint32_t m_x1;
@@ -31,12 +34,13 @@ public:
 	};
 	Mandelbrot_App()
 		: GUI_Task()
-		, m_thread_pool(std::make_unique<ThreadPool>(4))
+		, m_thread_pool(std::make_unique<ThreadPool>(8))
 	{}
 	void run() override;
 private:
 	uint8_t depth(double x0, double y0) const;
 	std::unique_ptr<ThreadPool> m_thread_pool;
+	bool m_dirty = false;
 };
 
 #endif

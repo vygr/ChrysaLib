@@ -55,13 +55,17 @@ void Mandelbrot_App::run()
 	//select
 	auto select = alloc_select(select_size);
 
-	//job que
-	auto jobs = std::list<std::shared_ptr<Msg>>{};
+	//job ques
+	auto jobs_ready = std::list<std::shared_ptr<Msg>>{};
+	auto jobs_sent = std::list<std::shared_ptr<Msg>>{};
+	uint32_t key = 0;
 	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
 	{
-		jobs.emplace_back(std::make_shared<Msg>(sizeof(Job)));
-		auto job_body = (Job*)jobs.back()->begin();
+		jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
+		auto job_body = (Job*)jobs_ready.back()->begin();
 		job_body->m_reply = select[select_reply];
+		job_body->m_time = std::chrono::high_resolution_clock::now();
+		job_body->m_key = key++;
 		job_body->m_x = 0;
 		job_body->m_y = y;
 		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
@@ -73,13 +77,16 @@ void Mandelbrot_App::run()
 		job_body->m_z = 1.0;
 	}
 
-	//send off all jobs, just for now !
-	for (auto &job : jobs)
+	//send off 16 jobs, just for  now
+	for (auto i = 0; i < 16; ++i)
 	{
+		if (jobs_ready.empty()) break;
+		auto job = jobs_ready.front();
+		jobs_ready.pop_front();
+		jobs_sent.push_back(job);
 		job->set_dest(select[select_worker]);
 		global_router->send(job);
 	}
-	jobs.clear();
 
 	//event loop
 	Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(1000), 0);
@@ -107,6 +114,7 @@ void Mandelbrot_App::run()
 				auto stride = (x1 - x);
 				auto reply = std::make_shared<Msg>(sizeof(Job_reply) + stride * (y1 - y));
 				auto reply_body = (Job_reply*)reply->begin();
+				reply_body->m_key = job_body->m_key;
 				reply_body->m_x = x;
 				reply_body->m_y = y;
 				reply_body->m_x1 = x1;
@@ -129,6 +137,7 @@ void Mandelbrot_App::run()
 		{
 			//job reply
 			auto reply_body = (Job_reply*)msg->begin();
+			auto rep_key = reply_body->m_key;
 			auto x = reply_body->m_x;
 			auto y = reply_body->m_y;
 			auto x1 = reply_body->m_x1;
@@ -148,13 +157,46 @@ void Mandelbrot_App::run()
 					canvas->plot(rx, ry);
 				}
 			}
+			m_dirty = true;
+
+			//remove completed job
+			auto itr = std::find_if(begin(jobs_sent), end(jobs_sent), [&] (const auto &job)
+			{
+				return ((Job*)job->begin())->m_key == rep_key;
+			});
+			if (itr != end(jobs_sent)) jobs_sent.erase(itr);
+
+			//send off another job ?
+			if (jobs_ready.empty()) break;
+			auto job = jobs_ready.front();
+			jobs_ready.pop_front();
+			jobs_sent.push_back(job);
+			job->set_dest(select[select_worker]);
+			global_router->send(job);
 			break;
 		}
 		case select_timer:
 		{
-			//any changes to service directory
-			Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(1000), 0);
-			canvas->swap();
+			//update display
+			if (m_dirty)
+			{
+				m_dirty = false;
+				Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(1000), 0);
+				canvas->swap();
+			}
+
+			//restart any jobs ?
+			auto now = std::chrono::high_resolution_clock::now();
+			for (auto &job : jobs_sent)
+			{
+				auto job_body = (Job*)job->begin();
+				auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - job_body->m_time);
+				if (age.count() > 1000)
+				{
+					job_body->m_time = now;
+					global_router->send(job);
+				}
+			}
 			break;
 		}
 		default:
