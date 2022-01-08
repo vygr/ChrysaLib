@@ -1,6 +1,7 @@
 #ifndef REGION_H
 #define REGION_H
 
+#include "../utils/heap.h"
 #include <forward_list>
 #include <stdint.h>
 
@@ -24,7 +25,7 @@ class Region
 {
 public:
 	Region() {}
-	std::forward_list<Rect> m_region;
+	std::forward_list<Rect, HeapAllocator<Rect>> m_region;
 	Rect bounds();
 	Region *free();
 	Region *translate(int32_t rx, int32_t ry);

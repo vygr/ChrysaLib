@@ -55,11 +55,9 @@ public:
 	};
 	File_Service()
 		: Service()
-	{
-		//async task pools, where big or blocking requests run
-		m_thread_pool1 = std::make_unique<ThreadPool>(2);
-		m_thread_pool2 = std::make_unique<ThreadPool>(1);
-	}
+		, m_thread_pool1(std::make_unique<ThreadPool>(2))
+		, m_thread_pool2(std::make_unique<ThreadPool>(1))
+	{}
 	//remote push helper methods
 	File_Service *set_file_list(const Net_ID &net_id, const std::vector<std::string> &file_list);
 	//request helper methods

@@ -125,8 +125,8 @@ public:
 	{
 		//wake any suspended caller
 		std::lock_guard<std::mutex> l(m_mutex);
-		if (m_select) m_select->wake();
 		m_mail.emplace_back(std::move(msg));
+		if (m_select) m_select->wake();
 		m_cv.notify_one();
 	}
 	auto empty() const { return m_mail.empty(); }
@@ -134,7 +134,7 @@ public:
 	void unlock() { m_mutex.unlock(); }
 	void set_select(Sync *select) { m_select = select; }
 private:
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	std::condition_variable m_cv;
 	std::list<T> m_mail;
 	Sync *m_select = nullptr;
