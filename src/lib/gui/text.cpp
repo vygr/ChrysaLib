@@ -12,7 +12,7 @@ Text::Text()
 
 view_size Text::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto font = get_font_prop("font");
 	auto text = get_string_prop("text");
 	if (font)

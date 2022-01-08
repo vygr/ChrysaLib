@@ -50,14 +50,14 @@ public:
 	void wait()
 	{
 		//suspend caller until notified
-		std::unique_lock<std::mutex> lock(m_mutex);
+		std::unique_lock<std::mutex> l(m_mutex);
 		m_state = true;
-		while (m_state) m_cv.wait(lock);
+		while (m_state) m_cv.wait(l);
 	}
 	void wake()
 	{
 		//wake any suspended caller
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> l(m_mutex);
 		m_state = false;
 		m_cv.notify_one();
 	}
@@ -79,7 +79,7 @@ public:
 	T poll()
 	{
 		//nullptr if que empty
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> l(m_mutex);
 		if (m_mail.empty()) return nullptr;
 		auto msg = std::move(m_mail.front());
 		m_mail.pop_front();
@@ -88,7 +88,7 @@ public:
 	void filter(std::vector<T> &out, std::function<bool(T&)> filter)
 	{
 		//read all that pass filter test
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> l(m_mutex);
 		for (auto itr = begin(m_mail); itr != end(m_mail);)
 		{
 			if (filter(*itr))
@@ -102,8 +102,8 @@ public:
 	T read()
 	{
 		//suspend caller if que empty
-		std::unique_lock<std::mutex> lock(m_mutex);
-		while (m_mail.empty()) m_cv.wait(lock);
+		std::unique_lock<std::mutex> l(m_mutex);
+		while (m_mail.empty()) m_cv.wait(l);
 		auto msg = std::move(m_mail.front());
 		m_mail.pop_front();
 		return msg;
@@ -111,10 +111,10 @@ public:
 	T read(std::chrono::milliseconds timeout)
 	{
 		//suspend caller if que empty, nullptr if timer expires
-		std::unique_lock<std::mutex> lock(m_mutex);
+		std::unique_lock<std::mutex> l(m_mutex);
 		if (m_mail.empty())
 		{
-			m_cv.wait_for(lock, timeout, [&]{ return !m_mail.empty(); });
+			m_cv.wait_for(l, timeout, [&]{ return !m_mail.empty(); });
 			if (m_mail.empty()) return nullptr;
 		}
 		auto msg = std::move(m_mail.front());
@@ -124,7 +124,7 @@ public:
 	void post(T &msg)
 	{
 		//wake any suspended caller
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> l(m_mutex);
 		if (m_select) m_select->wake();
 		m_mail.emplace_back(std::move(msg));
 		m_cv.notify_one();

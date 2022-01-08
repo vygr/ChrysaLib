@@ -28,6 +28,6 @@ std::vector<Net_ID> Task::alloc_select(uint32_t size)
 
 void Task::free_select(std::vector<Net_ID> &select)
 {
-	std::for_each(begin(select) + 1, end(select), [&] (auto &id) { global_router->free(id); });
+	std::for_each(begin(select) + 1, end(select), [&] (const auto &id) { global_router->free(id); });
 	select.clear();
 }

@@ -6,7 +6,7 @@ Title::Title()
 
 Title *Title::mouse_down(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)&*(event->begin());
 	auto window = m_parent;
 	while (!window->got_prop("is_window")) { window = window->m_parent; }
@@ -19,7 +19,7 @@ Title *Title::mouse_down(const std::shared_ptr<Msg> &event)
 
 Title *Title::mouse_move(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)&*(event->begin());
 	auto window = m_parent;
 	while (!window->got_prop("is_window")) { window = window->m_parent; }

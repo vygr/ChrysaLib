@@ -4,7 +4,7 @@
 
 view_size Grid::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto kids = children();
 	auto grid_w = (int32_t)get_long_prop("grid_width");
 	auto grid_h = (int32_t)get_long_prop("grid_height");
@@ -25,7 +25,7 @@ view_size Grid::pref_size()
 
 Grid *Grid::layout()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto kids = children();
 	auto grid_w = (int32_t)get_long_prop("grid_width");
 	auto grid_h = (int32_t)get_long_prop("grid_height");

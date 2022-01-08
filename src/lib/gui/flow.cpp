@@ -2,7 +2,7 @@
 
 Flow *Flow::layout()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto fw = m_w;
 	auto fh = m_h;
 	auto kids = children();
@@ -75,7 +75,7 @@ Flow *Flow::layout()
 
 view_size Flow::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto kids = children();
 	auto flow_flags = get_long_prop("flow_flags");
 	auto mw = (int32_t)got_long_prop("min_width");

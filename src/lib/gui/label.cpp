@@ -18,7 +18,7 @@ Label *Label::add_child(std::shared_ptr<View> child)
 
 view_size Label::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto border = std::abs((int32_t)get_long_prop("border"));
 	auto mw = (int32_t)got_long_prop("min_width");
 	auto mh = (int32_t)got_long_prop("min_height");
@@ -28,7 +28,7 @@ view_size Label::pref_size()
 
 Label *Label::layout()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto col = (uint32_t)get_long_prop("color");
 	auto border = get_long_prop("border");
 	m_flow->change(border, border, m_w - border * 2, m_h - border * 2)->layout();

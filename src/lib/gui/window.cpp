@@ -14,7 +14,7 @@ Window::Window()
 
 Window *Window::add_child(std::shared_ptr<View> child)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	if (m_child) m_child->sub();
 	if (child) add_back(child);
 	m_child = child;
@@ -23,7 +23,7 @@ Window *Window::add_child(std::shared_ptr<View> child)
 
 view_size Window::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto border = get_long_prop("border");
 	auto shadow = get_long_prop("shadow");
 	view_size s;
@@ -35,7 +35,7 @@ view_size Window::pref_size()
 
 Window *Window::layout()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto col = (uint32_t)get_long_prop("color");
 	auto border = get_long_prop("border");
 	auto shadow = get_long_prop("shadow");
@@ -98,7 +98,7 @@ drag_mode Window::get_drag_mode(int32_t rx, int32_t ry)
 
 Window *Window::mouse_down(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)event->begin();
 	m_mode = get_drag_mode(event_body->m_rx, event_body->m_ry);
 	return this;
@@ -106,7 +106,7 @@ Window *Window::mouse_down(const std::shared_ptr<Msg> &event)
 
 Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)event->begin();
 	auto ax = event_body->m_x;
 	auto ay = event_body->m_y;

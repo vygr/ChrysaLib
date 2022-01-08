@@ -181,7 +181,7 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 
 std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto key = std::make_pair<>(name, pixels);
 	auto itr_font = m_cache_font.find(key);
 	if (itr_font != end(m_cache_font)) return itr_font->second;
@@ -194,7 +194,7 @@ std::shared_ptr<Font> Font::open(const std::string &name, uint32_t pixels)
 
 std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	//look up string in sym map
 	auto itr = m_sym_map.find(utf8);
 	if (itr != end(m_sym_map)) return itr->second;

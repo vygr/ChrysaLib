@@ -61,7 +61,7 @@ Slider *Slider::draw(const Ctx &ctx)
 
 Slider *Slider::mouse_down(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)&*(event->begin());
 	m_old_value = get_long_prop("value");
 	m_state = 1;
@@ -72,7 +72,7 @@ Slider *Slider::mouse_down(const std::shared_ptr<Msg> &event)
 
 Slider *Slider::mouse_up(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	if (m_state != 0)
 	{
 		m_state = 0;
@@ -83,7 +83,7 @@ Slider *Slider::mouse_up(const std::shared_ptr<Msg> &event)
 
 Slider *Slider::mouse_move(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_mouse*)&*(event->begin());
 	auto value = get_long_prop("value");
 	auto portion = get_long_prop("portion");

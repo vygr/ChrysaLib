@@ -95,7 +95,6 @@ void Kernel_Service::run()
 			{
 				//timed mail
 				auto event_body = (Event_timed_mail*)body;
-				auto &mbox = event_body->m_mbox;
 				if (event_body->m_timeout != std::chrono::milliseconds(0))
 				{
 					//insert timer
@@ -112,10 +111,11 @@ void Kernel_Service::run()
 				else
 				{
 					//remove timer
+					auto &mb = event_body->m_mbox;
 					auto itr = std::find_if(begin(m_timer), end(m_timer), [&] (auto &msg)
 					{
 						auto body = (Event_timed_mail*)msg->begin();
-						return body->m_mbox == mbox;
+						return body->m_mbox == mb;
 					});
 					if (itr != end(m_timer)) m_timer.erase(itr);
 				}
@@ -130,13 +130,13 @@ void Kernel_Service::run()
 		now = std::chrono::high_resolution_clock::now();
 		for (auto itr = begin(m_timer); itr != end(m_timer);)
 		{
-			auto msg = *itr;
-			auto body = (Event_timed_mail*)msg->begin();
+			auto tmsg = *itr;
+			auto body = (Event_timed_mail*)tmsg->begin();
 			if (body->m_time <= now)
 			{
 				itr = m_timer.erase(itr);
-				msg->set_dest(body->m_mbox);
-				global_router->send(msg);
+				tmsg->set_dest(body->m_mbox);
+				global_router->send(tmsg);
 			}
 			else ++itr;
 		}

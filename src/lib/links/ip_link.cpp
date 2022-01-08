@@ -40,7 +40,7 @@ void IP_Link_Manager::run()
 		//got dialing to do ?
 		if (!m_dial_que.empty())
 		{
-			std::lock_guard<std::mutex> lock(m_mutex);
+			std::lock_guard<std::mutex> l(m_mutex);
 			for (auto &addr : m_dial_que) connect(addr);
 			m_dial_que.clear();
 		}
@@ -127,7 +127,7 @@ void IP_Link_Manager::connect(const std::string &addr)
 
 void IP_Link_Manager::dial(const std::string &addr)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> l(m_mutex);
 	m_dial_que.emplace_back(addr);
 }
 

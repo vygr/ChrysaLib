@@ -22,7 +22,7 @@ Scroll::Scroll(int32_t flags)
 
 view_size Scroll::pref_size()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto mw = (int32_t)got_long_prop("min_width");
 	auto mh = (int32_t)got_long_prop("min_height");
 	if (m_vslider) mw = mw + m_vslider->pref_size().m_w;
@@ -32,7 +32,7 @@ view_size Scroll::pref_size()
 
 Scroll *Scroll::add_child(std::shared_ptr<View> child)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	if (m_child) m_child->sub();
 	if (child) add_back(child);
 	m_child = child;
@@ -41,7 +41,7 @@ Scroll *Scroll::add_child(std::shared_ptr<View> child)
 
 Scroll *Scroll::layout()
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	//position any sliders
 	auto sw = 0;
 	auto sh = 0;
@@ -95,7 +95,7 @@ Scroll *Scroll::action(const std::shared_ptr<Msg> &event)
 
 Scroll *Scroll::mouse_wheel(const std::shared_ptr<Msg> &event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> l(m_mutex);
 	auto event_body = (View::Event_wheel*)&*(event->begin());
 	if (m_hslider)
 	{
