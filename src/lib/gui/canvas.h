@@ -67,6 +67,7 @@ public:
 	Canvas *set_canvas_flags(uint32_t flags) { m_canvas_flags = flags; return this; };
 	Canvas *plot(int32_t x, int32_t y);
 	uint32_t pick(int32_t x, int32_t y);
+	Canvas *fill();
 	Canvas *fbox(int32_t x, int32_t y, int32_t w, int32_t h);
 	Canvas *span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1);
 	Canvas *span(int32_t coverage, int32_t x, int32_t y, int32_t x1);

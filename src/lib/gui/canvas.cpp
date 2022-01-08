@@ -113,6 +113,12 @@ uint32_t Canvas::pick(int32_t x, int32_t y)
 	return 0;
 }
 
+Canvas *Canvas::fill()
+{
+	m_pixmap->fill(m_col);
+	return this;
+}
+
 Canvas *Canvas::fbox(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	if (w > 0 && h > 0)

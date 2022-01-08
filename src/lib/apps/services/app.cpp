@@ -21,6 +21,12 @@ void Services_App::run()
 				ui_flow(button_grid, ({
 					{"grid_height", 1},
 					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
+					ui_button(min_button, ({
+						{"text", to_utf8(0xea1a)}}))
+					ui_end
+					ui_button(max_button, ({
+						{"text", to_utf8(0xea1b)}}))
+					ui_end
 					ui_button(close_button, ({
 						{"text", to_utf8(0xea19)}}))
 					ui_end
