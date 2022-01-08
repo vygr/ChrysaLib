@@ -64,8 +64,8 @@ void Mandelbrot_App::run()
 		job_body->m_z = 1.0;
 	}
 
-	//send off 16 jobs, just for  now
-	for (auto i = 0; i < 16; ++i) dispatch_job();
+	//send off some jobs
+	for (auto i = 0; i < 32; ++i) dispatch_job();
 
 	//event loop
 	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
@@ -110,6 +110,8 @@ void Mandelbrot_App::run()
 					}
 				}
 				reply->set_dest(job_body->m_reply);
+				//simulate failure !
+				if (rand() % 100 < 10) return;
 				global_router->send(reply);
 			});
 			break;
@@ -164,6 +166,7 @@ void Mandelbrot_App::run()
 
 			//restart any jobs ?
 			auto now = std::chrono::high_resolution_clock::now();
+			auto cnt = 0;
 			for (auto itr = begin(m_jobs_sent); itr != end(m_jobs_sent);)
 			{
 				auto job = itr->second;
@@ -172,11 +175,12 @@ void Mandelbrot_App::run()
 				if (age.count() > 1000)
 				{
 					itr = m_jobs_sent.erase(itr);
-					m_jobs_ready.push_back(job);
-					dispatch_job();
+					m_jobs_ready.push_front(job);
+					cnt++;
 				}
 				else ++itr;
 			}
+			for (auto i = 0; i < cnt; ++i) dispatch_job();
 			break;
 		}
 		default:
