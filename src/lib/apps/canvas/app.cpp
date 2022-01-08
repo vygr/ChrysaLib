@@ -7,6 +7,12 @@ uint32_t from_utf8(uint8_t **data);
 
 void Canvas_App::run()
 {
+	enum
+	{
+		select_main,
+		select_size,
+	};
+	
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -65,7 +71,7 @@ void Canvas_App::run()
 	add_front(window);
 
 	//event loop
-	auto select = alloc_select(1);
+	auto select = alloc_select(select_size);
 	while (m_running)
 	{
 		auto idx = global_router->select(select);

@@ -13,9 +13,6 @@ void Services_App::run()
 		select_size,
 	};
 	
-	//get my mailbox address, id was allocated in the constructor
-	auto mbox = global_router->validate(m_net_id);
-
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -71,12 +68,12 @@ void Services_App::run()
 	//event loop
 	auto old_entries = std::vector<std::string>{};
 	auto old_labels = std::vector<std::shared_ptr<Label>>{};
-	auto select_ids = alloc_select(select_size);
-	Kernel_Service::timed_mail(select_ids[select_timer], std::chrono::milliseconds(100), 0);
+	auto select = alloc_select(select_size);
+	Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(100), 0);
 	while (m_running)
 	{
-		auto idx = global_router->select(select_ids);
-		auto msg = global_router->read(select_ids[idx]);
+		auto idx = global_router->select(select);
+		auto msg = global_router->read(select[idx]);
 		switch (idx)
 		{
 		case select_main:
@@ -96,7 +93,7 @@ void Services_App::run()
 		case select_timer:
 		{
 			//any changes to service directory
-			Kernel_Service::timed_mail(select_ids[select_timer], std::chrono::milliseconds(100), 0);
+			Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(100), 0);
 			auto entries = global_router->enquire("");
 			if (entries != old_entries)
 			{
@@ -138,5 +135,5 @@ void Services_App::run()
 			break;
 		}
 	}
-	free_select(select_ids);
+	free_select(select);
 }
