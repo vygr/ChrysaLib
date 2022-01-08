@@ -11,15 +11,6 @@ const uint32_t CANVAS_SCALE = 2;
 
 void Mandelbrot_App::run()
 {
-	enum
-	{
-		select_main,
-		select_reply,
-		select_worker,
-		select_timer,
-		select_size,
-	};
-
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -53,19 +44,13 @@ void Mandelbrot_App::run()
 	add_front(window);
 
 	//select
-	auto select = alloc_select(select_size);
+	m_select = alloc_select(select_size);
 
-	//job ques
-	auto jobs_ready = std::list<std::shared_ptr<Msg>>{};
-	auto jobs_sent = std::list<std::shared_ptr<Msg>>{};
-	uint32_t key = 0;
+	//job que
 	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
 	{
-		jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
-		auto job_body = (Job*)jobs_ready.back()->begin();
-		job_body->m_reply = select[select_reply];
-		job_body->m_time = std::chrono::high_resolution_clock::now();
-		job_body->m_key = key++;
+		m_jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
+		auto job_body = (Job*)m_jobs_ready.back()->begin();
 		job_body->m_x = 0;
 		job_body->m_y = y;
 		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
@@ -78,27 +63,21 @@ void Mandelbrot_App::run()
 	}
 
 	//send off 16 jobs, just for  now
-	for (auto i = 0; i < 16; ++i)
-	{
-		if (jobs_ready.empty()) break;
-		auto job = jobs_ready.front();
-		jobs_ready.pop_front();
-		jobs_sent.push_back(job);
-		job->set_dest(select[select_worker]);
-		global_router->send(job);
-	}
+	for (auto i = 0; i < 16; ++i) dispatch_job();
 
 	//event loop
-	Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(1000), 0);
+	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
 	while (m_running)
 	{
-		auto idx = global_router->select(select);
-		auto msg = global_router->read(select[idx]);
+		auto idx = global_router->select(m_select);
+		auto msg = global_router->read(m_select[idx]);
 		switch (idx)
 		{
 		case select_worker:
 		{
 			//job request, hive off to worker thread
+			//note these request can come from anywhere !
+			//we will gladly do the work for anyone.
 			m_thread_pool->enqueue([=, msg_ref = std::move(msg)]
 			{
 				auto job_body = (Job*)msg_ref->begin();
@@ -135,9 +114,13 @@ void Mandelbrot_App::run()
 		}
 		case select_reply:
 		{
-			//job reply
+			//job reply, validate it's a current job not some old discarded one maybe
 			auto reply_body = (Job_reply*)msg->begin();
-			auto rep_key = reply_body->m_key;
+			auto key = reply_body->m_key;
+			auto itr = m_jobs_sent.find(key);
+			if (itr == end(m_jobs_sent)) break;
+
+			//use the reply data
 			auto x = reply_body->m_x;
 			auto y = reply_body->m_y;
 			auto x1 = reply_body->m_x1;
@@ -159,43 +142,36 @@ void Mandelbrot_App::run()
 			}
 			m_dirty = true;
 
-			//remove completed job
-			auto itr = std::find_if(begin(jobs_sent), end(jobs_sent), [&] (const auto &job)
-			{
-				return ((Job*)job->begin())->m_key == rep_key;
-			});
-			if (itr != end(jobs_sent)) jobs_sent.erase(itr);
-
-			//send off another job ?
-			if (jobs_ready.empty()) break;
-			auto job = jobs_ready.front();
-			jobs_ready.pop_front();
-			jobs_sent.push_back(job);
-			job->set_dest(select[select_worker]);
-			global_router->send(job);
+			//remove completed job, maybe send off another
+			m_jobs_sent.erase(itr);
+			dispatch_job();
 			break;
 		}
 		case select_timer:
 		{
+			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
+
 			//update display
 			if (m_dirty)
 			{
 				m_dirty = false;
-				Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(1000), 0);
 				canvas->swap();
 			}
 
 			//restart any jobs ?
 			auto now = std::chrono::high_resolution_clock::now();
-			for (auto &job : jobs_sent)
+			for (auto itr = begin(m_jobs_sent); itr != end(m_jobs_sent);)
 			{
+				auto job = itr->second;
 				auto job_body = (Job*)job->begin();
 				auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - job_body->m_time);
 				if (age.count() > 1000)
 				{
-					job_body->m_time = now;
-					global_router->send(job);
+					itr = m_jobs_sent.erase(itr);
+					m_jobs_ready.push_back(job);
+					dispatch_job();
 				}
+				else ++itr;
 			}
 			break;
 		}
@@ -207,7 +183,8 @@ void Mandelbrot_App::run()
 		}
 		}
 	}
-	free_select(select);
+
+	free_select(m_select);
 }
 
 uint8_t Mandelbrot_App::depth(double x0, double y0) const
@@ -225,4 +202,18 @@ uint8_t Mandelbrot_App::depth(double x0, double y0) const
 		y2 = yc * yc;
 	}
 	return i;
+}
+
+void Mandelbrot_App::dispatch_job()
+{
+	if (m_jobs_ready.empty()) return;
+	auto job = m_jobs_ready.front();
+	auto job_body = (Job*)job->begin();
+	m_jobs_ready.pop_front();
+	m_jobs_sent[m_key] = job;
+	job_body->m_reply = m_select[select_reply];
+	job_body->m_time = std::chrono::high_resolution_clock::now();
+	job_body->m_key = m_key++;
+	job->set_dest(m_select[select_worker]);
+	global_router->send(job);
 }

@@ -38,9 +38,22 @@ public:
 	{}
 	void run() override;
 private:
+	enum
+	{
+		select_main,
+		select_reply,
+		select_worker,
+		select_timer,
+		select_size,
+	};
 	uint8_t depth(double x0, double y0) const;
+	void dispatch_job();
 	std::unique_ptr<ThreadPool> m_thread_pool;
+	std::list<std::shared_ptr<Msg>> m_jobs_ready;
+	std::map<uint32_t, std::shared_ptr<Msg>> m_jobs_sent;
+	std::vector<Net_ID> m_select;
 	bool m_dirty = false;
+	uint32_t m_key = 0;
 };
 
 #endif
