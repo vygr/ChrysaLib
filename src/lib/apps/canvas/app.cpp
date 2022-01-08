@@ -1,15 +1,11 @@
-#include "test1.h"
-#include "../gui/ui.h"
+#include "app.h"
+#include "../../gui/ui.h"
 #include <assert.h>
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
 
-////////////
-// test task
-////////////
-
-void Test_1::run()
+void Canvas_App::run()
 {
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
@@ -69,11 +65,10 @@ void Test_1::run()
 	add_front(window);
 
 	//event loop
-	const auto select = std::vector<Net_ID>{m_net_id};
+	auto select = alloc_select(1);
 	while (m_running)
 	{
 		auto idx = global_router->select(select);
-		assert(idx == 0);
 		auto msg = global_router->read(select[idx]);
 		auto body = (Event*)msg->begin();
 		switch (body->m_evt)
@@ -86,4 +81,5 @@ void Test_1::run()
 		}
 		}
 	}
+	free_select(select);
 }

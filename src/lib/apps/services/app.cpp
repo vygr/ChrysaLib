@@ -1,15 +1,18 @@
-#include "test2.h"
-#include "../gui/ui.h"
+#include "app.h"
+#include "../../gui/ui.h"
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
 
-////////////
-// test task
-////////////
-
-void Test_2::run()
+void Services_App::run()
 {
+	enum
+	{
+		select_main,
+		select_timer,
+		select_size,
+	};
+	
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 
@@ -68,10 +71,15 @@ void Test_2::run()
 	//event loop
 	auto old_entries = std::vector<std::string>{};
 	auto old_labels = std::vector<std::shared_ptr<Label>>{};
+	auto select_ids = alloc_select(select_size);
+	Kernel_Service::timed_mail(select_ids[select_timer], std::chrono::milliseconds(100), 0);
 	while (m_running)
 	{
-		auto msg = mbox->read(std::chrono::milliseconds(100));
-		if (msg)
+		auto idx = global_router->select(select_ids);
+		auto msg = global_router->read(select_ids[idx]);
+		switch (idx)
+		{
+		case select_main:
 		{
 			auto body = (Event*)msg->begin();
 			switch (body->m_evt)
@@ -83,10 +91,12 @@ void Test_2::run()
 				break;
 			}
 			}
+			break;
 		}
-		else
+		case select_timer:
 		{
 			//any changes to service directory
+			Kernel_Service::timed_mail(select_ids[select_timer], std::chrono::milliseconds(100), 0);
 			auto entries = global_router->enquire("");
 			if (entries != old_entries)
 			{
@@ -122,6 +132,11 @@ void Test_2::run()
 					window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
 				}
 			}
+			break;
+		}
+		default:
+			break;
 		}
 	}
+	free_select(select_ids);
 }
