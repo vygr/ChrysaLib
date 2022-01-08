@@ -2,6 +2,7 @@
 #include "task.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 extern std::thread::id global_kernel_thread_id;
 
