@@ -43,8 +43,10 @@ void Mandelbrot_App::run()
 	//add to my GUI screen
 	add_front(window);
 
-	//select
+	//select and init workers
 	m_select = alloc_select(select_size);
+	m_entry = global_router->declare(m_select[select_worker], "mandel_worker", "Mandelbrot v0.01");
+	refresh_workers();
 
 	//job que
 	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
@@ -149,7 +151,9 @@ void Mandelbrot_App::run()
 		}
 		case select_timer:
 		{
+			//restart timer, refresh workers
 			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
+			refresh_workers();
 
 			//update display
 			if (m_dirty)
@@ -184,6 +188,7 @@ void Mandelbrot_App::run()
 		}
 	}
 
+	global_router->forget(m_entry);
 	free_select(m_select);
 }
 
@@ -214,6 +219,21 @@ void Mandelbrot_App::dispatch_job()
 	job_body->m_reply = m_select[select_reply];
 	job_body->m_time = std::chrono::high_resolution_clock::now();
 	job_body->m_key = m_key++;
-	job->set_dest(m_select[select_worker]);
+	job->set_dest(m_workers[rand() % m_workers.size()]);
 	global_router->send(job);
+}
+
+void Mandelbrot_App::refresh_workers()
+{
+	auto entries = global_router->enquire("mandel_worker");
+	if (entries != m_entries)
+	{
+		m_entries = entries;
+		m_workers.clear();
+		for (auto &e : entries)
+		{
+			auto fields = split_string(e, ",");
+			m_workers.push_back(Net_ID::from_string(fields[1]));
+		}
+	}
 }

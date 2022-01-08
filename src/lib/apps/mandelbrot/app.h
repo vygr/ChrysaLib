@@ -48,10 +48,14 @@ private:
 	};
 	uint8_t depth(double x0, double y0) const;
 	void dispatch_job();
+	void refresh_workers();
 	std::unique_ptr<ThreadPool> m_thread_pool;
 	std::list<std::shared_ptr<Msg>> m_jobs_ready;
 	std::map<uint32_t, std::shared_ptr<Msg>> m_jobs_sent;
 	std::vector<Net_ID> m_select;
+	std::string m_entry;
+	std::vector<std::string> m_entries;
+	std::vector<Net_ID> m_workers;
 	bool m_dirty = false;
 	uint32_t m_key = 0;
 };
