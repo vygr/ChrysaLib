@@ -18,7 +18,7 @@ void Services_App::run()
 			{"flow_flags", flow_down_fill}}))
 			ui_flow(title_flow, ({
 				{"flow_flags", flow_left_fill}}))
-				ui_flow(button_grid, ({
+				ui_grid(button_grid, ({
 					{"grid_height", 1},
 					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
 					ui_button(min_button, ({
