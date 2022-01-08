@@ -1,5 +1,6 @@
 #include "task.h"
 #include "kernel_service.h"
+#include <algorithm>
 
 ///////
 // task
