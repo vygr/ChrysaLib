@@ -15,71 +15,129 @@ void Kernel_Service::run()
 	auto mbox = global_router->validate(m_net_id);
 	auto entry = global_router->declare(m_net_id, "kernel", "Kernel_Service v0.1");
 
+	//current time
+	auto now = std::chrono::high_resolution_clock::now();
+
 	//event loop
 	while (m_running)
 	{
-		auto msg = mbox->read();
-		auto body = (Event*)msg->begin();
-		switch (body->m_evt)
+		//read and wake for next timer time
+		auto delay = std::chrono::milliseconds(1000000);
+		if (!m_timer.empty())
 		{
-		case evt_exit:
-		{
-			m_running = false;
-			break;
+			auto time = ((Event_timed_mail*)m_timer.front()->begin())->m_time;
+			delay = std::chrono::duration_cast<std::chrono::milliseconds>(time - now);
 		}
-		case evt_directory:
+		auto msg = mbox->read(delay);
+		if (msg)
 		{
-			//directory update, flood filling
-			if (global_router->update_route(*msg->m_data)
-				&& global_router->update_dir(*msg->m_data))
+			auto body = (Event*)msg->begin();
+			switch (body->m_evt)
 			{
-				//new session so flood to peers
-				auto event_body = (Event_directory*)body;
-				auto via = event_body->m_via;
-				//fill in the new via and increment the distance as we flood out !
-				event_body->m_via = global_router->get_dev_id();
-				event_body->m_hops++;
-				for (auto &peer : global_router->get_peers())
-				{
-					//don't send to peer who sent it to me !
-					if (peer == via) continue;
-					auto flood_msg = std::make_shared<Msg>(msg->m_data);
-					flood_msg->set_dest(Net_ID(peer, Mailbox_ID{0}));
-					global_router->send(flood_msg);
-				}
+			case evt_exit:
+			{
+				m_running = false;
+				break;
 			}
-			break;
+			case evt_directory:
+			{
+				//directory update, flood filling
+				if (global_router->update_route(*msg->m_data)
+					&& global_router->update_dir(*msg->m_data))
+				{
+					//new session so flood to peers
+					auto event_body = (Event_directory*)body;
+					auto via = event_body->m_via;
+					//fill in the new via and increment the distance as we flood out !
+					event_body->m_via = global_router->get_dev_id();
+					event_body->m_hops++;
+					for (auto &peer : global_router->get_peers())
+					{
+						//don't send to peer who sent it to me !
+						if (peer == via) continue;
+						auto flood_msg = std::make_shared<Msg>(msg->m_data);
+						flood_msg->set_dest(Net_ID(peer, Mailbox_ID{0}));
+						global_router->send(flood_msg);
+					}
+				}
+				break;
+			}
+			case evt_start_task:
+			{
+				//start task
+				auto event_body = (Event_start_task*)body;
+				event_body->m_task->start_thread();
+				auto reply = std::make_shared<Msg>(sizeof(start_task_reply));
+				auto reply_body = (start_task_reply*)reply->begin();
+				reply->set_dest(event_body->m_reply);
+				reply_body->m_task = event_body->m_task->get_id();
+				global_router->send(reply);
+				break;
+			}
+			case evt_stop_task:
+			{
+				//stop task
+				auto event_body = (Event_stop_task*)body;
+				event_body->m_task->stop_thread();
+				event_body->m_task->join_thread();
+				break;
+			}
+			case evt_callback:
+			{
+				//callback
+				auto event_body = (Event_callback*)body;
+				event_body->m_callback();
+				event_body->m_sync->wake();
+				break;
+			}
+			case evt_timed_mail:
+			{
+				//timed mail
+				auto event_body = (Event_timed_mail*)body;
+				auto &mbox = event_body->m_mbox;
+				if (event_body->m_timeout != std::chrono::milliseconds(0))
+				{
+					//insert timer
+					auto time = std::chrono::high_resolution_clock::now()
+						+ event_body->m_timeout;
+					event_body->m_time = time;
+					auto itr = std::find_if(begin(m_timer), end(m_timer), [&] (auto &msg)
+					{
+						auto body = (Event_timed_mail*)msg->begin();
+						return body->m_time <= time;
+					});
+					m_timer.insert(itr, msg);
+				}
+				else
+				{
+					//remove timer
+					auto itr = std::find_if(begin(m_timer), end(m_timer), [&] (auto &msg)
+					{
+						auto body = (Event_timed_mail*)msg->begin();
+						return body->m_mbox == mbox;
+					});
+					if (itr != end(m_timer)) m_timer.erase(itr);
+				}
+				break;
+			}
+			default:
+				break;
+			}
 		}
-		case evt_start_task:
+
+		//check timer list
+		now = std::chrono::high_resolution_clock::now();
+		for (auto itr = begin(m_timer); itr != end(m_timer);)
 		{
-			//start task
-			auto event_body = (Event_start_task*)body;
-			event_body->m_task->start_thread();
-			auto reply = std::make_shared<Msg>(sizeof(start_task_reply));
-			auto reply_body = (start_task_reply*)reply->begin();
-			reply->set_dest(event_body->m_reply);
-			reply_body->m_task = event_body->m_task->get_id();
-			global_router->send(reply);
-			break;
-		}
-		case evt_stop_task:
-		{
-			//stop task
-			auto event_body = (Event_stop_task*)body;
-			event_body->m_task->stop_thread();
-			event_body->m_task->join_thread();
-			break;
-		}
-		case evt_callback:
-		{
-			//callback
-			auto event_body = (Event_callback*)body;
-			event_body->m_callback();
-			event_body->m_sync->wake();
-			break;
-		}
-		default:
-			break;
+			auto msg = *itr;
+			auto body = (Event_timed_mail*)msg->begin();
+			if (body->m_time <= now)
+			{
+				itr = m_timer.erase(itr);
+				msg->set_dest(body->m_mbox);
+				global_router->send(msg);
+			}
+			else ++itr;
 		}
 	}
 
@@ -126,6 +184,19 @@ void Kernel_Service::stop_task()
 	auto event_body = (Kernel_Service::Event_stop_task*)msg->begin();
 	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_stop_task;
+	global_router->send(msg);
+}
+
+void Kernel_Service::timed_mail(const Net_ID &reply, std::chrono::milliseconds timeout, uint64_t id)
+{
+	//timed mail request
+	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_timed_mail));
+	auto event_body = (Kernel_Service::Event_timed_mail*)msg->begin();
+	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	event_body->m_evt = Kernel_Service::evt_timed_mail;
+	event_body->m_mbox = reply;
+	event_body->m_timeout = timeout;
+	event_body->m_id = id;
 	global_router->send(msg);
 }
 

@@ -2,6 +2,7 @@
 #define KERNEL_H
 
 #include "service.h"
+#include <list>
 
 class Task;
 
@@ -20,6 +21,7 @@ public:
 		evt_start_task,
 		evt_stop_task,
 		evt_callback,
+		evt_timed_mail,
 	};
 	struct Event_directory : public Event
 	{
@@ -46,6 +48,13 @@ public:
 		Sync *m_sync;
 		std::function<void()> m_callback;
 	};
+	struct Event_timed_mail : public Event
+	{
+		Net_ID m_mbox;
+		std::chrono::high_resolution_clock::time_point m_time;
+		std::chrono::milliseconds m_timeout;
+		uint64_t m_id;
+	};
 	Kernel_Service()
 		: Service()
 	{}
@@ -54,6 +63,8 @@ public:
 	static void exit();
 	static Net_ID start_task(Task *task);
 	static void stop_task();
+	static void timed_mail(const Net_ID &reply, std::chrono::milliseconds timeout, uint64_t id);
+	std::list<std::shared_ptr<Msg>> m_timer;
 };
 
 #endif

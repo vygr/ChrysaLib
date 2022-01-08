@@ -7,8 +7,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "../apps/test1.h"
-#include "../apps/test2.h"
+#include "../apps/canvas/app.h"
+#include "../apps/services/app.h"
 
 //////
 // gui
@@ -45,9 +45,9 @@ void GUI_Service::run()
 	});
 
 	//start up test tasks
-	auto task1 = std::make_unique<Test_1>();
+	auto task1 = std::make_unique<Canvas_App>();
 	auto task1_id = Kernel_Service::start_task(task1.get());
-	auto task2 = std::make_unique<Test_2>();
+	auto task2 = std::make_unique<Services_App>();
 	auto task2_id = Kernel_Service::start_task(task2.get());
 
 	//event loop
