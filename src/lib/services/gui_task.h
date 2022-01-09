@@ -13,6 +13,7 @@ public:
 		: Task()
 	{}
 	//helper methods
+	Net_ID my_gui();
 	void add_front(std::shared_ptr<View> view);
 	void add_back(std::shared_ptr<View> view);
 	void sub(std::shared_ptr<View> view);
