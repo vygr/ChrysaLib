@@ -97,7 +97,7 @@ make clean
 Run with:
 
 ```text
-hub_node [switches] ip_addr ...
+hub_node [switches] [ip_addr] ...
 eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65
 -h:    this help info
 -t ms: exit timeout, default 0, ie never
@@ -164,7 +164,7 @@ silently ignore any in flight messages that may still be on route.
 
 The `File_Service` standalone example app/service can be launched with:
 
-`files_node 127.0.0.1`
+`./files_node 127.0.0.1`
 
 This example is only a base class, you would provide a subclass overriding the
 virtual methods to provide an implementation for a specific OS or filesystem
@@ -174,7 +174,7 @@ API etc.
 
 The `GUI_Service` can be launched with:
 
-`gui_node 127.0.0.1`
+`./gui_node 127.0.0.1`
 
 This is a work in progress, to port the current ChrysaLisp GUI system and
 widgets over to C++.
