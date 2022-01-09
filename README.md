@@ -1,8 +1,18 @@
 # ChrysaLib
 
+![](./screen_shot_1.png)
+
 C++ ChrysaLib !
 
 A version of ChrysaLisp system concepts written in C++.
+
+The screen shot above shows a network of 1 Intel MacBook, 1 M1 Arm MacBook, 1
+x86 Linux server, 1 x86 Ubuntu 20.4 VM in Virtualbox, 1 Windows 10 PC and last
+but not least, 1 Raspberry PI4.
+
+All machines running together, auto configured and sharing the demo apps work.
+5 GUIs running in total across the network. Very robust as nodes come online
+and go offline, things just keep on keeping on !
 
 ## Dependencies
 
