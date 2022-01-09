@@ -39,7 +39,7 @@ int32_t main(int32_t argc, char *argv[])
 			else
 			{
 			help:
-				std::cout << "files_node [switches] ip_addr ...\n";
+				std::cout << "files_node [switches] [ip_addr] ...\n";
 				std::cout << "eg. files_node -t 10000 127.0.0.1\n";
 				std::cout << "-h:    this help info\n";
 				std::cout << "-t ms: exit timeout, default 0, ie never\n";
