@@ -5,10 +5,6 @@
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
 
-const uint32_t CANVAS_WIDTH = 640;
-const uint32_t CANVAS_HEIGHT = 640;
-const uint32_t CANVAS_SCALE = 2;
-
 void Mandelbrot_App::run()
 {
 	ui_window(window, ({}))
@@ -32,13 +28,12 @@ void Mandelbrot_App::run()
 		ui_end
 	ui_end
 
-	auto s = window->pref_size();
-	window->change(120, 64, s.m_w, s.m_h);
-
-	//clear canvas
+	//clear canvas to black
 	canvas->set_col(argb_black);
 	canvas->fill();
 	canvas->swap();
+	auto s = window->pref_size();
+	window->change(120, 64, s.m_w, s.m_h);
 
 	//add to my GUI screen
 	add_front(window);
@@ -46,29 +41,10 @@ void Mandelbrot_App::run()
 	//select and init workers
 	m_select = alloc_select(select_size);
 	m_entry = global_router->declare(m_select[select_worker], "mandel_worker", "Mandelbrot v0.01");
-	refresh_workers();
-
-	//job que
-	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
-	{
-		m_jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
-		auto job_body = (Job*)m_jobs_ready.back()->begin();
-		job_body->m_x = 0;
-		job_body->m_y = y;
-		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
-		job_body->m_y1 = y + 1;
-		job_body->m_cw = CANVAS_WIDTH * CANVAS_SCALE;
-		job_body->m_ch = CANVAS_HEIGHT * CANVAS_SCALE;
-		job_body->m_cx = -0.5;
-		job_body->m_cy = 0.0;
-		job_body->m_z = 1.0;
-	}
-
-	//send off some jobs
-	for (auto i = 0; i < 32; ++i) dispatch_job();
+	reset();
 
 	//event loop
-	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
+	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1), 0);
 	while (m_running)
 	{
 		auto idx = global_router->select(m_select);
@@ -95,6 +71,7 @@ void Mandelbrot_App::run()
 				auto stride = (x1 - x);
 				auto reply = std::make_shared<Msg>(sizeof(Job_reply) + stride * (y1 - y));
 				auto reply_body = (Job_reply*)reply->begin();
+				reply_body->m_worker = job_body->m_worker;
 				reply_body->m_key = job_body->m_key;
 				reply_body->m_x = x;
 				reply_body->m_y = y;
@@ -111,18 +88,18 @@ void Mandelbrot_App::run()
 				}
 				reply->set_dest(job_body->m_reply);
 				//simulate failure !
-				if (rand() % 100 < 10) return;
+				//if (rand() % 100 < 5) return;
 				global_router->send(reply);
 			});
 			break;
 		}
 		case select_reply:
 		{
-			//job reply, validate it's a current job not some old discarded one maybe
+			//job reply, validate it's a current job not some old discarded one
 			auto reply_body = (Job_reply*)msg->begin();
-			auto key = reply_body->m_key;
-			auto itr = m_jobs_sent.find(key);
-			if (itr == end(m_jobs_sent)) break;
+			auto worker = reply_body->m_worker;
+			auto itr = m_jobs_assigned.find(worker);
+			if (itr == end(m_jobs_assigned)) break;
 
 			//use the reply data
 			auto x = reply_body->m_x;
@@ -147,15 +124,20 @@ void Mandelbrot_App::run()
 			m_dirty = true;
 
 			//remove completed job, maybe send off another
-			m_jobs_sent.erase(itr);
-			dispatch_job();
+			complete(worker, reply_body->m_key);
 			break;
 		}
 		case select_timer:
 		{
-			//restart timer, refresh workers
-			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1000), 0);
-			refresh_workers();
+			//restart timer
+			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(JOB_TIMEOUT), 0);
+
+			//adjust workforce and jobs
+			restart();
+			auto workers = census();
+			leavers(workers);
+			joiners(workers);
+			slackers();
 
 			//update display
 			if (m_dirty)
@@ -163,31 +145,45 @@ void Mandelbrot_App::run()
 				m_dirty = false;
 				canvas->swap();
 			}
-
-			//restart any jobs ?
-			auto now = std::chrono::high_resolution_clock::now();
-			auto cnt = 0;
-			for (auto itr = begin(m_jobs_sent); itr != end(m_jobs_sent);)
-			{
-				auto job = itr->second;
-				auto job_body = (Job*)job->begin();
-				auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - job_body->m_time);
-				if (age.count() > 1000)
-				{
-					itr = m_jobs_sent.erase(itr);
-					m_jobs_ready.push_front(job);
-					cnt++;
-				}
-				else ++itr;
-			}
-			for (auto i = 0; i < cnt; ++i) dispatch_job();
 			break;
 		}
 		default:
 		{
 			//must be select_main
-			//dispatch to widgets
-			window->event(msg);
+			auto msg_body = (View::Event*)msg->begin();
+			if (msg_body->m_target_id == canvas->get_id()
+				&& msg_body->m_type == ev_type_mouse)
+			{
+				//canvas mouse event
+				auto mouse_body = (View::Event_mouse*)msg_body;
+				if (mouse_body->m_buttons == 1)
+				{
+					//zoom in
+					auto size = canvas->get_size();
+					auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
+					auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+					m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
+					m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
+					m_zoom *= 0.5;
+					reset();
+				}
+				else if (mouse_body->m_buttons == 3)
+				{
+					//zoom out
+					auto size = canvas->get_size();
+					auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
+					auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+					m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
+					m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
+					m_zoom *= 2.0;
+					reset();
+				}
+			}
+			else
+			{
+				//dispatch to widgets
+				window->event(msg);
+			}
 		}
 		}
 	}
@@ -213,31 +209,168 @@ uint8_t Mandelbrot_App::depth(double x0, double y0) const
 	return i;
 }
 
-void Mandelbrot_App::dispatch_job()
+std::vector<Net_ID> Mandelbrot_App::census()
+{
+	auto census = std::vector<Net_ID>{};
+	auto entries = global_router->enquire("mandel_worker");
+	for (auto &e : entries)
+	{
+		auto fields = split_string(e, ",");
+		census.push_back(Net_ID::from_string(fields[1]));
+	}
+	return census;
+}
+
+void Mandelbrot_App::joiners(const std::vector<Net_ID> &census)
+{
+	std::copy_if(begin(census), end(census), std::back_inserter(m_workers), [&] (auto &worker)
+	{
+		auto itr = std::find(begin(m_workers), end(m_workers), worker);
+		if (itr == end(m_workers))
+		{
+			add_worker(worker);
+			return true;
+		}
+		return false;
+	});
+}
+
+void Mandelbrot_App::leavers(const std::vector<Net_ID> &census)
+{
+	m_workers.erase(std::remove_if(begin(m_workers), end(m_workers), [&] (auto &worker)
+	{
+		auto itr = std::find(begin(census), end(census), worker);
+		if (itr == end(census))
+		{
+			sub_worker(worker);
+			return true;
+		}
+		return false;
+	}), end(m_workers));
+}
+
+void Mandelbrot_App::add_worker(const Net_ID &worker)
 {
 	if (m_jobs_ready.empty()) return;
 	auto job = m_jobs_ready.front();
-	auto job_body = (Job*)job->begin();
 	m_jobs_ready.pop_front();
-	m_jobs_sent[m_key] = job;
+	dispatch(job, worker);
+}
+
+void Mandelbrot_App::sub_worker(const Net_ID &worker)
+{
+	auto itr = m_jobs_assigned.find(worker);
+	if (itr != end(m_jobs_assigned))
+	{
+		for (auto &ticket : itr->second) m_jobs_ready.push_back(ticket.m_job);
+		m_jobs_assigned.erase(itr);
+	}
+}
+
+void Mandelbrot_App::dispatch(std::shared_ptr<Msg> job, const Net_ID &worker)
+{
+	auto now = std::chrono::high_resolution_clock::now();
+	m_jobs_assigned[worker].push_back(ticket{job, now});
+	auto job_body = (Job*)job->begin();
 	job_body->m_reply = m_select[select_reply];
-	job_body->m_time = std::chrono::high_resolution_clock::now();
-	job_body->m_key = m_key++;
-	job->set_dest(m_workers[rand() % m_workers.size()]);
+	job_body->m_worker = worker;
+	job->set_dest(worker);
 	global_router->send(job);
 }
 
-void Mandelbrot_App::refresh_workers()
+void Mandelbrot_App::restart()
 {
-	auto entries = global_router->enquire("mandel_worker");
-	if (entries != m_entries)
+	auto now = std::chrono::high_resolution_clock::now();
+	for (auto &itr : m_jobs_assigned)
 	{
-		m_entries = entries;
-		m_workers.clear();
-		for (auto &e : entries)
+		auto &tickets = itr.second;
+		for (auto itr = begin(tickets); itr != end(tickets);)
 		{
-			auto fields = split_string(e, ",");
-			m_workers.push_back(Net_ID::from_string(fields[1]));
+			auto then = itr->m_time;
+			auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - then);
+			if (age.count() > JOB_TIMEOUT)
+			{
+				auto job = itr->m_job;
+				m_jobs_ready.push_front(job);
+				itr = tickets.erase(itr);
+			}
+			else ++itr;
 		}
 	}
+}
+
+void Mandelbrot_App::slackers()
+{
+	if (m_jobs_ready.empty()) return;
+	for (auto itr = begin(m_jobs_ready); itr != end(m_jobs_ready);)
+	{
+		const Net_ID *worker = nullptr;
+		size_t cnt = 1000000;
+		for (auto &entry : m_jobs_assigned)
+		{
+			auto c = entry.second.size();
+			if (c < JOB_LIMIT && c < cnt)
+			{
+				worker = &entry.first;
+				cnt = entry.second.size();
+			}
+		}
+		if (cnt == 1000000) return;		
+		auto job = *itr;
+		dispatch(job, *worker);
+		itr = m_jobs_ready.erase(itr);
+	}
+}
+
+void Mandelbrot_App::complete(const Net_ID &worker, uint32_t key)
+{
+	auto itr = m_jobs_assigned.find(worker);
+	if (itr != end(m_jobs_assigned))
+	{
+		auto &tickets = itr->second;
+		auto itr = std::find_if(begin(tickets), end(tickets), [&] (auto &ticket)
+		{
+			auto job = ticket.m_job;
+			auto job_body = (Job*)job->begin();
+			return key == job_body->m_key;
+		});
+		if (itr == end(tickets)) return;
+		tickets.erase(itr);
+		if (m_jobs_ready.empty()) return;
+		auto job = m_jobs_ready.front();
+		m_jobs_ready.pop_front();
+		dispatch(job, worker);
+	}
+}
+
+void Mandelbrot_App::reset()
+{
+	//new reply mailbox !
+	global_router->free(m_select[select_reply]);
+	m_select[select_reply] = global_router->alloc();
+
+	//clear out old assignments
+	for (auto &work : m_jobs_assigned) work.second.clear();
+
+	//fill job que
+	auto key = 0;
+	m_jobs_ready.clear();
+	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
+	{
+		m_jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
+		auto job_body = (Job*)m_jobs_ready.back()->begin();
+		job_body->m_key = key++;
+		job_body->m_x = 0;
+		job_body->m_y = y;
+		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
+		job_body->m_y1 = y + 1;
+		job_body->m_cw = CANVAS_WIDTH * CANVAS_SCALE;
+		job_body->m_ch = CANVAS_HEIGHT * CANVAS_SCALE;
+		job_body->m_cx = m_cx;
+		job_body->m_cy = m_cy;
+		job_body->m_z = m_zoom;
+	}
+
+	//get to work !
+	slackers();
 }
