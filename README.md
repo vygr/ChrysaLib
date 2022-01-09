@@ -97,7 +97,7 @@ make clean
 Run with:
 
 ```text
-hub_node [switches] [ip_addr] ...
+hub_node [switches] [ip_addr ...]
 eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65
 -h:    this help info
 -t ms: exit timeout, default 0, ie never

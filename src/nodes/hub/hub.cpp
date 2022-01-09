@@ -43,7 +43,7 @@ int32_t main(int32_t argc, char *argv[])
 			else
 			{
 			help:
-				std::cout << "hub_node [switches] [ip_addr] ...\n";
+				std::cout << "hub_node [switches] [ip_addr ...]\n";
 				std::cout << "eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65\n";
 				std::cout << "-h:    this help info\n";
 				std::cout << "-t ms: exit timeout, default 0, ie never\n";
