@@ -12,7 +12,7 @@ private:
 	const uint32_t CANVAS_WIDTH = 800;
 	const uint32_t CANVAS_HEIGHT = 800;
 	const uint32_t CANVAS_SCALE = 2;
-	const uint32_t JOB_TIMEOUT = 1000;
+	const uint32_t JOB_TIMEOUT = 5000;
 	const uint32_t JOB_LIMIT = 16;
 public:
 	Mandelbrot_App()
