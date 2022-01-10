@@ -1,6 +1,5 @@
 #include "app.h"
 #include "../../gui/ui.h"
-#include <assert.h>
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
@@ -58,7 +57,7 @@ void Mandelbrot_App::run()
 			//we will gladly do the work for anyone.
 			m_thread_pool->enqueue([=, msg_ref = std::move(msg)]
 			{
-				auto job_body = (Job*)msg_ref->begin();
+				auto job_body = (Mandelbrot_Job*)msg_ref->begin();
 				auto x = job_body->m_x;
 				auto y = job_body->m_y;
 				auto x1 = job_body->m_x1;
@@ -69,8 +68,10 @@ void Mandelbrot_App::run()
 				auto cy = job_body->m_cy;
 				auto z = job_body->m_z;
 				auto stride = (x1 - x);
-				auto reply = std::make_shared<Msg>(sizeof(Job_reply) + stride * (y1 - y));
-				auto reply_body = (Job_reply*)reply->begin();
+				auto reply = std::make_shared<Msg>(sizeof(Mandelbrot_Job_reply)
+					+ (stride * (y1 - y) * sizeof(uint8_t)));
+				auto reply_body = (Mandelbrot_Job_reply*)reply->begin();
+				//must return these two !!
 				reply_body->m_worker = job_body->m_worker;
 				reply_body->m_key = job_body->m_key;
 				reply_body->m_x = x;
@@ -96,10 +97,8 @@ void Mandelbrot_App::run()
 		case select_reply:
 		{
 			//job reply, validate it's a current job not some old discarded one
-			auto reply_body = (Job_reply*)msg->begin();
-			auto worker = reply_body->m_worker;
-			auto itr = m_jobs_assigned.find(worker);
-			if (itr == end(m_jobs_assigned)) break;
+			if (!m_farm->validate_job(msg)) break;
+			auto reply_body = (Mandelbrot_Job_reply*)msg->begin();
 
 			//use the reply data
 			auto x = reply_body->m_x;
@@ -124,7 +123,7 @@ void Mandelbrot_App::run()
 			m_dirty = true;
 
 			//remove completed job, maybe send off another
-			complete(worker, reply_body->m_key);
+			m_farm->complete_job(msg);
 			break;
 		}
 		case select_timer:
@@ -133,11 +132,7 @@ void Mandelbrot_App::run()
 			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(JOB_TIMEOUT), 0);
 
 			//adjust workforce and jobs
-			restart();
-			auto workers = census();
-			leavers(workers);
-			joiners(workers);
-			slackers();
+			m_farm->refresh();
 
 			//update display
 			if (m_dirty)
@@ -198,7 +193,7 @@ uint8_t Mandelbrot_App::depth(double x0, double y0) const
 	double yc = 0;
 	double x2 = 0;
 	double y2 = 0;
-	uint8_t i;
+	uint32_t i;
 	for (i = 0; i != 255 && (x2 + y2) < 4.0; ++i)
 	{
 		yc = xc * yc * 2.0 + y0;
@@ -209,157 +204,28 @@ uint8_t Mandelbrot_App::depth(double x0, double y0) const
 	return i;
 }
 
-std::vector<Net_ID> Mandelbrot_App::census()
-{
-	auto census = std::vector<Net_ID>{};
-	auto entries = global_router->enquire("mandel_worker");
-	for (auto &e : entries)
-	{
-		auto fields = split_string(e, ",");
-		census.push_back(Net_ID::from_string(fields[1]));
-	}
-	return census;
-}
-
-void Mandelbrot_App::joiners(const std::vector<Net_ID> &census)
-{
-	std::copy_if(begin(census), end(census), std::back_inserter(m_workers), [&] (auto &worker)
-	{
-		auto itr = std::find(begin(m_workers), end(m_workers), worker);
-		if (itr == end(m_workers))
-		{
-			add_worker(worker);
-			return true;
-		}
-		return false;
-	});
-}
-
-void Mandelbrot_App::leavers(const std::vector<Net_ID> &census)
-{
-	m_workers.erase(std::remove_if(begin(m_workers), end(m_workers), [&] (auto &worker)
-	{
-		auto itr = std::find(begin(census), end(census), worker);
-		if (itr == end(census))
-		{
-			sub_worker(worker);
-			return true;
-		}
-		return false;
-	}), end(m_workers));
-}
-
-void Mandelbrot_App::add_worker(const Net_ID &worker)
-{
-	if (m_jobs_ready.empty()) return;
-	auto job = m_jobs_ready.front();
-	m_jobs_ready.pop_front();
-	dispatch(job, worker);
-}
-
-void Mandelbrot_App::sub_worker(const Net_ID &worker)
-{
-	auto itr = m_jobs_assigned.find(worker);
-	if (itr != end(m_jobs_assigned))
-	{
-		for (auto &ticket : itr->second) m_jobs_ready.push_back(ticket.m_job);
-		m_jobs_assigned.erase(itr);
-	}
-}
-
-void Mandelbrot_App::dispatch(std::shared_ptr<Msg> job, const Net_ID &worker)
-{
-	auto now = std::chrono::high_resolution_clock::now();
-	m_jobs_assigned[worker].push_back(ticket{job, now});
-	auto job_body = (Job*)job->begin();
-	job_body->m_reply = m_select[select_reply];
-	job_body->m_worker = worker;
-	job->set_dest(worker);
-	global_router->send(job);
-}
-
-void Mandelbrot_App::restart()
-{
-	auto now = std::chrono::high_resolution_clock::now();
-	for (auto &itr : m_jobs_assigned)
-	{
-		auto &tickets = itr.second;
-		for (auto itr = begin(tickets); itr != end(tickets);)
-		{
-			auto then = itr->m_time;
-			auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - then);
-			if (age.count() > JOB_TIMEOUT)
-			{
-				auto job = itr->m_job;
-				m_jobs_ready.push_front(job);
-				itr = tickets.erase(itr);
-			}
-			else ++itr;
-		}
-	}
-}
-
-void Mandelbrot_App::slackers()
-{
-	if (m_jobs_ready.empty()) return;
-	for (auto itr = begin(m_jobs_ready); itr != end(m_jobs_ready);)
-	{
-		const Net_ID *worker = nullptr;
-		size_t cnt = 1000000;
-		for (auto &entry : m_jobs_assigned)
-		{
-			auto c = entry.second.size();
-			if (c < JOB_LIMIT && c < cnt)
-			{
-				worker = &entry.first;
-				cnt = entry.second.size();
-			}
-		}
-		if (cnt == 1000000) return;		
-		auto job = *itr;
-		dispatch(job, *worker);
-		itr = m_jobs_ready.erase(itr);
-	}
-}
-
-void Mandelbrot_App::complete(const Net_ID &worker, uint32_t key)
-{
-	auto itr = m_jobs_assigned.find(worker);
-	if (itr != end(m_jobs_assigned))
-	{
-		auto &tickets = itr->second;
-		auto itr = std::find_if(begin(tickets), end(tickets), [&] (auto &ticket)
-		{
-			auto job = ticket.m_job;
-			auto job_body = (Job*)job->begin();
-			return key == job_body->m_key;
-		});
-		if (itr == end(tickets)) return;
-		tickets.erase(itr);
-		if (m_jobs_ready.empty()) return;
-		auto job = m_jobs_ready.front();
-		m_jobs_ready.pop_front();
-		dispatch(job, worker);
-	}
-}
-
 void Mandelbrot_App::reset()
 {
 	//new reply mailbox !
 	global_router->free(m_select[select_reply]);
 	m_select[select_reply] = global_router->alloc();
 
-	//clear out old assignments
-	for (auto &work : m_jobs_assigned) work.second.clear();
+	//create farm, will kill old one
+	m_farm = std::make_unique<Farm>("mandel_worker",
+		JOB_LIMIT,
+		std::chrono::milliseconds(1),
+		[&] (auto &worker, std::shared_ptr<Msg> job)
+		{
+			//fill in what I need before dispatch
+			auto job_body = (Mandelbrot_Job*)job->begin();
+			job_body->m_reply = m_select[select_reply];
+		});
 
-	//fill job que
-	auto key = 0;
-	m_jobs_ready.clear();
+	//fill farm job que
 	for (auto y = 0; y < CANVAS_HEIGHT * CANVAS_SCALE; ++y)
 	{
-		m_jobs_ready.emplace_back(std::make_shared<Msg>(sizeof(Job)));
-		auto job_body = (Job*)m_jobs_ready.back()->begin();
-		job_body->m_key = key++;
+		auto job = std::make_shared<Msg>(sizeof(Mandelbrot_Job));
+		auto job_body = (Mandelbrot_Job*)job->begin();
 		job_body->m_x = 0;
 		job_body->m_y = y;
 		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
@@ -369,8 +235,9 @@ void Mandelbrot_App::reset()
 		job_body->m_cx = m_cx;
 		job_body->m_cy = m_cy;
 		job_body->m_z = m_zoom;
+		m_farm->add_job(job);
 	}
 
 	//get to work !
-	slackers();
+	m_farm->assign_work();
 }

@@ -3,6 +3,7 @@
 
 #include "../../services/gui_task.h"
 #include "../../utils/threadpool.h"
+#include "../../task/farm.h"
 
 //task
 class Mandelbrot_App : public GUI_Task
@@ -20,11 +21,9 @@ public:
 	{}
 	void run() override;
 private:
-	struct Job
+	struct Mandelbrot_Job : public Farm::Job
 	{
 		Net_ID m_reply;
-		Net_ID m_worker;
-		uint32_t m_key;
 		uint32_t m_x;
 		uint32_t m_y;
 		uint32_t m_x1;
@@ -35,10 +34,8 @@ private:
 		double m_cy;
 		double m_z;
 	};
-	struct Job_reply
+	struct Mandelbrot_Job_reply : public Farm::Job
 	{
-		Net_ID m_worker;
-		uint32_t m_key;
 		uint32_t m_x;
 		uint32_t m_y;
 		uint32_t m_x1;
@@ -53,26 +50,10 @@ private:
 		select_timer,
 		select_size,
 	};
-	struct ticket
-	{
-		std::shared_ptr<Msg> m_job;
-		std::chrono::high_resolution_clock::time_point m_time;
-	};
 	uint8_t depth(double x0, double y0) const;
 	void reset();
-	std::vector<Net_ID> census();
-	void joiners(const std::vector<Net_ID> &census);
-	void leavers(const std::vector<Net_ID> &census);
-	void add_worker(const Net_ID &worker);
-	void sub_worker(const Net_ID &worker);
-	void complete(const Net_ID &worker, uint32_t key);
-	void dispatch(std::shared_ptr<Msg> job, const Net_ID &worker);
-	void restart();
-	void slackers();
-	std::vector<Net_ID> m_workers;
-	std::list<std::shared_ptr<Msg>> m_jobs_ready;
-	std::map<Net_ID, std::list<ticket>> m_jobs_assigned;
 	std::unique_ptr<ThreadPool> m_thread_pool;
+	std::unique_ptr<Farm> m_farm;
 	std::vector<Net_ID> m_select;
 	std::string m_entry;
 	bool m_dirty = false;
