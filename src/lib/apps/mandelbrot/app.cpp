@@ -1,5 +1,6 @@
 #include "app.h"
 #include "../../gui/ui.h"
+#include <cstring>
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
@@ -71,9 +72,9 @@ void Mandelbrot_App::run()
 				auto reply = std::make_shared<Msg>(sizeof(Mandelbrot_Job_reply)
 					+ (stride * (y1 - y) * sizeof(uint8_t)));
 				auto reply_body = (Mandelbrot_Job_reply*)reply->begin();
-				//must return these two !!
-				reply_body->m_worker = job_body->m_worker;
-				reply_body->m_key = job_body->m_key;
+				//must return job header
+				memcpy(&reply_body->m_worker, &job_body->m_worker, sizeof(Farm::Job));
+				//now our specific data
 				reply_body->m_x = x;
 				reply_body->m_y = y;
 				reply_body->m_x1 = x1;
