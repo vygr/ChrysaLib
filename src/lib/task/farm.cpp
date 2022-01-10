@@ -7,7 +7,7 @@ extern std::unique_ptr<Router> global_router;
 
 void Farm::add_job(std::shared_ptr<Msg> job)
 {
-	m_jobs_ready.push_back(job);
+	m_jobs_ready.emplace_back(job);
 }
 
 bool Farm::validate_job(std::shared_ptr<Msg> job)
@@ -20,8 +20,7 @@ bool Farm::validate_job(std::shared_ptr<Msg> job)
 	auto &tickets = itr->second;
 	auto titr = std::find_if(begin(tickets), end(tickets), [&] (auto &ticket)
 	{
-		auto job = ticket.m_job;
-		auto job_body = (Job*)job->begin();
+		auto job_body = (Job*)ticket.m_job->begin();
 		return key == job_body->m_key;
 	});
 	return titr != end(tickets);
@@ -70,9 +69,8 @@ void Farm::leavers(const std::vector<Net_ID> &census)
 void Farm::add_worker(const Net_ID &worker)
 {
 	if (m_jobs_ready.empty()) return;
-	auto job = m_jobs_ready.front();
+	dispatch(worker, m_jobs_ready.front());
 	m_jobs_ready.pop_front();
-	dispatch(worker, job);
 }
 
 void Farm::sub_worker(const Net_ID &worker)
@@ -80,7 +78,11 @@ void Farm::sub_worker(const Net_ID &worker)
 	auto itr = m_jobs_assigned.find(worker);
 	if (itr != end(m_jobs_assigned))
 	{
-		for (auto &ticket : itr->second) m_jobs_ready.push_back(ticket.m_job);
+		auto &tickets = itr->second;
+		std::for_each(begin(tickets), end(tickets), [&] (auto &t)
+		{
+			m_jobs_ready.emplace_back(std::move(t.m_job));
+		});
 		m_jobs_assigned.erase(itr);
 	}
 }
@@ -103,17 +105,16 @@ void Farm::restart()
 	for (auto &itr : m_jobs_assigned)
 	{
 		auto &tickets = itr.second;
-		for (auto itr = begin(tickets); itr != end(tickets);)
+		for (auto titr = begin(tickets); titr != end(tickets);)
 		{
-			auto then = itr->m_time;
+			auto then = titr->m_time;
 			auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - then);
 			if (age > m_timeout)
 			{
-				auto job = itr->m_job;
-				m_jobs_ready.push_front(job);
-				itr = tickets.erase(itr);
+				m_jobs_ready.emplace_front(titr->m_job);
+				titr = tickets.erase(titr);
 			}
-			else ++itr;
+			else ++titr;
 		}
 	}
 }
@@ -135,8 +136,7 @@ void Farm::assign_work()
 			}
 		}
 		if (cnt == 1000000) return;		
-		auto job = *itr;
-		dispatch(*worker, job);
+		dispatch(*worker, *itr);
 		itr = m_jobs_ready.erase(itr);
 	}
 }
@@ -150,18 +150,16 @@ void Farm::complete_job(std::shared_ptr<Msg> job)
 	if (itr != end(m_jobs_assigned))
 	{
 		auto &tickets = itr->second;
-		auto itr = std::find_if(begin(tickets), end(tickets), [&] (auto &ticket)
+		auto titr = std::find_if(begin(tickets), end(tickets), [&] (auto &ticket)
 		{
-			auto job = ticket.m_job;
-			auto job_body = (Job*)job->begin();
+			auto job_body = (Job*)ticket.m_job->begin();
 			return key == job_body->m_key;
 		});
-		if (itr == end(tickets)) return;
-		tickets.erase(itr);
+		if (titr == end(tickets)) return;
+		tickets.erase(titr);
 		if (m_jobs_ready.empty()) return;
-		auto job = m_jobs_ready.front();
+		dispatch(worker, m_jobs_ready.front());
 		m_jobs_ready.pop_front();
-		dispatch(worker, job);
 	}
 }
 
