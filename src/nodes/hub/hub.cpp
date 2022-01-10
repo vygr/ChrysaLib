@@ -77,6 +77,9 @@ int32_t main(int32_t argc, char *argv[])
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
+	std::cout << "+----------+" << std::endl;
+	std::cout << "| Hub node |" << std::endl;
+	std::cout << "+----------+" << std::endl;
 	m_kernel = std::make_unique<Kernel_Service>();
 	m_kernel->start_thread();
 	if (arg_usb != "")
