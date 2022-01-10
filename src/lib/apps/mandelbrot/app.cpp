@@ -129,7 +129,7 @@ void Mandelbrot_App::run()
 		case select_timer:
 		{
 			//restart timer
-			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(JOB_TIMEOUT), 0);
+			Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(UPDATE_TIMEOUT), 0);
 
 			//adjust workforce and jobs
 			m_farm->refresh();
