@@ -51,9 +51,10 @@ void Mandelbrot_App::run()
 
 	//event loop
 	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1), 0);
-	while (m_running)
+	for (;;)
 	{
 		auto idx = global_router->select(m_select);
+		if (!m_running) break;
 		auto msg = global_router->read(m_select[idx]);
 		switch (idx)
 		{

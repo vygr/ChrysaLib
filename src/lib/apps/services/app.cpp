@@ -83,9 +83,10 @@ void Services_App::run()
 	auto old_labels = std::vector<std::shared_ptr<Label>>{};
 	auto select = alloc_select(select_size);
 	Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(100), 0);
-	while (m_running)
+	for (;;)
 	{
 		auto idx = global_router->select(select);
+		if (!m_running) break;
 		auto msg = global_router->read(select[idx]);
 		switch (idx)
 		{
@@ -154,8 +155,6 @@ void Services_App::run()
 			}
 			break;
 		}
-		default:
-			break;
 		}
 	}
 

@@ -59,9 +59,10 @@ void Launcher_App::run()
 
 	//event loop
 	auto mbox = global_router->validate(get_id());
-	while (m_running)
+	for (;;)
 	{
 		auto msg = mbox->read();
+		if (!m_running) break;
 		auto body = (View::Event*)msg->begin();
 		switch (body->m_target_id)
 		{
@@ -87,6 +88,7 @@ void Launcher_App::run()
 				auto app = Mandelbrot_App::create();
 				Kernel_Service::start_task(app);
 			}
+			break;
 		}
 		default:
 		{

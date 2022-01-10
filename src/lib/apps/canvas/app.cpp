@@ -77,9 +77,10 @@ void Canvas_App::run()
 
 	//event loop
 	auto select = alloc_select(select_size);
-	while (m_running)
+	for (;;)
 	{
 		auto idx = global_router->select(select);
+		if (!m_running) break;
 		auto msg = global_router->read(select[idx]);
 		auto body = (View::Event*)msg->begin();
 		switch (body->m_target_id)
