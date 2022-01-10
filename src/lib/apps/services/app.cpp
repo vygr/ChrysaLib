@@ -14,6 +14,11 @@ void Services_App::run()
 		select_size,
 	};
 	
+	enum
+	{
+		event_close,
+	};
+
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -30,6 +35,7 @@ void Services_App::run()
 					ui_end
 					ui_button(close_button, ({
 						{"text", to_utf8(0xea19)}}))
+						ui_connect(event_close)
 					ui_end
 				ui_end
 				ui_title(title, ({
@@ -85,9 +91,14 @@ void Services_App::run()
 		{
 		case select_main:
 		{
-			auto body = (Event*)msg->begin();
-			switch (body->m_evt)
+			auto body = (View::Event*)msg->begin();
+			switch (body->m_target_id)
 			{
+			case event_close:
+			{
+				Kernel_Service::stop_task(shared_from_this());
+				break;
+			}
 			default:
 			{
 				//dispatch to widgets
@@ -147,5 +158,8 @@ void Services_App::run()
 			break;
 		}
 	}
+
+	//tidy up
+	window->hide();
 	free_select(select);
 }

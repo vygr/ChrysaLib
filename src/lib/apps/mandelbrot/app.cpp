@@ -7,6 +7,11 @@ uint32_t from_utf8(uint8_t **data);
 
 void Mandelbrot_App::run()
 {
+	enum
+	{
+		event_close,
+	};
+
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))
@@ -17,6 +22,7 @@ void Mandelbrot_App::run()
 					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
 					ui_button(close_button, ({
 						{"text", to_utf8(0xea19)}}))
+					ui_connect(event_close)
 					ui_end
 				ui_end
 				ui_title(title, ({
@@ -143,47 +149,62 @@ void Mandelbrot_App::run()
 			}
 			break;
 		}
-		default:
+		case select_main:
 		{
 			//must be select_main
 			auto msg_body = (View::Event*)msg->begin();
-			if (msg_body->m_target_id == canvas->get_id()
-				&& msg_body->m_type == ev_type_mouse)
+			switch (msg_body->m_target_id)
 			{
-				//canvas mouse event
-				auto mouse_body = (View::Event_mouse*)msg_body;
-				if (mouse_body->m_buttons == 1)
-				{
-					//zoom in
-					auto size = canvas->get_size();
-					auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
-					auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
-					m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
-					m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
-					m_zoom *= 0.5;
-					reset();
-				}
-				else if (mouse_body->m_buttons == 3)
-				{
-					//zoom out
-					auto size = canvas->get_size();
-					auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
-					auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
-					m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
-					m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
-					m_zoom *= 2.0;
-					reset();
-				}
-			}
-			else
+			case event_close:
 			{
-				//dispatch to widgets
-				window->event(msg);
+				Kernel_Service::stop_task(shared_from_this());
+				break;
 			}
+			default:
+			{
+				if (msg_body->m_target_id == canvas->get_id()
+					&& msg_body->m_type == ev_type_mouse)
+				{
+					//canvas mouse event
+					auto mouse_body = (View::Event_mouse*)msg_body;
+					if (mouse_body->m_buttons == 1)
+					{
+						//zoom in
+						auto size = canvas->get_size();
+						auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
+						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+						m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
+						m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
+						m_zoom *= 0.5;
+						reset();
+					}
+					else if (mouse_body->m_buttons == 3)
+					{
+						//zoom out
+						auto size = canvas->get_size();
+						auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
+						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+						m_cx += (((((double)rx - (CANVAS_WIDTH / 2.0)) * 2.0) / CANVAS_WIDTH) * m_zoom);
+						m_cy += (((((double)ry - (CANVAS_HEIGHT / 2.0)) * 2.0) / CANVAS_HEIGHT) * m_zoom);
+						m_zoom *= 2.0;
+						reset();
+					}
+				}
+				else
+				{
+					//dispatch to widgets
+					window->event(msg);
+				}
+				break;
+			}
+			}
+			break;
 		}
 		}
 	}
 
+	//tidy up
+	window->hide();
 	global_router->forget(m_entry);
 	free_select(m_select);
 }

@@ -12,6 +12,7 @@ void Launcher_App::run()
 {
 	enum
 	{
+		event_close,
 		event_button,
 	};
 	
@@ -32,6 +33,7 @@ void Launcher_App::run()
 				ui_end
 			ui_end
 			ui_grid(app_grid, ({
+				{"color" , Property::get_default("env_toolbar2_col")->get_long()},
 				{"grid_width", 2}}))
 				ui_button(_1, ({
 					{"text", "services"}}))
@@ -50,7 +52,7 @@ void Launcher_App::run()
 	ui_end
 
 	auto s = window->pref_size();
-	window->change(0, 0, s.m_w, s.m_h);
+	window->change(0, 0, s.m_w * 110 / 100, s.m_h);
 
 	//add to my GUI screen
 	add_front(window);
@@ -94,4 +96,7 @@ void Launcher_App::run()
 		}
 		}
 	}
+
+	//tidy up
+	window->hide();
 }
