@@ -76,8 +76,7 @@ void Mandelbrot_App::run()
 				auto cy = job_body->m_cy;
 				auto z = job_body->m_z;
 				auto stride = (x1 - x);
-				auto reply = std::make_shared<Msg>(sizeof(Mandelbrot_Job_reply)
-					+ (stride * (y1 - y) * sizeof(uint8_t)));
+				auto reply = std::make_shared<Msg>(sizeof(Mandelbrot_Job_reply) + stride * (y1 - y));
 				auto reply_body = (Mandelbrot_Job_reply*)reply->begin();
 				//must return job header
 				memcpy(&reply_body->m_worker, &job_body->m_worker, sizeof(Farm::Job));
