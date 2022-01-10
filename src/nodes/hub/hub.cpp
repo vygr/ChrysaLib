@@ -112,9 +112,14 @@ int32_t main(int32_t argc, char *argv[])
 			old_entries = entries;
 			if (arg_v > 1)
 			{
-				std::cout << "+-----------+" << std::endl;
-				std::cout << "| Directory |" << std::endl;
-				std::cout << "+-----------+" << std::endl;
+				auto items = entries.size();
+				auto label = (items == 1) ? " Item |" : " Items |";
+				auto padding = std::string(std::to_string(items).length()+strlen(label), '-');
+				auto topntail = "+-----------" + padding + "+";
+				std::cout << topntail << std::endl;
+				std::cout << "| Directory: " << items << label << std::endl;
+				std::cout << topntail << std::endl;
+
 				for (auto &e : entries)
 				{
 					auto fields = split_string(e, ",");
