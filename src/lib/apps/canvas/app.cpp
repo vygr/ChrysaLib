@@ -1,6 +1,5 @@
 #include "app.h"
 #include "../../gui/ui.h"
-#include <assert.h>
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);

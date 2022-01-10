@@ -7,9 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "../apps/canvas/app.h"
-#include "../apps/services/app.h"
-#include "../apps/mandelbrot/app.h"
+#include "../apps/launcher/app.h"
 
 //////
 // gui
@@ -46,12 +44,8 @@ void GUI_Service::run()
 	});
 
 	//start up test tasks
-	auto task1 = std::make_unique<Canvas_App>();
-	auto task1_id = Kernel_Service::start_task(task1.get());
-	auto task2 = std::make_unique<Services_App>();
-	auto task2_id = Kernel_Service::start_task(task2.get());
-	auto task3 = std::make_unique<Mandelbrot_App>();
-	auto task3_id = Kernel_Service::start_task(task3.get());
+	auto app = std::make_shared<Launcher_App>();
+	Kernel_Service::start_task(app);
 
 	//event loop
 	while (m_running)
@@ -148,14 +142,8 @@ void GUI_Service::run()
 		SDL_Quit();
 	});
 
-	//stop test task
-	task1->stop_thread();
-	task2->stop_thread();
-	task3->stop_thread();
-
-	task1->join_thread();
-	task2->join_thread();
-	task3->join_thread();
+	//stop launcher task...
+	app->stop_thread();
 
 	//forget myself
 	global_router->forget(entry);

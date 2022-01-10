@@ -33,7 +33,7 @@ public:
 	struct Event_start_task : public Event
 	{
 		Net_ID m_reply;
-		Task *m_task;
+		std::shared_ptr<Task> m_task;
 	};
 	struct start_task_reply
 	{
@@ -41,7 +41,7 @@ public:
 	};
 	struct Event_stop_task : public Event
 	{
-		Task *m_task;
+		std::shared_ptr<Task> m_task;
 	};
 	struct Event_callback : public Event
 	{
@@ -61,11 +61,12 @@ public:
 	void run() override;
 	static void callback(std::function<void()> callback);
 	static void exit();
-	static Net_ID start_task(Task *task);
-	static void stop_task();
+	static Net_ID start_task(std::shared_ptr<Task> task);
+	static void stop_task(std::shared_ptr<Task> task);
 	static void timed_mail(const Net_ID &reply, std::chrono::milliseconds timeout, uint64_t id);
 private:
 	std::list<std::shared_ptr<Msg>> m_timer;
+	std::list<std::shared_ptr<Task>> m_tasks;
 };
 
 #endif

@@ -1,7 +1,6 @@
 #include "region.h"
 
 #include <algorithm>
-#include <assert.h>
 
 Region *Region::free()
 {

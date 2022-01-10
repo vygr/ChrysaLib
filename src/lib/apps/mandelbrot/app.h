@@ -20,6 +20,7 @@ public:
 		: GUI_Task()
 		, m_thread_pool(std::make_unique<ThreadPool>(JOB_LIMIT))
 	{}
+	static std::shared_ptr<Mandelbrot_App> create() { return std::make_shared<Mandelbrot_App>(); }
 	void run() override;
 private:
 	struct Mandelbrot_Job : public Farm::Job

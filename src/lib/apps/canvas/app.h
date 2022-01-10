@@ -10,6 +10,7 @@ public:
 	Canvas_App()
 		: GUI_Task()
 	{}
+	static std::shared_ptr<Canvas_App> create() { return std::make_shared<Canvas_App>(); }
 	void run() override;
 };
 

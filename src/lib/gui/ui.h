@@ -15,6 +15,7 @@
 #include "progress.h"
 
 #define ui_end ui_root.pop_back();
+#define ui_connect(_event_) ui_root.back()->connect(_event_);
 
 #define ui_window(_name_, _props_) \
 	auto ui_root = std::vector<std::shared_ptr<View>>{}; \

@@ -10,6 +10,7 @@ public:
 	Services_App()
 		: GUI_Task()
 	{}
+	static std::shared_ptr<Services_App> create() { return std::make_shared<Services_App>(); }
 	void run() override;
 };
 

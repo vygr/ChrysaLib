@@ -6,7 +6,7 @@
 extern std::unique_ptr<Router> global_router;
 
 //task class, thread executes the run method
-class Task
+class Task : public std::enable_shared_from_this<Task>
 {
 public:
 	enum
