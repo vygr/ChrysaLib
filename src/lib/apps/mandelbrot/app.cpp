@@ -213,7 +213,7 @@ void Mandelbrot_App::reset()
 	//create farm, will kill old one
 	m_farm = std::make_unique<Farm>("mandel_worker",
 		JOB_LIMIT,
-		std::chrono::milliseconds(1),
+		std::chrono::milliseconds(JOB_TIMEOUT),
 		[&] (auto &worker, std::shared_ptr<Msg> job)
 		{
 			//fill in what I need before dispatch
