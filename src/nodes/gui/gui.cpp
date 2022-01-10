@@ -10,7 +10,7 @@
 
 std::unique_ptr<Router> global_router;
 std::thread::id global_kernel_thread_id;
-int32_t arg_v = 0;
+uint32_t arg_v = 0;
 
 void ss_reset(std::stringstream &ss, std::string s)
 {
