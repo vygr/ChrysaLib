@@ -99,10 +99,11 @@ Run with:
 ```text
 hub_node [switches] [ip_addr ...]
 eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65
--h:    this help info
--t ms: exit timeout, default 0, ie never
--usb:  start the usb link manager
--ip:   start the ip link manager server
+-h:       this help info
+-v level: verbosity, default 0, ie none
+-t ms:    exit timeout, default 0, ie never
+-usb:     start the usb link manager
+-ip:      start the ip link manager server
 ```
 
 ## Usage

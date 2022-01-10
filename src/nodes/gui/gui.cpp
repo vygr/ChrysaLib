@@ -10,6 +10,7 @@
 
 std::unique_ptr<Router> global_router;
 std::thread::id global_kernel_thread_id;
+int32_t arg_v = 0;
 
 void ss_reset(std::stringstream &ss, std::string s)
 {
@@ -36,13 +37,20 @@ int32_t main(int32_t argc, char *argv[])
 				ss_reset(ss, argv[i]);
 				ss >> arg_t;
 			}
+			else if (opt == "v")
+			{
+				if (++i >= argc) goto help;
+				ss_reset(ss, argv[i]);
+				ss >> arg_v;
+			}
 			else
 			{
 			help:
 				std::cout << "gui_node [switches] [ip_addr ...]\n";
 				std::cout << "eg. gui_node -t 10000 127.0.0.1\n";
-				std::cout << "-h:    this help info\n";
-				std::cout << "-t ms: exit timeout, default 0, ie never\n";
+				std::cout << "-h:       this help info\n";
+				std::cout << "-v level: verbosity, default 0, ie none\n";
+				std::cout << "-t ms:    exit timeout, default 0, ie never\n";
 				exit(0);
 			}
 		}
@@ -68,12 +76,12 @@ int32_t main(int32_t argc, char *argv[])
 	m_gui->start_thread();
 	if (!arg_dial.empty())
 	{
-		std::cout << "Starting IP link manager" << std::endl;
+		if (arg_v > 1) std::cout << "Starting IP link manager" << std::endl;
 		m_ip_link_manager = std::make_unique<IP_Link_Manager>("");
 		m_ip_link_manager->start_thread();
 		for (auto &addr : arg_dial)
 		{
-			std::cout << "Dialing " << addr << std::endl;
+			if (arg_v > 1) std::cout << "Dialing " << addr << std::endl;
 			m_ip_link_manager->dial(addr);
 		}
 	}

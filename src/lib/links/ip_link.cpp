@@ -4,6 +4,7 @@
 #include <cstring>
 
 extern std::unique_ptr<Router> global_router;
+extern uint32_t arg_v;
 
 ///////////
 //utilities
@@ -60,7 +61,7 @@ void IP_Link_Manager::run()
 		m_links.erase(std::remove_if(begin(m_links), end(m_links), [&] (auto &link)
 		{
 			if (link->m_running) return false;
-			std::cout << "ip_link: purged" << std::endl;
+			if (arg_v > 0) std::cout << "ip_link: purged" << std::endl;
 			link->stop_threads();
 			link->join_threads();
 			return true;
@@ -82,19 +83,19 @@ void IP_Link_Manager::stop_thread()
 
 void IP_Link_Manager::accept()
 {
-	std::cout << "accept: waiting..." << std::endl;
+	if (arg_v > 0) std::cout << "accept: waiting..." << std::endl;
 	auto socket = std::make_shared<asio::ip::tcp::socket>(m_io_context);
 	m_acceptor.async_accept(*socket, [socket, this] (const asio::error_code ec)
 	{
 		if (!ec)
 		{
-			std::cout << "accept: connected" << std::endl;
+			if (arg_v > 0) std::cout << "accept: connected" << std::endl;
 			m_links.emplace_back(std::make_unique<IP_Link>(socket));
 			m_links.back()->start_threads();
 		}
 		else
 		{
-			std::cout << "accept: error, " << ec.message() << std::endl;
+			if (arg_v > 0) std::cout << "accept: error, " << ec.message() << std::endl;
 		}
 		if (m_running) accept();
 	});
@@ -106,20 +107,20 @@ void IP_Link_Manager::connect(const std::string &addr)
 	asio::ip::address ip_address = asio::ip::make_address(addr, ec);
 	if (!ec)
 	{
-		std::cout << "connect: waiting..." << std::endl;
+		if (arg_v > 0) std::cout << "connect: waiting..." << std::endl;
 		asio::ip::tcp::endpoint ep(ip_address, IP_LINK_PORT);
 		auto socket = std::make_shared<asio::ip::tcp::socket>(m_io_context);
 		socket->async_connect(ep, [socket, this] (const asio::error_code ec)
 		{
 			if (!ec)
 			{
-				std::cout << "connect: connected" << std::endl;
+				if (arg_v > 0) std::cout << "connect: connected" << std::endl;
 				m_links.emplace_back(std::make_unique<IP_Link>(socket));
 				m_links.back()->start_threads();
 			}
 			else
 			{
-				std::cout << "connect: error, " << ec.message() << std::endl;
+				if (arg_v > 0) std::cout << "connect: error, " << ec.message() << std::endl;
 			}
 		});
 	}

@@ -10,6 +10,7 @@
 
 std::unique_ptr<Router> global_router;
 std::thread::id global_kernel_thread_id;
+int32_t arg_v = 0;
 
 void ss_reset(std::stringstream &ss, std::string s)
 {
@@ -40,15 +41,22 @@ int32_t main(int32_t argc, char *argv[])
 				ss_reset(ss, argv[i]);
 				ss >> arg_t;
 			}
+			else if (opt == "v")
+			{
+				if (++i >= argc) goto help;
+				ss_reset(ss, argv[i]);
+				ss >> arg_v;
+			}
 			else
 			{
 			help:
 				std::cout << "hub_node [switches] [ip_addr ...]\n";
 				std::cout << "eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65\n";
-				std::cout << "-h:    this help info\n";
-				std::cout << "-t ms: exit timeout, default 0, ie never\n";
-				std::cout << "-usb:  start the usb link manager\n";
-				std::cout << "-ip:   start the ip link manager server\n";
+				std::cout << "-h:       this help info\n";
+				std::cout << "-v level: verbosity, default 0, ie none\n";
+				std::cout << "-t ms:    exit timeout, default 0, ie never\n";
+				std::cout << "-usb:     start the usb link manager\n";
+				std::cout << "-ip:      start the ip link manager server\n";
 				exit(0);
 			}
 		}
@@ -73,18 +81,18 @@ int32_t main(int32_t argc, char *argv[])
 	m_kernel->start_thread();
 	if (arg_usb != "")
 	{
-		std::cout << "Starting USB link manager" << std::endl;
+		if (arg_v > 1) std::cout << "Starting USB link manager" << std::endl;
 		m_usb_link_manager = std::make_unique<USB_Link_Manager>();
 		m_usb_link_manager->start_thread();
 	}
 	if (arg_ip != "" || !arg_dial.empty())
 	{
-		std::cout << "Starting IP link manager" << std::endl;
+		if (arg_v > 1) std::cout << "Starting IP link manager" << std::endl;
 		m_ip_link_manager = std::make_unique<IP_Link_Manager>(arg_ip);
 		m_ip_link_manager->start_thread();
 		for (auto &addr : arg_dial)
 		{
-			std::cout << "Dialing " << addr << std::endl;
+			if (arg_v > 1) std::cout << "Dialing " << addr << std::endl;
 			m_ip_link_manager->dial(addr);
 		}
 	}
@@ -97,17 +105,20 @@ int32_t main(int32_t argc, char *argv[])
 		auto entries = global_router->enquire("");
 		if (entries != old_entries)
 		{
-			std::cout << "+-----------+" << std::endl;
-			std::cout << "| Directory |" << std::endl;
-			std::cout << "+-----------+" << std::endl;
 			old_entries = entries;
-			for (auto &e : entries)
+			if (arg_v > 1)
 			{
-				auto fields = split_string(e, ",");
-				std::cout << "Service: '" << fields[0];
-				std::cout << "', Info: '" << fields[2];
-				std::cout << "', Net_ID: '" << fields[1];
-				std::cout << "'" << std::endl;
+				std::cout << "+-----------+" << std::endl;
+				std::cout << "| Directory |" << std::endl;
+				std::cout << "+-----------+" << std::endl;
+				for (auto &e : entries)
+				{
+					auto fields = split_string(e, ",");
+					std::cout << "Service: '" << fields[0];
+					std::cout << "', Info: '" << fields[2];
+					std::cout << "', Net_ID: '" << fields[1];
+					std::cout << "'" << std::endl;
+				}
 			}
 		}
 

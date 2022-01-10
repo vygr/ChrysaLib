@@ -6,6 +6,7 @@
 #include <cstring>
 
 extern std::unique_ptr<Router> global_router;
+extern uint32_t arg_v;
 
 ///////////
 //utilities
@@ -101,7 +102,7 @@ void USB_Link_Manager::run()
 		m_links.erase(std::remove_if(begin(m_links), end(m_links), [&] (auto &link)
 		{
 			if (link->get_usb_dev_inst().m_flag == true) return false;
-			std::cout << "usb_link: purged" << std::endl;
+			if (arg_v > 0) std::cout << "usb_link: purged" << std::endl;
 			link->stop_threads();
 			link->join_threads();
 			return true;
