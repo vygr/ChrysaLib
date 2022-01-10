@@ -1,6 +1,7 @@
 #include "farm.h"
 #include "../mail/router.h"
 #include <chrono>
+#include <algorithm>
 
 extern std::unique_ptr<Router> global_router;
 
