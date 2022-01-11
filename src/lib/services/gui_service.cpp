@@ -43,15 +43,22 @@ void GUI_Service::run()
 		SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 	});
 
-	//start up test tasks
+	//start up launcher task
 	auto app = std::make_shared<Launcher_App>();
+	std::shared_ptr<Msg> msg;
 	Kernel_Service::start_task(app);
+	while ((msg = mbox->poll()) == nullptr)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(GUI_FRAME_RATE));
+	}
+	goto body;
 
 	//event loop
 	while (m_running)
 	{
-		while (auto msg = mbox->poll())
+		while ((msg = mbox->poll()))
 		{
+		body:
 			auto body = (Event*)msg->begin();
 			switch (body->m_evt)
 			{
@@ -81,8 +88,8 @@ void GUI_Service::run()
 			{
 				//sub view from screen
 				auto event_body = (Event_sub*)body;
+				event_body->m_view->hide();
 				event_body->m_view->sub();
-				m_screen->dirty_all();
 				auto reply = std::make_shared<Msg>();
 				reply->set_dest(event_body->m_reply);
 				global_router->send(reply);
@@ -133,6 +140,7 @@ void GUI_Service::run()
 
 		//frame polling loop
 		std::this_thread::sleep_for(std::chrono::milliseconds(GUI_FRAME_RATE));
+		if (m_screen->m_children.empty()) break;
 	}
 
 	Kernel_Service::callback([&]()
@@ -142,13 +150,12 @@ void GUI_Service::run()
 		SDL_Quit();
 	});
 
-	//stop launcher task...
-	app->stop_thread();
-
 	//forget myself
 	global_router->forget(entry);
 
 	//ask kernel to exit !!!
+	Kernel_Service::stop_task(shared_from_this());
+	Kernel_Service::join_task(shared_from_this());
 	Kernel_Service::exit();
 }
 
@@ -352,7 +359,21 @@ void GUI_Service::composit()
 
 GUI_Service *GUI_Service::quit(SDL_Event &e)
 {
-	m_running = false;
+	//send close to all children
+	auto children = m_screen->children();
+	for (auto &child : children)
+	{
+		auto owner = child->find_owner();
+		if (owner != Net_ID())
+		{
+			auto msg = std::make_shared<Msg>(sizeof(View::Event));
+			auto event_body = (View::Event*)msg->begin();
+			msg->set_dest(owner);
+			event_body->m_evt = evt_exit;
+			event_body->m_type = ev_type_gui;
+			global_router->send(msg);
+		}
+	}
 	return this;
 }
 
@@ -371,7 +392,7 @@ View *GUI_Service::set_mouse_id()
 				auto event_body = (View::Event_exit*)msg->begin();
 				msg->set_dest(owner);
 				event_body->m_type = ev_type_exit;
-				event_body->m_target_id = m_mouse_id;
+				event_body->m_evt = m_mouse_id;
 				global_router->send(msg);
 			}
 		}
@@ -383,7 +404,7 @@ View *GUI_Service::set_mouse_id()
 			auto event_body = (View::Event_enter*)msg->begin();
 			msg->set_dest(owner);
 			event_body->m_type = ev_type_enter;
-			event_body->m_target_id = m_mouse_id;
+			event_body->m_evt = m_mouse_id;
 			global_router->send(msg);
 		}
 	}
@@ -400,7 +421,7 @@ GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
 		auto event_body = (View::Event_wheel*)msg->begin();
 		msg->set_dest(owner);
 		event_body->m_type = ev_type_wheel;
-		event_body->m_target_id = m_mouse_id;
+		event_body->m_evt = m_mouse_id;
 		event_body->m_x = e.x;
 		event_body->m_y = e.y;
 		event_body->m_direction = e.direction;
@@ -422,7 +443,7 @@ GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
 		auto event_body = (View::Event_mouse*)msg->begin();
 		msg->set_dest(owner);
 		event_body->m_type = ev_type_mouse;
-		event_body->m_target_id = m_mouse_id;
+		event_body->m_evt = m_mouse_id;
 		event_body->m_x = m_mouse_x;
 		event_body->m_y = m_mouse_y;
 		event_body->m_rx = m_mouse_x - view->m_ctx.m_x;
@@ -448,7 +469,7 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 			auto event_body = (View::Event_mouse*)msg->begin();
 			msg->set_dest(owner);
 			event_body->m_type = ev_type_mouse;
-			event_body->m_target_id = m_mouse_id;
+			event_body->m_evt = m_mouse_id;
 			event_body->m_x = m_mouse_x;
 			event_body->m_y = m_mouse_y;
 			event_body->m_rx = m_mouse_x - view->m_ctx.m_x;
@@ -476,7 +497,7 @@ GUI_Service *GUI_Service::mouse_motion(SDL_MouseMotionEvent &e)
 			auto event_body = (View::Event_mouse*)msg->begin();
 			msg->set_dest(owner);
 			event_body->m_type = ev_type_mouse;
-			event_body->m_target_id = m_mouse_id;
+			event_body->m_evt = m_mouse_id;
 			event_body->m_x = m_mouse_x;
 			event_body->m_y = m_mouse_y;
 			event_body->m_rx = m_mouse_x - view->m_ctx.m_x;
@@ -514,7 +535,7 @@ GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
 		auto event_body = (View::Event_key*)msg->begin();
 		msg->set_dest(owner);
 		event_body->m_type = ev_type_key;
-		event_body->m_target_id = m_mouse_id;
+		event_body->m_evt = m_mouse_id;
 		event_body->m_keycode = key_code;
 		event_body->m_key = cook_key(key_code, key, mod);
 		event_body->m_mod = mod;
@@ -539,7 +560,7 @@ GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
 				auto event_body = (View::Event_gui*)msg->begin();
 				msg->set_dest(owner);
 				event_body->m_type = ev_type_gui;
-				event_body->m_target_id = child->get_id();
+				event_body->m_evt = child->get_id();
 				global_router->send(msg);
 			}
 		}

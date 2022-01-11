@@ -51,10 +51,9 @@ void Mandelbrot_App::run()
 
 	//event loop
 	Kernel_Service::timed_mail(m_select[select_timer], std::chrono::milliseconds(1), 0);
-	for (;;)
+	while (m_running)
 	{
 		auto idx = global_router->select(m_select);
-		if (!m_running) break;
 		auto msg = global_router->read(m_select[idx]);
 		switch (idx)
 		{
@@ -153,16 +152,17 @@ void Mandelbrot_App::run()
 		{
 			//must be select_main
 			auto msg_body = (View::Event*)msg->begin();
-			switch (msg_body->m_target_id)
+			switch (msg_body->m_evt)
 			{
 			case event_close:
 			{
+				m_running = false;
 				Kernel_Service::stop_task(shared_from_this());
 				break;
 			}
 			default:
 			{
-				if (msg_body->m_target_id == canvas->get_id()
+				if (msg_body->m_evt == canvas->get_id()
 					&& msg_body->m_type == ev_type_mouse)
 				{
 					//canvas mouse event
@@ -204,9 +204,10 @@ void Mandelbrot_App::run()
 	}
 
 	//tidy up
-	window->hide();
+	sub(window);
 	global_router->forget(m_entry);
 	free_select(m_select);
+	Kernel_Service::join_task(shared_from_this());
 }
 
 uint8_t Mandelbrot_App::depth(double x0, double y0) const

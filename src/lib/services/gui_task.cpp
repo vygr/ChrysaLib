@@ -14,6 +14,7 @@ Net_ID GUI_Task::my_gui()
 	//return my GUI node
 	auto filter = "gui," + global_router->get_dev_id().to_string();
 	auto services = global_router->enquire(filter);
+	if (services.empty()) return Net_ID();
 	auto fields = split_string(services[0], ",");
 	return Net_ID::from_string(fields[1]);
 }
@@ -21,8 +22,9 @@ Net_ID GUI_Task::my_gui()
 void GUI_Task::add_front(std::shared_ptr<View> view)
 {
 	//message to my GUI
-	view->m_owner = m_net_id;
 	auto service_id = my_gui();
+	if (service_id == Net_ID()) return;
+	view->m_owner = m_net_id;
 	auto reply_id = global_router->alloc();
 	auto reply_mbox = global_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_add_front));
@@ -40,8 +42,9 @@ void GUI_Task::add_front(std::shared_ptr<View> view)
 void GUI_Task::add_back(std::shared_ptr<View> view)
 {
 	//message to my GUI
-	view->m_owner = m_net_id;
 	auto service_id = my_gui();
+	if (service_id == Net_ID()) return;
+	view->m_owner = m_net_id;
 	auto reply_id = global_router->alloc();
 	auto reply_mbox = global_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_add_back));
@@ -59,8 +62,9 @@ void GUI_Task::add_back(std::shared_ptr<View> view)
 void GUI_Task::sub(std::shared_ptr<View> view)
 {
 	//message to my GUI
-	view->m_owner = m_net_id;
 	auto service_id = my_gui();
+	if (service_id == Net_ID()) return;
+	view->m_owner = m_net_id;
 	auto reply_id = global_router->alloc();
 	auto reply_mbox = global_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_sub));

@@ -83,20 +83,20 @@ void Services_App::run()
 	auto old_labels = std::vector<std::shared_ptr<Label>>{};
 	auto select = alloc_select(select_size);
 	Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(100), 0);
-	for (;;)
+	while (m_running)
 	{
 		auto idx = global_router->select(select);
-		if (!m_running) break;
 		auto msg = global_router->read(select[idx]);
 		switch (idx)
 		{
 		case select_main:
 		{
 			auto body = (View::Event*)msg->begin();
-			switch (body->m_target_id)
+			switch (body->m_evt)
 			{
 			case event_close:
 			{
+				m_running = false;
 				Kernel_Service::stop_task(shared_from_this());
 				break;
 			}
@@ -159,6 +159,7 @@ void Services_App::run()
 	}
 
 	//tidy up
-	window->hide();
+	sub(window);
 	free_select(select);
+	Kernel_Service::join_task(shared_from_this());
 }

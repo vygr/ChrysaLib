@@ -15,7 +15,7 @@ public:
 	};
 	struct Event
 	{
-		uint32_t m_evt;
+		uint64_t m_evt;
 	};
 	Task()
 		: m_net_id(global_router->alloc())

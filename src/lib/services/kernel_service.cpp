@@ -81,9 +81,18 @@ void Kernel_Service::run()
 			{
 				//stop task
 				auto event_body = (Event_stop_task*)body;
-				event_body->m_task->stop_thread();
-				event_body->m_task->join_thread();
 				auto itr = std::find(begin(m_tasks), end(m_tasks), event_body->m_task);
+				if (itr == end(m_tasks)) break;
+				event_body->m_task->stop_thread();
+				break;
+			}
+			case evt_join_task:
+			{
+				//stop task
+				auto event_body = (Event_stop_task*)body;
+				auto itr = std::find(begin(m_tasks), end(m_tasks), event_body->m_task);
+				if (itr == end(m_tasks)) break;
+				event_body->m_task->join_thread();
 				m_tasks.erase(itr);
 				break;
 			}
@@ -184,7 +193,19 @@ Net_ID Kernel_Service::start_task(std::shared_ptr<Task> task)
 void Kernel_Service::stop_task(std::shared_ptr<Task> task)
 {
 	//send task stop request
-	//kernel will call stop_thread and join_thread
+	//kernel will call stop_thread
+	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_stop_task));
+	auto event_body = (Kernel_Service::Event_stop_task*)msg->begin();
+	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	event_body->m_evt = Kernel_Service::evt_stop_task;
+	event_body->m_task = task;
+	global_router->send(msg);
+}
+
+void Kernel_Service::join_task(std::shared_ptr<Task> task)
+{
+	//send task join request
+	//kernel will call join_thread
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_stop_task));
 	auto event_body = (Kernel_Service::Event_stop_task*)msg->begin();
 	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));

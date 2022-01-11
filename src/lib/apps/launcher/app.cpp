@@ -59,12 +59,11 @@ void Launcher_App::run()
 
 	//event loop
 	auto mbox = global_router->validate(get_id());
-	for (;;)
+	while (m_running)
 	{
 		auto msg = mbox->read();
-		if (!m_running) break;
 		auto body = (View::Event*)msg->begin();
-		switch (body->m_target_id)
+		switch (body->m_evt)
 		{
 		case event_button:
 		{
@@ -90,6 +89,12 @@ void Launcher_App::run()
 			}
 			break;
 		}
+		case event_close:
+		{
+			m_running = false;
+			Kernel_Service::stop_task(shared_from_this());
+			break;
+		}
 		default:
 		{
 			//dispatch to widgets
@@ -100,5 +105,6 @@ void Launcher_App::run()
 	}
 
 	//tidy up
-	window->hide();
+	sub(window);
+	Kernel_Service::join_task(shared_from_this());
 }

@@ -126,7 +126,7 @@ Window *Window::mouse_move(const std::shared_ptr<Msg> &event)
 Window *Window::event(const std::shared_ptr<Msg> &event)
 {
 	auto event_body = (View::Event*)event->begin();
-	auto target = find_id(event_body->m_target_id);
+	auto target = find_id(event_body->m_evt);
 	auto type = event_body->m_type;
 	if (target)
 	{

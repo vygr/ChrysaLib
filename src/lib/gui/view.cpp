@@ -488,7 +488,7 @@ View *View::emit()
 			auto event_body = (View::Event_action*)msg->begin();
 			msg->set_dest(owner);
 			event_body->m_type = ev_type_action;
-			event_body->m_target_id = id;
+			event_body->m_evt = id;
 			event_body->m_source_id = source_id;
 			global_router->send(msg);
 		}

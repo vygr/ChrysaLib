@@ -77,16 +77,16 @@ void Canvas_App::run()
 
 	//event loop
 	auto select = alloc_select(select_size);
-	for (;;)
+	while (m_running)
 	{
 		auto idx = global_router->select(select);
-		if (!m_running) break;
 		auto msg = global_router->read(select[idx]);
 		auto body = (View::Event*)msg->begin();
-		switch (body->m_target_id)
+		switch (body->m_evt)
 		{
 		case event_close:
 		{
+			m_running = false;
 			Kernel_Service::stop_task(shared_from_this());
 			break;
 		}
@@ -100,6 +100,7 @@ void Canvas_App::run()
 	}
 
 	//tidy up
-	window->hide();
+	sub(window);
 	free_select(select);
+	Kernel_Service::join_task(shared_from_this());
 }

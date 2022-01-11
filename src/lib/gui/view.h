@@ -1,11 +1,12 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+#include "../services/task.h"
+#include "../mail/msg.h"
 #include "property.h"
 #include "region.h"
 #include "ctx.h"
 #include "font.h"
-#include "../mail/msg.h"
 #include <list>
 #include <mutex>
 #include <map>
@@ -13,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-//view event msg
+//view event msg types
 enum
 {
 	ev_type_mouse,
@@ -86,9 +87,8 @@ class Router;
 class View
 {
 public:
-	struct Event
+	struct Event : public Task::Event
 	{
-		uint64_t m_target_id;
 		uint64_t m_type;
 	};
 	struct Event_mouse : public Event

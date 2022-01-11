@@ -67,12 +67,12 @@ int32_t main(int32_t argc, char *argv[])
 
 	//vars
 	std::unique_ptr<Kernel_Service> m_kernel;
-	std::unique_ptr<GUI_Service> m_gui;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
+	std::shared_ptr<GUI_Service> m_gui;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
 	m_kernel = std::make_unique<Kernel_Service>();
-	m_gui = std::make_unique<GUI_Service>();
+	m_gui = std::make_shared<GUI_Service>();
 	m_gui->start_thread();
 	if (!arg_dial.empty())
 	{

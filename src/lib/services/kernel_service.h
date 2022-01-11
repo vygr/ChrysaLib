@@ -20,6 +20,7 @@ public:
 		evt_directory,
 		evt_start_task,
 		evt_stop_task,
+		evt_join_task,
 		evt_callback,
 		evt_timed_mail,
 	};
@@ -43,6 +44,10 @@ public:
 	{
 		std::shared_ptr<Task> m_task;
 	};
+	struct Event_join_task : public Event
+	{
+		std::shared_ptr<Task> m_task;
+	};
 	struct Event_callback : public Event
 	{
 		Sync *m_sync;
@@ -63,6 +68,7 @@ public:
 	static void exit();
 	static Net_ID start_task(std::shared_ptr<Task> task);
 	static void stop_task(std::shared_ptr<Task> task);
+	static void join_task(std::shared_ptr<Task> task);
 	static void timed_mail(const Net_ID &reply, std::chrono::milliseconds timeout, uint64_t id);
 private:
 	std::list<std::shared_ptr<Msg>> m_timer;

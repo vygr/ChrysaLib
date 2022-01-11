@@ -8,7 +8,6 @@
 
 void Task::stop_thread()
 {
-	if (!m_running) return;
 	//set stop_thread flag
 	m_running = false;
 	//wake the thread
