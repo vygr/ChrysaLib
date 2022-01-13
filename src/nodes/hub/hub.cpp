@@ -72,7 +72,7 @@ int32_t main(int32_t argc, char *argv[])
 	global_router = std::make_unique<Router>();
 
 	//vars
-	std::unique_ptr<Kernel_Service> m_kernel;
+	std::shared_ptr<Kernel_Service> m_kernel;
 	std::unique_ptr<USB_Link_Manager> m_usb_link_manager;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
 
@@ -81,7 +81,7 @@ int32_t main(int32_t argc, char *argv[])
 	std::cout << "+----------+" << std::endl;
 	std::cout << "| Hub node |" << std::endl;
 	std::cout << "+----------+" << std::endl;
-	m_kernel = std::make_unique<Kernel_Service>();
+	m_kernel = std::make_shared<Kernel_Service>();
 	m_kernel->start_thread();
 	if (arg_usb != "")
 	{

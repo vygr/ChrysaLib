@@ -26,13 +26,10 @@ public:
 		global_router->free(m_net_id);
 	}
 	//responce handling
-	void start_thread()
-	{
-		m_running = true;
-		m_thread = std::thread(&Task::run, this);
-	}
-	void join_thread() { if (m_thread.joinable()) m_thread.join(); }
+	void start_thread();
+	void join_thread();
 	void stop_thread();
+	void run_then_join();
 	const Net_ID &get_id() const { return m_net_id; }
 	bool m_running = false;
 protected:

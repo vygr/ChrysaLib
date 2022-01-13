@@ -6,16 +6,34 @@
 // task
 ///////
 
+void Task::run_then_join()
+{
+	run();
+	Kernel_Service::join_task(shared_from_this());
+}
+
+void Task::start_thread()
+{
+	if (m_running) return;
+	m_running = true;
+	m_thread = std::thread(&Task::run_then_join, this);
+}
+
 void Task::stop_thread()
 {
-	//set stop_thread flag
+	if (!m_running) return;
 	m_running = false;
-	//wake the thread
+	//wake the thread with an exit message
 	auto msg = std::make_shared<Msg>(sizeof(Event));
 	msg->set_dest(m_net_id);
 	auto event_body = (Event*)msg->begin();
 	event_body->m_evt = evt_exit;
 	global_router->send(msg);
+}
+
+void Task::join_thread()
+{
+	if (m_thread.joinable()) m_thread.join();
 }
 
 std::vector<Net_ID> Task::alloc_select(uint32_t size)

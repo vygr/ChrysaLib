@@ -92,8 +92,8 @@ void Kernel_Service::run()
 				auto event_body = (Event_stop_task*)body;
 				auto itr = std::find(begin(m_tasks), end(m_tasks), event_body->m_task);
 				if (itr == end(m_tasks)) break;
-				event_body->m_task->join_thread();
 				m_tasks.erase(itr);
+				event_body->m_task->join_thread();
 				break;
 			}
 			case evt_callback:

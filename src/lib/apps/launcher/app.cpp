@@ -91,7 +91,6 @@ void Launcher_App::run()
 		}
 		case event_close:
 		{
-			m_running = false;
 			Kernel_Service::stop_task(shared_from_this());
 			break;
 		}
@@ -106,5 +105,4 @@ void Launcher_App::run()
 
 	//tidy up
 	sub(window);
-	Kernel_Service::join_task(shared_from_this());
 }

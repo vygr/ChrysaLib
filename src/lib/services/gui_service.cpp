@@ -138,7 +138,7 @@ void GUI_Service::run()
 			View::m_temps.clear();
 		});
 
-		//frame polling loop
+		//frame polling loop, then exit if no children
 		std::this_thread::sleep_for(std::chrono::milliseconds(GUI_FRAME_RATE));
 		if (m_screen->m_children.empty()) break;
 	}
@@ -153,9 +153,10 @@ void GUI_Service::run()
 	//forget myself
 	global_router->forget(entry);
 
-	//ask kernel to exit !!!
+	//stop myself !!!
 	Kernel_Service::stop_task(shared_from_this());
 	Kernel_Service::join_task(shared_from_this());
+	//ask kernel to exit !!!
 	Kernel_Service::exit();
 }
 

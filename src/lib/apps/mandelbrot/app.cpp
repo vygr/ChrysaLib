@@ -156,7 +156,6 @@ void Mandelbrot_App::run()
 			{
 			case event_close:
 			{
-				m_running = false;
 				Kernel_Service::stop_task(shared_from_this());
 				break;
 			}
@@ -207,7 +206,6 @@ void Mandelbrot_App::run()
 	sub(window);
 	global_router->forget(m_entry);
 	free_select(m_select);
-	Kernel_Service::join_task(shared_from_this());
 }
 
 uint8_t Mandelbrot_App::depth(double x0, double y0) const
