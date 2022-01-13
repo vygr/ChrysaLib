@@ -105,8 +105,38 @@ void IP_Link_Manager::connect(const std::string &addr)
 {
 	asio::error_code ec;
 	asio::ip::address ip_address = asio::ip::make_address(addr, ec);
-	if (!ec)
+	if (ec)
 	{
+		//lets try a dns resolve...
+		asio::ip::tcp::resolver::query resolver_query(addr,
+			std::string(IP_LINK_PORT_STRING), asio::ip::tcp::resolver::query::numeric_service);
+		asio::ip::tcp::resolver resolver(m_io_context);
+		asio::ip::tcp::resolver::iterator it = resolver.resolve(resolver_query, ec);
+		if (ec)
+		{
+			if (arg_v > 0) std::cout << "connect: error, " << ec.message() << std::endl;
+			return;
+		}
+		asio::ip::tcp::resolver::iterator it_end;
+		asio::ip::tcp::endpoint ep = it->endpoint();
+		auto socket = std::make_shared<asio::ip::tcp::socket>(m_io_context);
+		socket->async_connect(ep, [socket, this] (const asio::error_code ec)
+		{
+			if (!ec)
+			{
+				if (arg_v > 0) std::cout << "connect: connected" << std::endl;
+				m_links.emplace_back(std::make_unique<IP_Link>(socket));
+				m_links.back()->start_threads();
+			}
+			else
+			{
+				if (arg_v > 0) std::cout << "connect: error, " << ec.message() << std::endl;
+			}
+		});
+	}
+	else
+	{
+		//use our valididated ip address
 		if (arg_v > 0) std::cout << "connect: waiting..." << std::endl;
 		asio::ip::tcp::endpoint ep(ip_address, IP_LINK_PORT);
 		auto socket = std::make_shared<asio::ip::tcp::socket>(m_io_context);

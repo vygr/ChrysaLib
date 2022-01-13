@@ -15,6 +15,7 @@ const uint32_t MAX_PACKET_SIZE = 4096;
 const uint32_t FILE_CHUNK_WINDOW_SIZE = 32;
 //ip link server port
 const uint32_t IP_LINK_PORT = 3333;
+#define IP_LINK_PORT_STRING "3333"
 //timeouts and rates in ms
 const uint32_t MAX_DIRECTORY_AGE = 10000;
 const uint32_t MAX_ROUTE_AGE = 10000;

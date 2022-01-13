@@ -3,6 +3,7 @@
 
 #include "../settings.h"
 #include <vector>
+#include <cstddef>
 
 class Path
 {
