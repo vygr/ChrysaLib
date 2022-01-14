@@ -404,7 +404,7 @@ void GUI_Service::composit()
 	}
 }
 
-GUI_Service *GUI_Service::quit(SDL_Event &e)
+GUI_Service *GUI_Service::quit(const SDL_Event &e)
 {
 	//send close to all children
 	auto children = m_screen->children();
@@ -458,7 +458,7 @@ View *GUI_Service::set_mouse_id()
 	return view;
 }
 
-GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
+GUI_Service *GUI_Service::mouse_wheel(const SDL_MouseWheelEvent &e)
 {
 	auto view = set_mouse_id();
 	auto owner = view->find_owner();
@@ -477,7 +477,7 @@ GUI_Service *GUI_Service::mouse_wheel(SDL_MouseWheelEvent &e)
 	return this;
 }
 
-GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
+GUI_Service *GUI_Service::mouse_button_down(const SDL_MouseButtonEvent &e)
 {
 	m_mouse_x = e.x;
 	m_mouse_y = e.y;
@@ -502,7 +502,7 @@ GUI_Service *GUI_Service::mouse_button_down(SDL_MouseButtonEvent &e)
 	return this;
 }
 
-GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
+GUI_Service *GUI_Service::mouse_button_up(const SDL_MouseButtonEvent &e)
 {
 	m_mouse_x = e.x;
 	m_mouse_y = e.y;
@@ -529,7 +529,7 @@ GUI_Service *GUI_Service::mouse_button_up(SDL_MouseButtonEvent &e)
 	return this;
 }
 
-GUI_Service *GUI_Service::mouse_motion(SDL_MouseMotionEvent &e)
+GUI_Service *GUI_Service::mouse_motion(const SDL_MouseMotionEvent &e)
 {
 	m_mouse_x = e.x;
 	m_mouse_y = e.y;
@@ -569,7 +569,7 @@ int cook_key(uint32_t key_code, uint32_t key, uint32_t mod)
 	return key;
 }
 
-GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
+GUI_Service *GUI_Service::key_down(const SDL_KeyboardEvent &e)
 {
 	auto view = set_mouse_id();
 	auto key_code = e.keysym.scancode;
@@ -591,7 +591,7 @@ GUI_Service *GUI_Service::key_down(SDL_KeyboardEvent &e)
 	return this;
 }
 
-GUI_Service *GUI_Service::window_event(SDL_WindowEvent &e)
+GUI_Service *GUI_Service::window_event(const SDL_WindowEvent &e)
 {
 	auto event = e.event;
 	if (event == SDL_WINDOWEVENT_SIZE_CHANGED)

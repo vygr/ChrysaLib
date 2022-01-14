@@ -9,13 +9,13 @@
 
 //helpers
 
-Net_ID GUI_Task::my_gui()
+Net_ID &GUI_Task::my_gui()
 {
 	//return my GUI node
 	if (m_gui_id != Net_ID()) return m_gui_id;
 	auto filter = "gui," + global_router->get_dev_id().to_string();
 	auto services = global_router->enquire(filter);
-	if (services.empty()) return Net_ID();
+	if (services.empty()) return m_gui_id;
 	auto fields = split_string(services[0], ",");
 	return m_gui_id = Net_ID::from_string(fields[1]);
 }

@@ -27,14 +27,14 @@ public:
 	}
 	//responce handling
 	void start_thread();
-	void join_thread();
 	void stop_thread();
-	void run_then_join();
+	void join_thread();
 	const Net_ID &get_id() const { return m_net_id; }
 	bool m_running = false;
 protected:
 	std::vector<Net_ID> alloc_select(uint32_t size);
 	void free_select(std::vector<Net_ID> &select);
+	void run_then_join();
 	virtual void run() = 0;
 	const Net_ID m_net_id;
 	std::thread m_thread;
