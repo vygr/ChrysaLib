@@ -12,10 +12,10 @@ void Launcher_App::run()
 {
 	enum
 	{
-		event_close,
+		event_close, //must be first !
 		event_button,
 	};
-	
+
 	ui_window(window, ({}))
 		ui_flow(window_flow, ({
 			{"flow_flags", flow_down_fill}}))

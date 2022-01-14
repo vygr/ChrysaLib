@@ -14,7 +14,7 @@ void Canvas_App::run()
 
 	enum
 	{
-		event_close,
+		event_close, //must be first !
 	};
 
 	ui_window(window, ({}))
