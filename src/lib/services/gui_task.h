@@ -27,6 +27,8 @@ public:
 	view_bounds locate(int32_t w, int32_t h, int32_t pos = locate_center);
 	view_bounds locate(const view_size &size, int32_t pos = locate_center)
 		{ return locate(size.m_w, size.m_h, pos); }
+private:
+	Net_ID m_gui_id;
 };
 
 #endif
