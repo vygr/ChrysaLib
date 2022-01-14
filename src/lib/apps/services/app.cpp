@@ -72,10 +72,8 @@ void Services_App::run()
 		ui_end
 	ui_end
 
-	auto s = window->pref_size();
-	window->change(150, 150, s.m_w, s.m_h);
-
 	//add to my GUI screen
+	window->change(locate(window->pref_size()));
 	add_front(window);
 
 	//event loop
@@ -147,7 +145,7 @@ void Services_App::run()
 					flow1->add_child(label1);
 					flow2->add_child(label2);
 					flow3->add_child(label3);
-					s = window->pref_size();
+					auto s = window->pref_size();
 					auto p = window->get_pos();
 					window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
 				}

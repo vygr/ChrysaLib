@@ -2,9 +2,9 @@
 #define GUI_H
 
 #include "service.h"
+#include "../gui/view.h"
 #include <SDL.h>
 
-class View;
 class SDL_Renderer;
 
 //gui service
@@ -17,6 +17,7 @@ public:
 		evt_add_front,
 		evt_add_back,
 		evt_sub,
+		evt_locate,
 	};
 	struct Event_add_front : public Event
 	{
@@ -32,6 +33,17 @@ public:
 	{
 		Net_ID m_reply;
 		std::shared_ptr<View> m_view;
+	};
+	struct Event_locate : public Event
+	{
+		Net_ID m_reply;
+		int32_t m_w;
+		int32_t m_h;
+		int32_t m_pos;
+	};
+	struct locate_reply
+	{
+		view_bounds m_bounds;
 	};
 	GUI_Service()
 		: Service()

@@ -38,10 +38,9 @@ void Mandelbrot_App::run()
 	canvas->set_col(argb_black);
 	canvas->fill();
 	canvas->swap();
-	auto s = window->pref_size();
-	window->change(120, 64, s.m_w, s.m_h);
 
 	//add to my GUI screen
+	window->change(locate(window->pref_size()));
 	add_front(window);
 
 	//select and init workers

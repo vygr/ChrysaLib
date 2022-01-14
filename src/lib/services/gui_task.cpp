@@ -78,3 +78,26 @@ void GUI_Task::sub(std::shared_ptr<View> view)
 	reply_mbox->read();
 	global_router->free(reply_id);
 }
+
+view_bounds GUI_Task::locate(int32_t w, int32_t h, int32_t pos)
+{
+	//message to my GUI
+	auto service_id = my_gui();
+	if (service_id == Net_ID()) return view_bounds{0, 0, 0, 0};
+	auto reply_id = global_router->alloc();
+	auto reply_mbox = global_router->validate(reply_id);
+	auto msg = std::make_shared<Msg>(sizeof(GUI_Service::Event_locate));
+	auto event_body = (GUI_Service::Event_locate*)msg->begin();
+	msg->set_dest(service_id);
+	event_body->m_evt = GUI_Service::evt_locate;
+	event_body->m_reply = reply_id;
+	event_body->m_w = w;
+	event_body->m_h = h;
+	event_body->m_pos = pos;
+	global_router->send(msg);
+	//wait for reply
+	auto reply = reply_mbox->read();
+	global_router->free(reply_id);
+	auto reply_body = (GUI_Service::locate_reply*)reply->begin();
+	return reply_body->m_bounds;
+}

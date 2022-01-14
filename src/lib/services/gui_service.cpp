@@ -6,6 +6,7 @@
 #include "../gui/colors.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include "../apps/launcher/app.h"
 
@@ -92,6 +93,51 @@ void GUI_Service::run()
 				event_body->m_view->sub();
 				auto reply = std::make_shared<Msg>();
 				reply->set_dest(event_body->m_reply);
+				global_router->send(reply);
+				break;
+			}
+			case evt_locate:
+			{
+				//locate view on screen
+				auto event_body = (Event_locate*)body;
+				auto w = event_body->m_w;
+				auto h = event_body->m_h;
+				auto pos = event_body->m_pos;
+				auto reply = std::make_shared<Msg>(sizeof(locate_reply));
+				auto reply_body = (locate_reply*)reply->begin();
+				reply->set_dest(event_body->m_reply);
+				//fit to screen
+				auto sw = m_screen->m_w;
+				auto sh = m_screen->m_h;
+				auto mx = m_mouse_x;
+				auto my = m_mouse_y;
+				auto x = mx - w / 2;
+				auto y = my - h / 2;
+				switch (pos)
+				{
+				case GUI_Task::locate_top:
+					y = my;
+					break;
+				case GUI_Task::locate_left:
+					x = mx;
+					break;
+				case GUI_Task::locate_bottom:
+					y = my - h + 1;
+					break;
+				case GUI_Task::locate_right:
+					x = mx - w + 1;
+					break;
+				default:
+					break;
+				}
+				x = std::max(0, std::min(x, sw - w));
+				y = std::max(0, std::min(y, sh - h));
+				w = std::min(w, sw);
+				h = std::min(h, sh);
+				reply_body->m_bounds.m_x = x;
+				reply_body->m_bounds.m_y = y;
+				reply_body->m_bounds.m_w = w;
+				reply_body->m_bounds.m_h = h;
 				global_router->send(reply);
 				break;
 			}

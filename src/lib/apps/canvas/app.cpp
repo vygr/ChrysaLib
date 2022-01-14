@@ -49,9 +49,6 @@ void Canvas_App::run()
 		ui_end
 	ui_end
 
-	auto s = window->pref_size();
-	window->change(107, 107, s.m_w, s.m_h);
-
 	//draw a polygon on the canvas !!!
 	auto path = Path();
 	path.gen_cubic(
@@ -73,6 +70,7 @@ void Canvas_App::run()
 	canvas->swap();
 
 	//add to my GUI screen
+	window->change(locate(window->pref_size()));
 	add_front(window);
 
 	//event loop

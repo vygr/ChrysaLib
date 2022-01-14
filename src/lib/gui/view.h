@@ -167,13 +167,15 @@ public:
 	View *find_id(int64_t id);
 	bool hit(int32_t x, int32_t y) const;
 	View *hit_tree(int32_t x, int32_t y);
+	View *change(int32_t x, int32_t y, int32_t w, int32_t h);
+	View *change(const view_bounds &bounds)
+		{ return change(bounds.m_x, bounds.m_y, bounds.m_w, bounds.m_h); }
 	//actions
 	View *connect(uint64_t id) { m_actions.push_back(id); return this; }
 	View *emit();
 	//subclass overides
 	virtual view_size pref_size();
 	virtual View *layout();
-	virtual View *change(int32_t x, int32_t y, int32_t w, int32_t h);
 	virtual View *add_child(std::shared_ptr<View> child) { return add_back(child); }
 	virtual View *draw(const Ctx &ctx);
 	virtual View *action(const std::shared_ptr<Msg> &event) { return this; }

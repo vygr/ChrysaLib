@@ -51,10 +51,9 @@ void Launcher_App::run()
 		ui_end
 	ui_end
 
+	//add to my GUI screen
 	auto s = window->pref_size();
 	window->change(0, 0, s.m_w * 110 / 100, s.m_h);
-
-	//add to my GUI screen
 	add_front(window);
 
 	//event loop
