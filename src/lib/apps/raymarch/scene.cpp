@@ -26,6 +26,10 @@ const double ref_coef = 0.25;
 const int32_t ref_depth = 1;
 const point_3d light_pos = {-0.1, -0.1, -3.0};
 
+const auto ex = point_3d{-eps, 0.0, 0.0};
+const auto ey = point_3d{0.0, -eps, 0.0};
+const auto ez = point_3d{0.0, 0.0, -eps};
+
 //the scene
 double scene(const point_3d &p)
 {
@@ -45,13 +49,13 @@ double ray_march(const point_3d &ray_origin, const point_3d &ray_dir,
 	return d > min_distance ? max_l : l;
 }
 
-point_3d get_normal(point_3d p)
+point_3d get_normal(const point_3d &p)
 {
-	auto d = scene(p);
+	const auto d = scene(p);
 	return norm_3d(point_3d(
-		d - scene(add_3d(p, point_3d{-eps, 0.0, 0.0})),
-		d - scene(add_3d(p, point_3d{0.0, -eps, 0.0})),
-		d - scene(add_3d(p, point_3d{0.0, 0.0, -eps}))));
+		d - scene(add_3d(p, ex)),
+		d - scene(add_3d(p, ey)),
+		d - scene(add_3d(p, ez))));
 }
 
 double shadow(const point_3d &ray_origin, const point_3d &ray_dir,
@@ -118,16 +122,16 @@ void Raymarch_App::render(Raymarch_Job_reply* body,
 		uint32_t x1, uint32_t y1,
 		uint32_t cw, uint32_t ch) const
 {
-	auto stride = (x1 - x);
-	auto w2 = cw / 2.0;
-	auto h2 = ch / 2.0;
+	const auto stride = (x1 - x);
+	const auto w2 = cw / 2.0;
+	const auto h2 = ch / 2.0;
+	const auto ray_origin = point_3d{0.0, 0.0, -3.0};
 	for (auto ry = y; ry < y1; ++ry)
 	{
 		for (auto rx = x; rx < x1; ++rx)
 		{
 			auto dx = (rx - w2) / w2;
 			auto dy = (ry - h2) / h2;
-			auto ray_origin = point_3d{0.0, 0.0, -3.0};
 			auto ray_dir = norm_3d(sub_3d(point_3d(dx, dy, 0.0), ray_origin));
 			auto col_3d = scene_ray(ray_origin, ray_dir);
 			auto col = argb_black +
