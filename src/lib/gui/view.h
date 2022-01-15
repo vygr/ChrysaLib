@@ -168,6 +168,8 @@ public:
 	bool hit(int32_t x, int32_t y) const;
 	View *hit_tree(int32_t x, int32_t y);
 	View *change(int32_t x, int32_t y, int32_t w, int32_t h);
+	View *change(const view_size &size)
+		{ return change(0, 0, size.m_w, size.m_h); }
 	View *change(const view_bounds &bounds)
 		{ return change(bounds.m_x, bounds.m_y, bounds.m_w, bounds.m_h); }
 	//actions

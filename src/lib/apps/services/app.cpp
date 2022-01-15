@@ -17,6 +17,8 @@ void Services_App::run()
 	enum
 	{
 		event_close, //must be first !
+		event_min,
+		event_max,
 	};
 
 	ui_window(window, ({}))
@@ -29,9 +31,11 @@ void Services_App::run()
 					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
 					ui_button(min_button, ({
 						{"text", to_utf8(0xea1a)}}))
+						ui_connect(event_min)
 					ui_end
 					ui_button(max_button, ({
 						{"text", to_utf8(0xea1b)}}))
+						ui_connect(event_max)
 					ui_end
 					ui_button(close_button, ({
 						{"text", to_utf8(0xea19)}}))
@@ -42,30 +46,32 @@ void Services_App::run()
 					{"text", "Services"}}));
 				ui_end
 			ui_end
-			ui_flow(main_widget, ({
-				{"flow_flags", flow_right_fill}}))
-				ui_flow(flow1, ({
-					{"flow_flags", flow_down_fill}}))
-					ui_label(labe1, ({
-						{"text", "Service"},
-						{"color", argb_white},
-						{"flow_flags", flow_flag_align_hcenter}}))
+			ui_scroll(scroll, scroll_flag_vertical, ({}))
+				ui_flow(main_widget, ({
+					{"flow_flags", flow_right_fill}}))
+					ui_flow(flow1, ({
+						{"flow_flags", flow_down_fill}}))
+						ui_label(labe1, ({
+							{"text", "Service"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter}}))
+						ui_end
 					ui_end
-				ui_end
-				ui_flow(flow2, ({
-					{"flow_flags", flow_down_fill}}))
-					ui_label(labe2, ({
-						{"text", "Mailbox"},
-						{"color", argb_white},
-						{"flow_flags", flow_flag_align_hcenter}}))
+					ui_flow(flow2, ({
+						{"flow_flags", flow_down_fill}}))
+						ui_label(labe2, ({
+							{"text", "Mailbox"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter}}))
+						ui_end
 					ui_end
-				ui_end
-				ui_flow(flow3, ({
-					{"flow_flags", flow_down_fill}}))
-					ui_label(labe3, ({
-						{"text", "Info"},
-						{"color", argb_white},
-						{"flow_flags", flow_flag_align_hcenter}}))
+					ui_flow(flow3, ({
+						{"flow_flags", flow_down_fill}}))
+						ui_label(labe3, ({
+							{"text", "Info"},
+							{"color", argb_white},
+							{"flow_flags", flow_flag_align_hcenter}}))
+						ui_end
 					ui_end
 				ui_end
 			ui_end
@@ -73,6 +79,7 @@ void Services_App::run()
 	ui_end
 
 	//add to my GUI screen
+	main_widget->change(main_widget->pref_size());
 	window->change(locate(window->pref_size()));
 	add_front(window);
 
@@ -95,6 +102,17 @@ void Services_App::run()
 			case event_close:
 			{
 				Kernel_Service::stop_task(shared_from_this());
+				break;
+			}
+			case event_min:
+			case event_max:
+			{
+				auto s = main_widget->pref_size();
+				main_widget->change(s);
+				scroll->def_props({{"min_width", s.m_w}, {"min_height", std::min(s.m_h, 640)}});
+				s = window->pref_size();
+				auto p = window->get_pos();
+				window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
 				break;
 			}
 			default:
@@ -145,7 +163,11 @@ void Services_App::run()
 					flow1->add_child(label1);
 					flow2->add_child(label2);
 					flow3->add_child(label3);
-					auto s = window->pref_size();
+					//set size
+					auto s = main_widget->pref_size();
+					main_widget->change(s);
+					scroll->def_props({{"min_width", s.m_w}, {"min_height", std::min(s.m_h, 640)}});
+					s = window->pref_size();
 					auto p = window->get_pos();
 					window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
 				}
