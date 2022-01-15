@@ -4,6 +4,7 @@
 #include "../canvas/app.h"
 #include "../services/app.h"
 #include "../mandelbrot/app.h"
+#include "../raymarch/app.h"
 
 std::string to_utf8(uint32_t c);
 uint32_t from_utf8(uint8_t **data);
@@ -47,6 +48,10 @@ void Launcher_App::run()
 					{"text", "mandelbrot"}}))
 					ui_connect(event_button)
 				ui_end
+				ui_button(_4, ({
+					{"text", "raymarch"}}))
+					ui_connect(event_button)
+				ui_end
 			ui_end
 		ui_end
 	ui_end
@@ -73,18 +78,19 @@ void Launcher_App::run()
 			auto text = source->get_string_prop("text");
 			if (text == "services")
 			{
-				auto app = Services_App::create();
-				Kernel_Service::start_task(app);
+				Kernel_Service::start_task(Services_App::create());
 			}
 			else if (text == "canvas")
 			{
-				auto app = Canvas_App::create();
-				Kernel_Service::start_task(app);
+				Kernel_Service::start_task(Canvas_App::create());
 			}
 			else if (text == "mandelbrot")
 			{
-				auto app = Mandelbrot_App::create();
-				Kernel_Service::start_task(app);
+				Kernel_Service::start_task(Mandelbrot_App::create());
+			}
+			else if (text == "raymarch")
+			{
+				Kernel_Service::start_task(Raymarch_App::create());
 			}
 			break;
 		}
