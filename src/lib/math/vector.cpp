@@ -1,5 +1,5 @@
 #include "vector.h"
-#include <math.h>
+#include <cmath>
 
 ///////////////////////
 //distance metric stuff
@@ -94,6 +94,11 @@ auto sub_2d(const point_2d &p1, const point_2d &p2)
 	return point_2d(p1.m_x - p2.m_x, p1.m_y - p2.m_y);
 }
 
+auto add_3d(const point_3d &p1, const point_3d &p2)
+{
+	return point_3d(p1.m_x + p2.m_x, p1.m_y + p2.m_y, p1.m_z + p2.m_z);
+}
+
 auto sub_3d(const point_3d &p1, const point_3d &p2)
 {
 	return point_3d(p1.m_x - p2.m_x, p1.m_y - p2.m_y, p1.m_z - p2.m_z);
@@ -104,9 +109,33 @@ auto scale_2d(const point_2d &p, double s)
 	return point_2d(p.m_x * s, p.m_y * s);
 }
 
+auto mul_3d(const point_3d &p1, const point_3d &p2)
+{
+	return point_3d(p1.m_x * p2.m_x, p1.m_y * p2.m_y, p1.m_z * p2.m_z);
+}
+
 auto scale_3d(const point_3d &p, double s)
 {
 	return point_3d(p.m_x * s, p.m_y * s, p.m_z * s);
+}
+
+auto mod_3d(const point_3d &p1, const point_3d &p2)
+{
+	return point_3d(
+		std::fmod(p1.m_x, p2.m_x),
+		std::fmod(p1.m_y, p2.m_y),
+		std::fmod(p1.m_z, p2.m_z));
+}
+
+auto frac_3d(const point_3d &p)
+{
+	double intpart;
+	return point_3d(std::modf(p.m_x, &intpart), std::modf(p.m_z, &intpart), std::modf(p.m_z, &intpart));
+}
+
+auto floor_3d(const point_3d &p)
+{
+	return point_3d(std::floor(p.m_x), std::floor(p.m_z), std::floor(p.m_z));
 }
 
 auto perp_2d(const point_2d &p)
@@ -151,6 +180,11 @@ auto norm_3d(const point_3d &p)
 	auto l = length_3d(p);
 	if (l == 0.0) return point_3d(0.0, 0.0, 0.0);
 	return scale_3d(p, 1.0 / l);
+}
+
+auto reflect_3d(const point_3d &p1, const point_3d &p2)
+{
+	return sub_3d(p1, scale_3d(p2, dot_3d(p1, p2) * 2.0));
 }
 
 auto distance_2d(const point_2d &p1, const point_2d &p2)
