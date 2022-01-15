@@ -155,6 +155,8 @@ public:
 	View *dirty();
 	View *dirty_all();
 	View *change_dirty(int32_t x, int32_t y, int32_t w, int32_t h);
+	View *change_dirty(const view_pos &pos, const view_size &size)
+		{ return change_dirty(pos.m_x, pos.m_y, size.m_w, size.m_h); }
 	//flags
 	View *set_flags(uint32_t flags, uint32_t mask);
 	//info

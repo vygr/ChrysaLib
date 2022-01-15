@@ -110,9 +110,7 @@ void Services_App::run()
 				auto s = main_widget->pref_size();
 				main_widget->change(s);
 				scroll->def_props({{"min_width", s.m_w}, {"min_height", std::min(s.m_h, 640)}});
-				s = window->pref_size();
-				auto p = window->get_pos();
-				window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
+				window->change_dirty(window->get_pos(), window->pref_size());
 				break;
 			}
 			default:
@@ -167,9 +165,7 @@ void Services_App::run()
 					auto s = main_widget->pref_size();
 					main_widget->change(s);
 					scroll->def_props({{"min_width", s.m_w}, {"min_height", std::min(s.m_h, 640)}});
-					s = window->pref_size();
-					auto p = window->get_pos();
-					window->change_dirty(p.m_x, p.m_y, s.m_w, s.m_h);
+					window->change_dirty(window->get_pos(), window->pref_size());
 				}
 			}
 			break;
