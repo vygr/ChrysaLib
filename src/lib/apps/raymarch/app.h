@@ -11,7 +11,7 @@ class Raymarch_App : public GUI_Task
 private:
 	const uint32_t CANVAS_WIDTH = 800;
 	const uint32_t CANVAS_HEIGHT = 800;
-	const uint32_t CANVAS_SCALE = 1;
+	const uint32_t CANVAS_SCALE = 2;
 	const uint32_t UPDATE_TIMEOUT = 100;
 	const uint32_t JOB_TIMEOUT = 5000;
 	const uint32_t JOB_LIMIT = 16;

@@ -90,7 +90,7 @@ point_3d lighting(const point_3d &surface_pos, const point_3d &surface_norm, con
 point_3d scene_ray(point_3d ray_origin, point_3d ray_dir)
 {
 	auto l = ray_march(ray_origin, ray_dir, 0.0, clipfar, min_distance, march_factor);
-	if (l >= clipfar) return point_3d{1.0, 0.0, 0.0};
+	if (l >= clipfar) return point_3d{0.0, 0.0, 0.0};
 	//diffuse lighting
 	auto surface_pos = add_3d(ray_origin, scale_3d(ray_dir, l));
 	auto surface_norm = get_normal(surface_pos);
@@ -125,8 +125,10 @@ void Raymarch_App::render(Raymarch_Job_reply* body,
 	{
 		for (auto rx = x; rx < x1; ++rx)
 		{
+			auto dx = (rx - w2) / w2;
+			auto dy = (ry - h2) / h2;
 			auto ray_origin = point_3d{0.0, 0.0, -3.0};
-			auto ray_dir = norm_3d(sub_3d(point_3d((rx - w2) / w2, (ry - h2) / h2, 0.0), ray_origin));
+			auto ray_dir = norm_3d(sub_3d(point_3d(dx, dy, 0.0), ray_origin));
 			auto col_3d = scene_ray(ray_origin, ray_dir);
 			auto col = argb_black +
 				((int)(col_3d.m_x * 0xff) << 16) +

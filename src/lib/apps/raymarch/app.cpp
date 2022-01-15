@@ -155,6 +155,9 @@ void Raymarch_App::run()
 						auto size = canvas->get_size();
 						auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
 						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+						canvas->set_col(argb_black);
+						canvas->fill();
+						canvas->swap();
 						reset();
 					}
 					else if (mouse_body->m_buttons == 3)
@@ -163,6 +166,9 @@ void Raymarch_App::run()
 						auto size = canvas->get_size();
 						auto rx = mouse_body->m_rx - (size.m_w - CANVAS_WIDTH) / 2;
 						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
+						canvas->set_col(argb_black);
+						canvas->fill();
+						canvas->swap();
 						reset();
 					}
 				}

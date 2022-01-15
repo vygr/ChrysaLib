@@ -124,16 +124,25 @@ auto scale_3d(const point_3d &p, double s)
 
 auto mod_3d(const point_3d &p1, const point_3d &p2)
 {
-	return point_3d(
-		std::fmod(p1.m_x, p2.m_x),
-		std::fmod(p1.m_y, p2.m_y),
-		std::fmod(p1.m_z, p2.m_z));
+	auto x = std::fmod(p1.m_x, p2.m_x);
+	auto y = std::fmod(p1.m_y, p2.m_y);
+	auto z = std::fmod(p1.m_z, p2.m_z);
+	if (x < 0.0) x += p2.m_x;
+	if (y < 0.0) y += p2.m_y;
+	if (z < 0.0) z += p2.m_z;
+	return point_3d(x, y, z);
 }
 
 auto frac_3d(const point_3d &p)
 {
 	double intpart;
-	return point_3d(std::modf(p.m_x, &intpart), std::modf(p.m_y, &intpart), std::modf(p.m_z, &intpart));
+	auto x = std::modf(p.m_x, &intpart);
+	auto y = std::modf(p.m_y, &intpart);
+	auto z = std::modf(p.m_z, &intpart);
+	if (x < 0.0) x += 1.0;
+	if (y < 0.0) y += 1.0;
+	if (z < 0.0) z += 1.0;
+	return point_3d(x, y, z);
 }
 
 auto floor_3d(const point_3d &p)
