@@ -165,8 +165,8 @@ void Farm::complete_job(std::shared_ptr<Msg> job)
 
 void Farm::refresh()
 {
-	restart();
 	auto workers = census();
+	restart();
 	leavers(workers);
 	joiners(workers);
 	assign_work();

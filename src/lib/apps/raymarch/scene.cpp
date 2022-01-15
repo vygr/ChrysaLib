@@ -22,8 +22,8 @@ const double march_factor = 1.0;
 const double shadow_softness = 64.0;
 const double attenuation = 0.05;
 const double ambient = 0.05;
-const double ref_coef = 0.25;
-const int32_t ref_depth = 1;
+const double ref_coef = 0.3;
+const int32_t ref_depth = 2;
 const point_3d light_pos = {-0.1, -0.1, -3.0};
 
 const auto ex = point_3d{-eps, 0.0, 0.0};
@@ -112,7 +112,7 @@ point_3d scene_ray(point_3d ray_origin, point_3d ray_dir)
 		surface_pos = add_3d(ray_origin, scale_3d(ray_dir, l));
 		surface_norm = get_normal(surface_pos);
 		color = add_3d(scale_3d(color, 1.0 - r), scale_3d(lighting(surface_pos, surface_norm, ray_origin), r));
-		r += ref_coef;
+		r *= ref_coef;
 	}
 	return clamp_3d(color, point_3d{0.0, 0.0, 0.0}, point_3d{1.0, 1.0, 1.0});
 }
