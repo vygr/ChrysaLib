@@ -1,5 +1,8 @@
 #include "vector.h"
 #include <cmath>
+#ifdef  _WIN32
+#include <corecrt_math_defines.h>
+#endif
 
 ///////////////////////
 //distance metric stuff
@@ -104,14 +107,14 @@ auto sub_3d(const point_3d &p1, const point_3d &p2)
 	return point_3d(p1.m_x - p2.m_x, p1.m_y - p2.m_y, p1.m_z - p2.m_z);
 }
 
-auto scale_2d(const point_2d &p, double s)
-{
-	return point_2d(p.m_x * s, p.m_y * s);
-}
-
 auto mul_3d(const point_3d &p1, const point_3d &p2)
 {
 	return point_3d(p1.m_x * p2.m_x, p1.m_y * p2.m_y, p1.m_z * p2.m_z);
+}
+
+auto scale_2d(const point_2d &p, double s)
+{
+	return point_2d(p.m_x * s, p.m_y * s);
 }
 
 auto scale_3d(const point_3d &p, double s)
@@ -130,12 +133,12 @@ auto mod_3d(const point_3d &p1, const point_3d &p2)
 auto frac_3d(const point_3d &p)
 {
 	double intpart;
-	return point_3d(std::modf(p.m_x, &intpart), std::modf(p.m_z, &intpart), std::modf(p.m_z, &intpart));
+	return point_3d(std::modf(p.m_x, &intpart), std::modf(p.m_y, &intpart), std::modf(p.m_z, &intpart));
 }
 
 auto floor_3d(const point_3d &p)
 {
-	return point_3d(std::floor(p.m_x), std::floor(p.m_z), std::floor(p.m_z));
+	return point_3d(std::floor(p.m_x), std::floor(p.m_y), std::floor(p.m_z));
 }
 
 auto perp_2d(const point_2d &p)
@@ -182,9 +185,17 @@ auto norm_3d(const point_3d &p)
 	return scale_3d(p, 1.0 / l);
 }
 
-auto reflect_3d(const point_3d &p1, const point_3d &p2)
+auto reflect_3d(const point_3d &p, const point_3d &n)
 {
-	return sub_3d(p1, scale_3d(p2, dot_3d(p1, p2) * 2.0));
+	return sub_3d(p, scale_3d(n, dot_3d(p, n) * 2.0));
+}
+
+auto clamp_3d(const point_3d &p1, const point_3d &p2, const point_3d &p3)
+{
+	return point_3d(
+		std::min(std::max(p1.m_x, p2.m_x), p3.m_x),
+		std::min(std::max(p1.m_y, p2.m_y), p3.m_y),
+		std::min(std::max(p1.m_z, p2.m_z), p3.m_z));
 }
 
 auto distance_2d(const point_2d &p1, const point_2d &p2)

@@ -219,20 +219,3 @@ void Raymarch_App::reset()
 	//get to work !
 	m_farm->assign_work();
 }
-
-void Raymarch_App::render(Raymarch_Job_reply* body,
-		uint32_t x, uint32_t y,
-		uint32_t x1, uint32_t y1,
-		uint32_t cw, uint32_t ch) const
-{
-	auto stride = (x1 - x);
-	for (auto ry = y; ry < y1; ++ry)
-	{
-		for (auto rx = x; rx < x1; ++rx)
-		{
-			auto dx = (((double)rx - (cw / 2.0)) * 2.0) / cw;
-			auto dy = (((double)ry - (ch / 2.0)) * 2.0) / ch;
-			body->m_data[(ry - y) * stride + (rx - x)] = argb_white;
-		}
-	}
-}

@@ -32,6 +32,14 @@ struct point_3d
 		return std::tie(m_x, m_y, m_z) != std::tie(p.m_x, p.m_y, p.m_z); }
 	bool operator<(const point_3d &p) const {
 		return std::tie(m_x, m_y, m_z) < std::tie(p.m_x, p.m_y, p.m_z); }
+	point_3d& operator=(const point_3d& other)
+	{
+		if (this == &other) return *this;
+		this->m_x = other.m_x;
+		this->m_y = other.m_y;
+		this->m_z = other.m_z;
+		return *this;
+	}
 	double m_x;
 	double m_y;
 	double m_z;
