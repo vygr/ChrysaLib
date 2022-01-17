@@ -107,7 +107,7 @@ point_3d scene_ray(point_3d ray_origin, point_3d ray_dir)
 		if (--i < 0) break;
 		ray_origin = surface_pos;
 		ray_dir = reflect_3d(ray_dir, surface_norm);
-		auto l = ray_march(ray_origin, ray_dir, min_distance * 10.0, clipfar, min_distance, march_factor);
+		l = ray_march(ray_origin, ray_dir, min_distance * 10.0, clipfar, min_distance, march_factor);
 		if (l >= clipfar) break;
 		surface_pos = add_3d(ray_origin, scale_3d(ray_dir, l));
 		surface_norm = get_normal(surface_pos);
