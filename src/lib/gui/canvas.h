@@ -1,7 +1,7 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-#include "../settings.h"
+#include "../math/fixed.h"
 #include "view.h"
 
 //load flags
@@ -27,7 +27,7 @@ enum
 
 struct Edge
 {
-	Edge(int32_t x, int32_t ys, int32_t ye, int32_t w, int32_t dda)
+	Edge(fixed32_t x, int32_t ys, int32_t ye, int32_t w, fixed32_t dda)
 		: m_x(x)
 		, m_ys(ys)
 		, m_ye(ye)
@@ -35,11 +35,11 @@ struct Edge
 		, m_dda(dda)
 	{}
 	Edge *m_next = 0;
-	int32_t m_x;
+	fixed32_t m_x;
 	int32_t m_ys;
 	int32_t m_ye;
 	int32_t m_w;
-	int32_t m_dda;
+	fixed32_t m_dda;
 };
 
 struct edge_bounds

@@ -3,10 +3,6 @@
 
 #include <stdint.h>
 
-//fixed point
-typedef int32_t fixed32_t;
-typedef int64_t fixed64_t;
-const uint32_t FP_SHIFT = 16;
 //max mailbox id
 const uint32_t MAX_ID = 4294967295;
 //maximum packet size

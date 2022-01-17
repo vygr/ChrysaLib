@@ -1,5 +1,5 @@
 #include "grid.h"
-#include "../settings.h"
+#include "../math/fixed.h"
 #include <algorithm>
 
 view_size Grid::pref_size()
@@ -34,16 +34,16 @@ Grid *Grid::layout()
 	if (!grid_h) grid_h = ((num_child - 1) / grid_w) + 1;
 
 	auto child_num = 0;
-	auto w = ((int64_t)m_w << FP_SHIFT);
-	auto h = ((int64_t)m_h << FP_SHIFT);
+	auto w = fixed32_t(m_w);
+	auto h = fixed32_t(m_h);
 	for (auto &child : kids)
 	{
 		auto row = child_num / grid_w;
 		auto col = child_num % grid_w;
-		auto cell_x = (col * w / grid_w) >> FP_SHIFT;
-		auto cell_y = (row * h / grid_h) >> FP_SHIFT;
-		auto cell_x1 = ((col + 1) * w / grid_w) >> FP_SHIFT;
-		auto cell_y1 = ((row + 1) * h / grid_h) >> FP_SHIFT;
+		auto cell_x = w * col / grid_w;
+		auto cell_y = h * row / grid_h;
+		auto cell_x1 = w * (col + 1) / grid_w;
+		auto cell_y1 = h * (row + 1) / grid_h;
 		child->change(cell_x, cell_y, cell_x1 - cell_x, cell_y1 - cell_y);
 		child_num++;
 	}

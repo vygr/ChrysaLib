@@ -1,7 +1,7 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "../settings.h"
+#include "../math/fixed.h"
 #include <vector>
 #include <cstddef>
 
@@ -11,8 +11,8 @@ public:
 	Path() {}
 	Path *push_back(fixed32_t x, fixed32_t y);
 	Path *pop_back();
-	fixed32_t &operator[](const fixed32_t &i) { return m_points[i]; }
-	const fixed32_t &operator[](const fixed32_t &i) const { return m_points[i]; }
+	fixed32_t &operator[](const uint64_t &i) { return m_points[i]; }
+	const fixed32_t &operator[](const uint64_t &i) const { return m_points[i]; }
 	size_t size() const { return m_points.size(); };
 	Path *gen_quadratic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
 		fixed32_t p3x, fixed32_t p3y, fixed32_t tol);

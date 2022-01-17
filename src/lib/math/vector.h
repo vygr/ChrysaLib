@@ -134,8 +134,6 @@ auto reciprocal_distance_3d(const T &p1, const T &p2)
 //specific lengths
 //////////////////
 
-//2d
-
 template <class T>
 auto add_v2(const T &p1, const T &p2)
 {
@@ -143,95 +141,95 @@ auto add_v2(const T &p1, const T &p2)
 }
 
 template <class T>
-auto sub_2d(const T &p1, const T &p2)
+auto sub_v2(const T &p1, const T &p2)
 {
 	return T(p1.m_x - p2.m_x, p1.m_y - p2.m_y);
 }
 
 template <class T>
-auto scale_2d(const T &p, double s)
+auto scale_v2(const T &p, double s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
 template <class T>
-auto perp_2d(const T &p)
+auto perp_v2(const T &p)
 {
 	return T(-p.m_y, p.m_x);
 }
 
 template <class T>
-auto dot_2d(const T &p1, const T &p2)
+auto dot_v2(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_x + p1.m_y * p2.m_y;
 }
 
 template <class T>
-auto det_2d(const T &p1, const T &p2)
+auto det_v2(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_y - p1.m_y * p2.m_x;
 }
 
 template <class T>
-auto length_2d(const T &p)
+auto length_v2(const T &p)
 {
-	return double(sqrt(dot_2d(p, p)));
+	return double(sqrt(dot_v2(p, p)));
 }
 
 template <class T>
-auto norm_2d(const T &p)
+auto norm_v2(const T &p)
 {
-	auto l = length_2d(p);
+	auto l = length_v2(p);
 	if (l == 0.0) return T(0.0, 0.0);
-	return scale_2d(p, 1.0 / l);
+	return scale_v2(p, 1.0 / l);
 }
 
 template <class T>
-auto distance_2d(const T &p1, const T &p2)
+auto distance_v2(const T &p1, const T &p2)
 {
-	return length_2d(sub_2d(p2, p1));
+	return length_v2(sub_v2(p2, p1));
 }
 
 template <class T>
 auto distance_squared_2d(const T &p1, const T &p2)
 {
-	auto p = sub_2d(p2, p1);
-	return dot_2d(p, p);
+	auto p = sub_v2(p2, p1);
+	return dot_v2(p, p);
 }
 
 template <class T>
 auto distance_to_line_2d(const T &p, const T &p1, const T &p2)
 {
-	auto lv = sub_2d(p2, p1);
-	auto pv = sub_2d(p, p1);
-	auto c1 = dot_2d(pv, lv);
-	if (c1 <= 0.0) return distance_2d(p, p1);
-	auto c2 = dot_2d(lv, lv);
-	if (c2 <= c1) return distance_2d(p, p2);
-	return distance_2d(p, add_v2(p1, scale_2d(lv, c1/c2)));
+	auto lv = sub_v2(p2, p1);
+	auto pv = sub_v2(p, p1);
+	auto c1 = dot_v2(pv, lv);
+	if (c1 <= 0.0) return distance_v2(p, p1);
+	auto c2 = dot_v2(lv, lv);
+	if (c2 <= c1) return distance_v2(p, p2);
+	return distance_v2(p, add_v2(p1, scale_v2(lv, c1/c2)));
 }
 
 template <class T>
 auto distance_squared_to_line_2d(const T &p, const T &p1, const T &p2)
 {
-	auto lv = sub_2d(p2, p1);
-	auto pv = sub_2d(p, p1);
-	auto c1 = dot_2d(pv, lv);
+	auto lv = sub_v2(p2, p1);
+	auto pv = sub_v2(p, p1);
+	auto c1 = dot_v2(pv, lv);
 	if (c1 <= 0.0) return distance_squared_2d(p, p1);
-	auto c2 = dot_2d(lv, lv);
+	auto c2 = dot_v2(lv, lv);
 	if (c2 <= c1) return distance_squared_2d(p, p2);
-	return distance_squared_2d(p, add_v2(p1, scale_2d(lv, c1/c2)));
+	return distance_squared_2d(p, add_v2(p1, scale_v2(lv, c1/c2)));
 }
 
 template <class T>
 auto collide_lines_2d(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
 {
-	auto av = sub_2d(l1_p2, l1_p1);
-	auto bv = sub_2d(l2_p2, l2_p1);
-	auto cv = sub_2d(l2_p2, l1_p1);
-	auto axb = det_2d(av, bv);
-	auto axc = det_2d(av, cv);
-	auto cxb = det_2d(cv, bv);
+	auto av = sub_v2(l1_p2, l1_p1);
+	auto bv = sub_v2(l2_p2, l2_p1);
+	auto cv = sub_v2(l2_p2, l1_p1);
+	auto axb = det_v2(av, bv);
+	auto axc = det_v2(av, cv);
+	auto cxb = det_v2(cv, bv);
 	if (axb == 0.0) return false;
 	if (axb > 0.0)
 	{
@@ -259,34 +257,32 @@ bool collide_thick_lines_2d(const T &tl1_p1, const T &tl1_p2,
 	return false;
 }
 
-//3d
-
 template <class T>
-auto add_3d(const T &p1, const T &p2)
+auto add_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x + p2.m_x, p1.m_y + p2.m_y, p1.m_z + p2.m_z);
 }
 
 template <class T>
-auto sub_3d(const T &p1, const T &p2)
+auto sub_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x - p2.m_x, p1.m_y - p2.m_y, p1.m_z - p2.m_z);
 }
 
 template <class T>
-auto mul_3d(const T &p1, const T &p2)
+auto mul_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x * p2.m_x, p1.m_y * p2.m_y, p1.m_z * p2.m_z);
 }
 
 template <class T>
-auto scale_3d(const T &p, double s)
+auto scale_v3(const T &p, double s)
 {
 	return T(p.m_x * s, p.m_y * s, p.m_z * s);
 }
 
 template <class T>
-auto mod_3d(const T &p1, const T &p2)
+auto mod_v3(const T &p1, const T &p2)
 {
 	auto x = std::fmod(p1.m_x, p2.m_x);
 	auto y = std::fmod(p1.m_y, p2.m_y);
@@ -298,7 +294,7 @@ auto mod_3d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto frac_3d(const T &p)
+auto frac_v3(const T &p)
 {
 	double intpart;
 	auto x = std::modf(p.m_x, &intpart);
@@ -311,39 +307,39 @@ auto frac_3d(const T &p)
 }
 
 template <class T>
-auto floor_3d(const T &p)
+auto floor_v3(const T &p)
 {
 	return T(std::floor(p.m_x), std::floor(p.m_y), std::floor(p.m_z));
 }
 
 template <class T>
-auto dot_3d(const T &p1, const T &p2)
+auto dot_v3(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_x + p1.m_y * p2.m_y + p1.m_z * p2.m_z;
 }
 
 template <class T>
-auto length_3d(const T &p)
+auto length_v3(const T &p)
 {
-	return double(sqrt(dot_3d(p, p)));
+	return double(sqrt(dot_v3(p, p)));
 }
 
 template <class T>
-auto norm_3d(const T &p)
+auto norm_v3(const T &p)
 {
-	auto l = length_3d(p);
+	auto l = length_v3(p);
 	if (l == 0.0) return T(0.0, 0.0, 0.0);
-	return scale_3d(p, 1.0 / l);
+	return scale_v3(p, 1.0 / l);
 }
 
 template <class T>
-auto reflect_3d(const T &p, const T &n)
+auto reflect_v3(const T &p, const T &n)
 {
-	return sub_3d(p, scale_3d(n, dot_3d(p, n) * 2.0));
+	return sub_v3(p, scale_v3(n, dot_v3(p, n) * 2.0));
 }
 
 template <class T>
-auto clamp_3d(const T &p1, const T &p2, const T &p3)
+auto clamp_v3(const T &p1, const T &p2, const T &p3)
 {
 	return T(
 		std::min(std::max(p1.m_x, p2.m_x), p3.m_x),
@@ -367,7 +363,7 @@ auto circle_as_lines(const T &p, double radius, int resolution)
 		auto s = double(sin(angle));
 		auto c = double(cos(angle));
 		auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
-		out_points.push_back(sub_2d(p, rv));
+		out_points.push_back(sub_v2(p, rv));
 	}
 	out_points.push_back(out_points[0]);
 	return out_points;
@@ -388,8 +384,8 @@ auto torus_as_tristrip(const T &p, double radius1, double radius2, int resolutio
 		auto c = double(cos(angle));
 		auto rv1 = T(rvx1*c - rvy1*s, rvx1*s + rvy1*c);
 		auto rv2 = T(rvx2*c - rvy2*s, rvx2*s + rvy2*c);
-		out_points.push_back(sub_2d(p, rv1));
-		out_points.push_back(sub_2d(p, rv2));
+		out_points.push_back(sub_v2(p, rv1));
+		out_points.push_back(sub_v2(p, rv2));
 	}
 	out_points.push_back(out_points[0]);
 	out_points.push_back(out_points[1]);
@@ -409,7 +405,7 @@ auto circle_as_trifan(const T &p, double radius, int resolution)
 		auto s = double(sin(angle));
 		auto c = double(cos(angle));
 		auto rv1 = T(rvx1*c - rvy1*s, rvx1*s + rvy1*c);
-		out_points.push_back(sub_2d(p, rv1));
+		out_points.push_back(sub_v2(p, rv1));
 	}
 	out_points.push_back(out_points[0]);
 	return out_points;
@@ -428,32 +424,32 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 		index += step;
 		auto p2 = path[index];
 		index += step;
-		auto l2_v = sub_2d(p2, p1);
-		auto l2_pv = perp_2d(l2_v);
-		auto l2_npv = norm_2d(l2_pv);
-		auto rv = scale_2d(l2_npv, radius);
+		auto l2_v = sub_v2(p2, p1);
+		auto l2_pv = perp_v2(l2_v);
+		auto l2_npv = norm_v2(l2_pv);
+		auto rv = scale_v2(l2_npv, radius);
 		switch (capstyle)
 		{
 			case 0:
 			{
 				//butt cap
-				out_points.push_back(sub_2d(p1, rv));
+				out_points.push_back(sub_v2(p1, rv));
 				out_points.push_back(add_v2(p1, rv));
 				break;
 			}
 			case 1:
 			{
 				//square cap
-				auto p0 = add_v2(p1, perp_2d(rv));
-				out_points.push_back(sub_2d(p0, rv));
+				auto p0 = add_v2(p1, perp_v2(rv));
+				out_points.push_back(sub_v2(p0, rv));
 				out_points.push_back(add_v2(p0, rv));
 				break;
 			}
 			case 2:
 			{
 				//triangle cap
-				out_points.push_back(sub_2d(p1, rv));
-				out_points.push_back(add_v2(p1, perp_2d(rv)));
+				out_points.push_back(sub_v2(p1, rv));
+				out_points.push_back(add_v2(p1, perp_v2(rv)));
 				out_points.push_back(add_v2(p1, rv));
 				break;
 			}
@@ -468,7 +464,7 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 					auto s = double(sin(angle));
 					auto c = double(cos(angle));
 					auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
-					out_points.push_back(sub_2d(p1, rv));
+					out_points.push_back(sub_v2(p1, rv));
 				}
 			}
 		}
@@ -479,11 +475,11 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 			auto l1_npv = l2_npv;
 			p2 = path[index];
 			index += step;
-			l2_v = sub_2d(p2, p1);
-			l2_pv = perp_2d(l2_v);
-			l2_npv = norm_2d(l2_pv);
-			auto nbv = norm_2d(scale_2d(add_v2(l1_npv, l2_npv), 0.5f));
-			auto c = dot_2d(nbv, norm_2d(l1_v));
+			l2_v = sub_v2(p2, p1);
+			l2_pv = perp_v2(l2_v);
+			l2_npv = norm_v2(l2_pv);
+			auto nbv = norm_v2(scale_v2(add_v2(l1_npv, l2_npv), 0.5f));
+			auto c = dot_v2(nbv, norm_v2(l1_v));
 			if (c <= 0.0) goto mitre_join;
 			switch (joinstyle)
 			{
@@ -492,24 +488,24 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 				mitre_join:
 					//mitre join
 					auto s = double(sin(acos(c)));
-					auto bv = scale_2d(nbv, radius/s);
+					auto bv = scale_v2(nbv, radius/s);
 					out_points.push_back(add_v2(p1, bv));
 					break;
 				}
 				case 1:
 				{
 					//bevel join
-					out_points.push_back(add_v2(p1, scale_2d(l1_npv, radius)));
-					out_points.push_back(add_v2(p1, scale_2d(l2_npv, radius)));
+					out_points.push_back(add_v2(p1, scale_v2(l1_npv, radius)));
+					out_points.push_back(add_v2(p1, scale_v2(l2_npv, radius)));
 					break;
 				}
 				default:
 				{
 					//round join
-					auto rv = scale_2d(l1_npv, radius);
+					auto rv = scale_v2(l1_npv, radius);
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -double(acos(dot_2d(l1_npv, l2_npv)));
+					auto theta = -double(acos(dot_v2(l1_npv, l2_npv)));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{
@@ -543,17 +539,17 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 		index += step;
 		auto p2 = path[index];
 		index += step;
-		auto l2_v = sub_2d(p2, p1);
-		auto l2_pv = perp_2d(l2_v);
-		auto l2_npv = norm_2d(l2_pv);
-		auto rv = scale_2d(l2_npv, radius);
+		auto l2_v = sub_v2(p2, p1);
+		auto l2_pv = perp_v2(l2_v);
+		auto l2_npv = norm_v2(l2_pv);
+		auto rv = scale_v2(l2_npv, radius);
 		switch (capstyle)
 		{
 			case 0:
 			{
 				//butt cap
 				out_points.push_back(p1);
-				out_points.push_back(sub_2d(p1, rv));
+				out_points.push_back(sub_v2(p1, rv));
 				out_points.push_back(p1);
 				out_points.push_back(add_v2(p1, rv));
 				break;
@@ -561,9 +557,9 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 			case 1:
 			{
 				//square cap
-				auto p0 = add_v2(p1, perp_2d(rv));
+				auto p0 = add_v2(p1, perp_v2(rv));
 				out_points.push_back(p0);
-				out_points.push_back(sub_2d(p0, rv));
+				out_points.push_back(sub_v2(p0, rv));
 				out_points.push_back(p0);
 				out_points.push_back(add_v2(p0, rv));
 				break;
@@ -572,9 +568,9 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 			{
 				//triangle cap
 				out_points.push_back(p1);
-				out_points.push_back(sub_2d(p1, rv));
+				out_points.push_back(sub_v2(p1, rv));
 				out_points.push_back(p1);
-				out_points.push_back(add_v2(p1, perp_2d(rv)));
+				out_points.push_back(add_v2(p1, perp_v2(rv)));
 				out_points.push_back(p1);
 				out_points.push_back(add_v2(p1, rv));
 				break;
@@ -591,7 +587,7 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 					auto c = double(cos(angle));
 					auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
 					out_points.push_back(p1);
-					out_points.push_back(sub_2d(p1, rv));
+					out_points.push_back(sub_v2(p1, rv));
 				}
 			}
 		}
@@ -602,11 +598,11 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 			auto l1_npv = l2_npv;
 			p2 = path[index];
 			index += step;
-			l2_v = sub_2d(p2, p1);
-			l2_pv = perp_2d(l2_v);
-			l2_npv = norm_2d(l2_pv);
-			auto nbv = norm_2d(scale_2d(add_v2(l1_npv, l2_npv), 0.5f));
-			auto c = dot_2d(nbv, norm_2d(l1_v));
+			l2_v = sub_v2(p2, p1);
+			l2_pv = perp_v2(l2_v);
+			l2_npv = norm_v2(l2_pv);
+			auto nbv = norm_v2(scale_v2(add_v2(l1_npv, l2_npv), 0.5f));
+			auto c = dot_v2(nbv, norm_v2(l1_v));
 			if (c <= 0.0) goto mitre_join;
 			switch (joinstyle)
 			{
@@ -615,7 +611,7 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 				mitre_join:
 					//mitre join
 					auto s = double(sin(acos(c)));
-					auto bv = scale_2d(nbv, radius/s);
+					auto bv = scale_v2(nbv, radius/s);
 					out_points.push_back(p1);
 					out_points.push_back(add_v2(p1, bv));
 					break;
@@ -624,18 +620,18 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 				{
 					//bevel join
 					out_points.push_back(p1);
-					out_points.push_back(add_v2(p1, scale_2d(l1_npv, radius)));
+					out_points.push_back(add_v2(p1, scale_v2(l1_npv, radius)));
 					out_points.push_back(p1);
-					out_points.push_back(add_v2(p1, scale_2d(l2_npv, radius)));
+					out_points.push_back(add_v2(p1, scale_v2(l2_npv, radius)));
 					break;
 				}
 				default:
 				{
 					//round join
-					auto rv = scale_2d(l1_npv, radius);
+					auto rv = scale_v2(l1_npv, radius);
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -double(acos(dot_2d(l1_npv, l2_npv)));
+					auto theta = -double(acos(dot_v2(l1_npv, l2_npv)));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{

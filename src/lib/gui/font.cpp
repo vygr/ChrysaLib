@@ -20,7 +20,7 @@ font_metrics Font::get_metrics()
 	fixed64_t ascent = data->m_ascent * m_pixels;
 	fixed64_t descent = data->m_descent * m_pixels;
 	fixed64_t height = ascent + descent;
-	return font_metrics{(uint32_t)(ascent >> 24), (uint32_t)(descent >> 24), (uint32_t)(height >> 24)};
+	return font_metrics{uint32_t(ascent) >> 8, uint32_t(descent) >> 8, uint32_t(height) >> 8};
 }
 
 font_path *Font::glyph_data(uint32_t code)
@@ -90,10 +90,7 @@ glyph_size Font::glyph_bounds(const std::vector<font_path*> &info)
 	}
 	w *= m_pixels;
 	h *= m_pixels;
-	w >>= 24;
-	h >>= 24;
-	w++;
-	return glyph_size{(uint32_t)w, (uint32_t)h};
+	return glyph_size{(uint32_t(w) >> 8) + 1, uint32_t(h) >> 8};
 }
 
 std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_size &size)
@@ -102,7 +99,7 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 	auto data = (font_data*)m_data;
 	const fixed64_t height = data->m_ascent + data->m_descent;
 	const fixed64_t gap = height >> 4;
-	const fixed32_t eps = 1 << (FP_SHIFT - 2);
+	const fixed32_t eps = 0.25;
 	const auto pixels = m_pixels;
 	fixed64_t ox = gap;
 	fixed64_t oy = 0;
@@ -174,8 +171,8 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 			ox += (height >> 4) + gap;
 		}
 	}
-	size.m_w = (ox * pixels >> 24) + 1;
-	size.m_h = height * pixels >> 24;
+	size.m_w = (uint32_t(ox * pixels) >> 8) + 1;
+	size.m_h = uint32_t(height * pixels) >> 8;
 	return paths;
 }
 
@@ -207,7 +204,7 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	sym_canvas->set_col(argb_white);
 	sym_canvas->set_canvas_flags(canvas_flag_antialias);
 	auto metrics = get_metrics();
-	sym_canvas->fpoly(paths, 0, metrics.m_ascent << (FP_SHIFT + 1), winding_odd_even);
+	sym_canvas->fpoly(paths, 0, metrics.m_ascent * 2, winding_odd_even);
 
 	//take texture from canvas
 	sym_canvas->swap();
