@@ -40,10 +40,10 @@ Grid *Grid::layout()
 	{
 		auto row = child_num / grid_w;
 		auto col = child_num % grid_w;
-		auto cell_x = w * col / grid_w;
-		auto cell_y = h * row / grid_h;
-		auto cell_x1 = w * (col + 1) / grid_w;
-		auto cell_y1 = h * (row + 1) / grid_h;
+		int32_t cell_x = w * col / grid_w;
+		int32_t cell_y = h * row / grid_h;
+		int32_t cell_x1 = w * (col + 1) / grid_w;
+		int32_t cell_y1 = h * (row + 1) / grid_h;
 		child->change(cell_x, cell_y, cell_x1 - cell_x, cell_y1 - cell_y);
 		child_num++;
 	}
