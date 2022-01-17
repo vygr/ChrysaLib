@@ -46,7 +46,7 @@ struct Vec3d
 ///////////////////////
 
 template <class T>
-auto manhattan_distance_2d(const T &p1, const T &p2)
+auto manhattan_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -54,7 +54,7 @@ auto manhattan_distance_2d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto manhattan_distance_3d(const T &p1, const T &p2)
+auto manhattan_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -63,7 +63,7 @@ auto manhattan_distance_3d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto euclidean_distance_2d(const T &p1, const T &p2)
+auto euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -71,7 +71,7 @@ auto euclidean_distance_2d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto euclidean_distance_3d(const T &p1, const T &p2)
+auto euclidean_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -80,7 +80,7 @@ auto euclidean_distance_3d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto squared_euclidean_distance_2d(const T &p1, const T &p2)
+auto squared_euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -88,7 +88,7 @@ auto squared_euclidean_distance_2d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto squared_euclidean_distance_3d(const T &p1, const T &p2)
+auto squared_euclidean_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
@@ -97,7 +97,7 @@ auto squared_euclidean_distance_3d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto chebyshev_distance_2d(const T &p1, const T &p2)
+auto chebyshev_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = fabs(p1.m_x - p2.m_x);
 	auto dy = fabs(p1.m_y - p2.m_y);
@@ -105,7 +105,7 @@ auto chebyshev_distance_2d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto chebyshev_distance_3d(const T &p1, const T &p2)
+auto chebyshev_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = fabs(p1.m_x - p2.m_x);
 	auto dy = fabs(p1.m_y - p2.m_y);
@@ -115,17 +115,17 @@ auto chebyshev_distance_3d(const T &p1, const T &p2)
 }
 
 template <class T>
-auto reciprocal_distance_2d(const T &p1, const T &p2)
+auto reciprocal_distance_v2(const T &p1, const T &p2)
 {
-	auto d = manhattan_distance_2d(p1, p2);
+	auto d = manhattan_distance_v2(p1, p2);
 	if (d == 0.0) return 1.0;
 	return 1.0 / d;
 }
 
 template <class T>
-auto reciprocal_distance_3d(const T &p1, const T &p2)
+auto reciprocal_distance_v3(const T &p1, const T &p2)
 {
-	auto d = manhattan_distance_3d(p1, p2);
+	auto d = manhattan_distance_v3(p1, p2);
 	if (d == 0.0) return 1.0;
 	return 1.0 / d;
 }
@@ -191,14 +191,14 @@ auto distance_v2(const T &p1, const T &p2)
 }
 
 template <class T>
-auto distance_squared_2d(const T &p1, const T &p2)
+auto distance_squared_v2(const T &p1, const T &p2)
 {
 	auto p = sub_v2(p2, p1);
 	return dot_v2(p, p);
 }
 
 template <class T>
-auto distance_to_line_2d(const T &p, const T &p1, const T &p2)
+auto distance_to_line_v2(const T &p, const T &p1, const T &p2)
 {
 	auto lv = sub_v2(p2, p1);
 	auto pv = sub_v2(p, p1);
@@ -210,19 +210,19 @@ auto distance_to_line_2d(const T &p, const T &p1, const T &p2)
 }
 
 template <class T>
-auto distance_squared_to_line_2d(const T &p, const T &p1, const T &p2)
+auto distance_squared_to_line_v2(const T &p, const T &p1, const T &p2)
 {
 	auto lv = sub_v2(p2, p1);
 	auto pv = sub_v2(p, p1);
 	auto c1 = dot_v2(pv, lv);
-	if (c1 <= 0.0) return distance_squared_2d(p, p1);
+	if (c1 <= 0.0) return distance_squared_v2(p, p1);
 	auto c2 = dot_v2(lv, lv);
-	if (c2 <= c1) return distance_squared_2d(p, p2);
-	return distance_squared_2d(p, add_v2(p1, scale_v2(lv, c1/c2)));
+	if (c2 <= c1) return distance_squared_v2(p, p2);
+	return distance_squared_v2(p, add_v2(p1, scale_v2(lv, c1/c2)));
 }
 
 template <class T>
-auto collide_lines_2d(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
+auto collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
 {
 	auto av = sub_v2(l1_p2, l1_p1);
 	auto bv = sub_v2(l2_p2, l2_p1);
@@ -245,15 +245,15 @@ auto collide_lines_2d(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l
 }
 
 template <class T>
-bool collide_thick_lines_2d(const T &tl1_p1, const T &tl1_p2,
+bool collide_thick_lines_v2(const T &tl1_p1, const T &tl1_p2,
 	 						const T &tl2_p1, const T &tl2_p2, double r)
 {
-	if (collide_lines_2d(tl1_p1, tl1_p2, tl2_p1, tl2_p2)) return true;
+	if (collide_lines_v2(tl1_p1, tl1_p2, tl2_p1, tl2_p2)) return true;
 	r *= r;
-	if (distance_squared_to_line_2d(tl2_p1, tl1_p1, tl1_p2) <= r) return true;
-	if (distance_squared_to_line_2d(tl2_p2, tl1_p1, tl1_p2) <= r) return true;
-	if (distance_squared_to_line_2d(tl1_p1, tl2_p1, tl2_p2) <= r) return true;
-	if (distance_squared_to_line_2d(tl1_p2, tl2_p1, tl2_p2) <= r) return true;
+	if (distance_squared_to_line_v2(tl2_p1, tl1_p1, tl1_p2) <= r) return true;
+	if (distance_squared_to_line_v2(tl2_p2, tl1_p1, tl1_p2) <= r) return true;
+	if (distance_squared_to_line_v2(tl1_p1, tl2_p1, tl2_p2) <= r) return true;
+	if (distance_squared_to_line_v2(tl1_p2, tl2_p1, tl2_p2) <= r) return true;
 	return false;
 }
 
