@@ -5,13 +5,13 @@
 //settings
 const double eps = 0.1;
 const double min_distance = 0.01;
-const double clipfar = 8.0;
+const double clipfar = 10.0;
 const double march_factor = 1.0;
 const double shadow_softness = 64.0;
 const double attenuation = 0.05;
 const double ambient = 0.05;
 const double ref_coef = 0.3;
-const int32_t ref_depth = 2;
+const int32_t ref_depth = 3;
 const Vec3d light_pos = {-0.1, -0.1, -3.0};
 
 const auto ex = Vec3d{-eps, 0.0, 0.0};

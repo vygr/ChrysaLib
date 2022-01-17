@@ -101,7 +101,7 @@ fixed64_t &fixed64_t::operator/=(const fixed64_t &n)
 
 fixed64_t &fixed64_t::operator/=(const int32_t &n)
 {
-	m_val = m_val / n;
+	m_val /= n;
 	return *this;
 }
 
