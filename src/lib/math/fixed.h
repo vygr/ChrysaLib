@@ -12,13 +12,13 @@ class fixed32_t
 {
 public:
 	fixed32_t() : m_val(0) {}
-	fixed32_t(int32_t v) : m_val(v << FP_SHIFT) {}
-	fixed32_t(int64_t v) : m_val(v << FP_SHIFT) {}
-	fixed32_t(uint32_t v) : m_val(v << FP_SHIFT) {}
-	fixed32_t(uint64_t v) : m_val(v << FP_SHIFT) {}
-	fixed32_t(float v) : m_val(v * (1 << FP_SHIFT)) {}
-	fixed32_t(double v) : m_val(v * (1 << FP_SHIFT)) {}
-	fixed32_t(fixed64_t v);
+	fixed32_t(int32_t n) : m_val(n << FP_SHIFT) {}
+	fixed32_t(int64_t n) : m_val(n << FP_SHIFT) {}
+	fixed32_t(uint32_t n) : m_val(n << FP_SHIFT) {}
+	fixed32_t(uint64_t n) : m_val(n << FP_SHIFT) {}
+	fixed32_t(float n) : m_val(n * (1 << FP_SHIFT)) {}
+	fixed32_t(double n) : m_val(n * (1 << FP_SHIFT)) {}
+	fixed32_t(fixed64_t n);
 	operator int32_t() const { return m_val >> FP_SHIFT; }
 	operator uint32_t() const { return m_val >> FP_SHIFT; }
 	operator int64_t() const { return m_val >> FP_SHIFT; }
@@ -45,8 +45,8 @@ public:
 	fixed32_t &operator/=(const int32_t &n);
 	fixed32_t operator/(const fixed32_t &n) const;
 	fixed32_t operator/(const int32_t &n) const;
-	fixed32_t &operator>>=(const int &s);
-	fixed32_t operator>>(const int &s) const;
+	fixed32_t &operator>>=(const int &n);
+	fixed32_t operator>>(const int &n) const;
 	static fixed32_t abs(const fixed32_t &n);
 	int32_t m_val;
 };
@@ -55,13 +55,13 @@ class fixed64_t
 {
 public:
 	fixed64_t() : m_val(0) {}
-	fixed64_t(int32_t v) : m_val(v << FP_SHIFT) {}
-	fixed64_t(int64_t v) : m_val(v << FP_SHIFT) {}
-	fixed64_t(uint32_t v) : m_val(v << FP_SHIFT) {}
-	fixed64_t(uint64_t v) : m_val(v << FP_SHIFT) {}
-	fixed64_t(float v) : m_val(v * (1 << FP_SHIFT)) {}
-	fixed64_t(double v) : m_val(v * (1 << FP_SHIFT)) {}
-	fixed64_t(fixed32_t v);
+	fixed64_t(int32_t n) : m_val(n << FP_SHIFT) {}
+	fixed64_t(int64_t n) : m_val(n << FP_SHIFT) {}
+	fixed64_t(uint32_t n) : m_val(n << FP_SHIFT) {}
+	fixed64_t(uint64_t n) : m_val(n << FP_SHIFT) {}
+	fixed64_t(float n) : m_val(n * (1 << FP_SHIFT)) {}
+	fixed64_t(double n) : m_val(n * (1 << FP_SHIFT)) {}
+	fixed64_t(fixed32_t n);
 	operator int32_t() const { return m_val >> FP_SHIFT; }
 	operator uint32_t() const { return m_val >> FP_SHIFT; }
 	operator int64_t() const { return m_val >> FP_SHIFT; }
@@ -87,8 +87,8 @@ public:
 	fixed64_t &operator/=(const int32_t &n);
 	fixed64_t operator/(const fixed64_t &n) const;
 	fixed64_t operator/(const int32_t &n) const;
-	fixed64_t &operator>>=(const int &s);
-	fixed64_t operator>>(const int &s) const;
+	fixed64_t &operator>>=(const int &n);
+	fixed64_t operator>>(const int &n) const;
 	static fixed64_t abs(const fixed64_t &n);
 	int64_t m_val;
 };

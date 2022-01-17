@@ -4,20 +4,20 @@
 //fixed 64
 //////////
 
-fixed64_t::fixed64_t(fixed32_t v)
-	: m_val(v.m_val)
+fixed64_t::fixed64_t(fixed32_t n)
+	: m_val(n.m_val)
 {}
 
-fixed64_t &fixed64_t::operator>>=(const int &s)
+fixed64_t &fixed64_t::operator>>=(const int &n)
 {
-	m_val >>= s;
+	m_val >>= n;
 	return *this;
 }
 
-fixed64_t fixed64_t::operator>>(const int &s) const
+fixed64_t fixed64_t::operator>>(const int &n) const
 {
 	fixed64_t result(*this);
-	return result >>= s;
+	return result >>= n;
 }
 
 fixed64_t &fixed64_t::operator+=(const fixed64_t &n)
@@ -65,13 +65,13 @@ fixed64_t &fixed64_t::operator*=(const fixed64_t &n)
 
 fixed64_t &fixed64_t::operator*=(const int32_t &n)
 {
-	m_val = (m_val * n);
+	m_val *= n;
 	return *this;
 }
 
 fixed64_t &fixed64_t::operator*=(const uint32_t &n)
 {
-	m_val = (m_val * n);
+	m_val *= n;
 	return *this;
 }
 
@@ -127,20 +127,20 @@ fixed64_t fixed64_t::abs(const fixed64_t &n)
 //fixed 32
 //////////
 
-fixed32_t::fixed32_t(fixed64_t v)
-	: m_val(v.m_val)
+fixed32_t::fixed32_t(fixed64_t n)
+	: m_val(n.m_val)
 {}
 
-fixed32_t &fixed32_t::operator>>=(const int &s)
+fixed32_t &fixed32_t::operator>>=(const int &n)
 {
-	m_val >>= s;
+	m_val >>= n;
 	return *this;
 }
 
-fixed32_t fixed32_t::operator>>(const int &s) const
+fixed32_t fixed32_t::operator>>(const int &n) const
 {
 	fixed32_t result(*this);
-	return result >>= s;
+	return result >>= n;
 }
 
 fixed32_t &fixed32_t::operator+=(const fixed32_t &n)
@@ -182,19 +182,19 @@ fixed32_t fixed32_t::operator-(const fixed32_t &n) const
 
 fixed32_t &fixed32_t::operator*=(const fixed32_t &n)
 {
-	m_val = (m_val * n.m_val) >> FP_SHIFT;
+	m_val = ((int64_t)m_val * n.m_val) >> FP_SHIFT;
 	return *this;
 }
 
 fixed32_t &fixed32_t::operator*=(const int32_t &n)
 {
-	m_val = (m_val * n);
+	m_val *= n;
 	return *this;
 }
 
 fixed32_t &fixed32_t::operator*=(const uint32_t &n)
 {
-	m_val = (m_val * n);
+	m_val *= n;
 	return *this;
 }
 
@@ -218,7 +218,7 @@ fixed32_t fixed32_t::operator*(const uint32_t &n) const
 
 fixed32_t &fixed32_t::operator/=(const fixed32_t &n)
 {
-	m_val = (m_val << FP_SHIFT) / n.m_val;
+	m_val = ((int64_t)m_val << FP_SHIFT) / n.m_val;
 	return *this;
 }
 
