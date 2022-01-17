@@ -2,19 +2,7 @@
 #include "../../gui/colors.h"
 #include "../../math/vector.h"
 
-point_3d frac_3d(const point_3d &p);
-point_3d floor_3d(const point_3d &p);
-point_3d sub_3d(const point_3d &p1, const point_3d &p2);
-point_3d add_3d(const point_3d &p1, const point_3d &p2);
-point_3d mul_3d(const point_3d &p1, const point_3d &p2);
-point_3d mod_3d(const point_3d &p1, const point_3d &p2);
-point_3d clamp_3d(const point_3d &p1, const point_3d &p2, const point_3d &p3);
-double dot_3d(const point_3d &p1, const point_3d &p2);
-point_3d scale_3d(const point_3d &p, double s);
-point_3d reflect_3d(const point_3d &p, const point_3d &n);
-point_3d norm_3d(const point_3d &p);
-double length_3d(const point_3d &p);
-
+//settings
 const double eps = 0.1;
 const double min_distance = 0.01;
 const double clipfar = 8.0;
@@ -24,19 +12,19 @@ const double attenuation = 0.05;
 const double ambient = 0.05;
 const double ref_coef = 0.3;
 const int32_t ref_depth = 2;
-const point_3d light_pos = {-0.1, -0.1, -3.0};
+const Vec3d light_pos = {-0.1, -0.1, -3.0};
 
-const auto ex = point_3d{-eps, 0.0, 0.0};
-const auto ey = point_3d{0.0, -eps, 0.0};
-const auto ez = point_3d{0.0, 0.0, -eps};
+const auto ex = Vec3d{-eps, 0.0, 0.0};
+const auto ey = Vec3d{0.0, -eps, 0.0};
+const auto ez = Vec3d{0.0, 0.0, -eps};
 
 //the scene
-double scene(const point_3d &p)
+double scene(const Vec3d &p)
 {
-	return length_3d(sub_3d(frac_3d(p), point_3d{0.5, 0.5, 0.5})) - 0.35;
+	return length_3d(sub_3d(frac_3d(p), Vec3d{0.5, 0.5, 0.5})) - 0.35;
 }
 
-double ray_march(const point_3d &ray_origin, const point_3d &ray_dir,
+double ray_march(const Vec3d &ray_origin, const Vec3d &ray_dir,
 	double l, double max_l, double min_distance, double march_factor)
 {
 	auto i = -1;
@@ -49,16 +37,16 @@ double ray_march(const point_3d &ray_origin, const point_3d &ray_dir,
 	return d > min_distance ? max_l : l;
 }
 
-point_3d get_normal(const point_3d &p)
+Vec3d get_normal(const Vec3d &p)
 {
 	const auto d = scene(p);
-	return norm_3d(point_3d(
+	return norm_3d(Vec3d(
 		d - scene(add_3d(p, ex)),
 		d - scene(add_3d(p, ey)),
 		d - scene(add_3d(p, ez))));
 }
 
-double shadow(const point_3d &ray_origin, const point_3d &ray_dir,
+double shadow(const Vec3d &ray_origin, const Vec3d &ray_dir,
 	double l, double max_l, double k)
 {
 	auto s = 1.0;
@@ -73,28 +61,28 @@ double shadow(const point_3d &ray_origin, const point_3d &ray_dir,
 	return std::max(s, 0.1);
 }
 
-point_3d lighting(const point_3d &surface_pos, const point_3d &surface_norm, const point_3d &cam_pos)
+Vec3d lighting(const Vec3d &surface_pos, const Vec3d &surface_norm, const Vec3d &cam_pos)
 {
-	auto obj_color = floor_3d(mod_3d(surface_pos, point_3d{2.0, 2.0, 2.0}));
+	auto obj_color = floor_3d(mod_3d(surface_pos, Vec3d{2.0, 2.0, 2.0}));
 	auto light_vec = sub_3d(light_pos, surface_pos);
 	auto light_dis = length_3d(light_vec);
 	auto light_norm = scale_3d(light_vec, 1.0 / light_dis);
 	auto light_atten = std::min(1.0 / (light_dis * light_dis * attenuation), 1.0);
 	auto ref = reflect_3d(scale_3d(light_norm, -1.0), surface_norm);
 	auto ss = shadow(surface_pos, light_norm, min_distance, light_dis, shadow_softness);
-	auto light_col = scale_3d(point_3d{1.0, 1.0, 1.0}, light_atten * ss);
+	auto light_col = scale_3d(Vec3d{1.0, 1.0, 1.0}, light_atten * ss);
 	auto diffuse = std::max(0.0, dot_3d(surface_norm, light_norm));
 	auto specular = std::max(0.0, dot_3d(ref, norm_3d(sub_3d(cam_pos, surface_pos))));
 	specular = specular * specular * specular * specular;
 	obj_color = scale_3d(obj_color, (diffuse * (1.0 - ambient)) + ambient);
-	obj_color = add_3d(obj_color, point_3d{specular, specular, specular});
+	obj_color = add_3d(obj_color, Vec3d{specular, specular, specular});
 	return mul_3d(obj_color, light_col);
 }
 
-point_3d scene_ray(point_3d ray_origin, point_3d ray_dir)
+Vec3d scene_ray(Vec3d ray_origin, Vec3d ray_dir)
 {
 	auto l = ray_march(ray_origin, ray_dir, 0.0, clipfar, min_distance, march_factor);
-	if (l >= clipfar) return point_3d{0.0, 0.0, 0.0};
+	if (l >= clipfar) return Vec3d{0.0, 0.0, 0.0};
 	//diffuse lighting
 	auto surface_pos = add_3d(ray_origin, scale_3d(ray_dir, l));
 	auto surface_norm = get_normal(surface_pos);
@@ -114,7 +102,7 @@ point_3d scene_ray(point_3d ray_origin, point_3d ray_dir)
 		color = add_3d(scale_3d(color, 1.0 - r), scale_3d(lighting(surface_pos, surface_norm, ray_origin), r));
 		r *= ref_coef;
 	}
-	return clamp_3d(color, point_3d{0.0, 0.0, 0.0}, point_3d{1.0, 1.0, 1.0});
+	return clamp_3d(color, Vec3d{0.0, 0.0, 0.0}, Vec3d{1.0, 1.0, 1.0});
 }
 
 void Raymarch_App::render(Raymarch_Job_reply* body,
@@ -125,14 +113,14 @@ void Raymarch_App::render(Raymarch_Job_reply* body,
 	const auto stride = (x1 - x);
 	const auto w2 = cw / 2.0;
 	const auto h2 = ch / 2.0;
-	const auto ray_origin = point_3d{0.0, 0.0, -3.0};
+	const auto ray_origin = Vec3d{0.0, 0.0, -3.0};
 	for (auto ry = y; ry < y1; ++ry)
 	{
 		for (auto rx = x; rx < x1; ++rx)
 		{
 			auto dx = (rx - w2) / w2;
 			auto dy = (ry - h2) / h2;
-			auto ray_dir = norm_3d(sub_3d(point_3d(dx, dy, 0.0), ray_origin));
+			auto ray_dir = norm_3d(sub_3d(Vec3d(dx, dy, 0.0), ray_origin));
 			auto col_3d = scene_ray(ray_origin, ray_dir);
 			auto col = argb_black +
 				((int)(col_3d.m_x * 0xff) << 16) +
