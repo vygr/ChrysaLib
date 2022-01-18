@@ -189,13 +189,13 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 	{
 		auto len = path.size();
 		auto x2 = path[len - 2] + x;
-		auto y2 = int32_t((path[len - 1] + y) * scale);
+		int32_t y2 = (path[len - 1] + y) * scale;
 		for (auto i = 0; i < len;)
 		{
 			auto x1 = x2;
 			auto y1 = y2;
 			x2 = path[i++] + x;
-			y2 = int32_t((path[i++] + y) * scale);
+			y2 = (path[i++] + y) * scale;
 			bounds.m_min_x = std::min(bounds.m_min_x, int32_t(x2));
 			bounds.m_max_x = std::max(bounds.m_max_x, int32_t(x2));
 			if (y1 == y2) continue;
@@ -266,8 +266,8 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 		}
 
 		//for each scan line
-		auto cx = fixed32_t(m_cx);
-		auto cx1 = fixed32_t(m_cx1 - 1);
+		fixed32_t cx = m_cx;
+		fixed32_t cx1 = m_cx1 - 1;
 		auto min_x = INT32_MAX;
 		auto max_x = INT32_MIN;
 		while (ys < ye)
@@ -320,7 +320,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 						x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
-						auto ix = int32_t(x);
+						int32_t ix = x;
 						min_x = std::min(ix, min_x);
 						max_x = std::max(ix, max_x);
 						m_coverage[ix] ^= xm;
@@ -336,7 +336,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 						auto w = node->m_w;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
-						auto ix = int32_t(x);
+						int32_t ix = x;
 						min_x = std::min(ix, min_x);
 						m_coverage[ix] ^= xm;
 						do
@@ -347,7 +347,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 						x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
-						ix = int32_t(x);
+						ix = x;
 						max_x = std::max(ix, max_x);
 						m_coverage[ix] ^= xm;
 					}
