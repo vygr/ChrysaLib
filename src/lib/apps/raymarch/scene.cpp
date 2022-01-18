@@ -12,7 +12,7 @@ const double attenuation = 0.05;
 const double ambient = 0.05;
 const double ref_coef = 0.3;
 const int32_t ref_depth = 3;
-const int32_t over_sample = 3;
+const int32_t over_sample = 4;
 const Vec3d light_pos = {-0.1, -0.1, -3.0};
 
 const auto ex = Vec3d{-eps, 0.0, 0.0};
