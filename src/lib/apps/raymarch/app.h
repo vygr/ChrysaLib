@@ -12,6 +12,7 @@ private:
 	const uint32_t CANVAS_WIDTH = 900;
 	const uint32_t CANVAS_HEIGHT = 900;
 	const uint32_t CANVAS_SCALE = 1;
+	const uint32_t OVER_SAMPLE = 4;
 	const uint32_t UPDATE_TIMEOUT = 500;
 	const uint32_t JOB_TIMEOUT = 5000;
 	const uint32_t JOB_LIMIT = 16;
@@ -26,6 +27,7 @@ private:
 	struct Raymarch_Job : public Farm::Job
 	{
 		Net_ID m_reply;
+		uint32_t m_over_sample;
 		uint32_t m_x;
 		uint32_t m_y;
 		uint32_t m_x1;
@@ -49,7 +51,7 @@ private:
 		select_timer,
 		select_size,
 	};
-	void render(Raymarch_Job_reply* body,
+	void render(Raymarch_Job_reply* body, uint32_t over_sample,
 		uint32_t x, uint32_t y,
 		uint32_t x1, uint32_t y1,
 		uint32_t cw, uint32_t ch) const;

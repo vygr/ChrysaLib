@@ -12,7 +12,6 @@ const double attenuation = 0.05;
 const double ambient = 0.05;
 const double ref_coef = 0.3;
 const int32_t ref_depth = 3;
-const int32_t over_sample = 4;
 const Vec3d light_pos = {-0.1, -0.1, -3.0};
 
 const auto ex = Vec3d{-eps, 0.0, 0.0};
@@ -106,7 +105,7 @@ Vec3d scene_ray(Vec3d ray_origin, Vec3d ray_dir)
 	return clamp_v3(color, Vec3d{0.0, 0.0, 0.0}, Vec3d{1.0, 1.0, 1.0});
 }
 
-void Raymarch_App::render(Raymarch_Job_reply* body,
+void Raymarch_App::render(Raymarch_Job_reply* body, uint32_t over_sample,
 		uint32_t x, uint32_t y,
 		uint32_t x1, uint32_t y1,
 		uint32_t cw, uint32_t ch) const

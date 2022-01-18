@@ -64,6 +64,7 @@ void Raymarch_App::run()
 			m_thread_pool->enqueue([=, msg_ref = std::move(msg)]
 			{
 				auto job_body = (Raymarch_Job*)msg_ref->begin();
+				auto over_sample = job_body->m_over_sample;
 				auto x = job_body->m_x;
 				auto y = job_body->m_y;
 				auto x1 = job_body->m_x1;
@@ -80,7 +81,7 @@ void Raymarch_App::run()
 				reply_body->m_y = y;
 				reply_body->m_x1 = x1;
 				reply_body->m_y1 = y1;
-				render(reply_body, x, y, x1, y1, cw, ch);
+				render(reply_body, over_sample, x, y, x1, y1, cw, ch);
 				reply->set_dest(job_body->m_reply);
 				//simulate failure !
 				//if (rand() % 100 < 5) return;
@@ -213,6 +214,7 @@ void Raymarch_App::reset()
 	{
 		auto job = std::make_shared<Msg>(sizeof(Raymarch_Job));
 		auto job_body = (Raymarch_Job*)job->begin();
+		job_body->m_over_sample = OVER_SAMPLE;
 		job_body->m_x = 0;
 		job_body->m_y = y;
 		job_body->m_x1 = CANVAS_WIDTH * CANVAS_SCALE;
