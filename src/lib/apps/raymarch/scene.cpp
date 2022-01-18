@@ -12,6 +12,7 @@ const double attenuation = 0.05;
 const double ambient = 0.05;
 const double ref_coef = 0.3;
 const int32_t ref_depth = 3;
+const int32_t over_sample = 3;
 const Vec3d light_pos = {-0.1, -0.1, -3.0};
 
 const auto ex = Vec3d{-eps, 0.0, 0.0};
@@ -114,14 +115,31 @@ void Raymarch_App::render(Raymarch_Job_reply* body,
 	const auto w2 = cw / 2.0;
 	const auto h2 = ch / 2.0;
 	const auto ray_origin = Vec3d{0.0, 0.0, -3.0};
+	const auto os_scale = Vec3d(
+		1.0 / (over_sample * over_sample),
+		1.0 / (over_sample * over_sample),
+		1.0 / (over_sample * over_sample));
 	for (auto ry = y; ry < y1; ++ry)
 	{
+		auto dy = (ry - h2) / h2;
+		const auto osy_itr = ((((ry + 1) - h2) / h2) - dy) / over_sample;
 		for (auto rx = x; rx < x1; ++rx)
 		{
 			auto dx = (rx - w2) / w2;
-			auto dy = (ry - h2) / h2;
-			auto ray_dir = norm_v3(sub_v3(Vec3d(dx, dy, 0.0), ray_origin));
-			auto col_v3 = scene_ray(ray_origin, ray_dir);
+			const auto osx_itr = ((((rx + 1) - w2) / w2) - dx) / over_sample;
+			auto col_v3 = Vec3d(0.0, 0.0, 0.0);
+			for (auto osy = 0; osy < over_sample; ++osy)
+			{
+				for (auto osx = 0; osx < over_sample; ++osx)
+				{
+					auto ray_dir = norm_v3(sub_v3(Vec3d(
+						dx + (osx * osx_itr),
+						dy + (osy * osy_itr),
+						0.0), ray_origin));
+					col_v3 = add_v3(col_v3, scene_ray(ray_origin, ray_dir));
+				}
+			}
+			col_v3 = mul_v3(col_v3, os_scale);
 			auto col = argb_black +
 				((int)(col_v3.m_x * 0xff) << 16) +
 				((int)(col_v3.m_y * 0xff) << 8) +
