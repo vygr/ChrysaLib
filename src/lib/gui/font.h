@@ -35,16 +35,13 @@ struct font_path_element
 
 struct font_line_element : public font_path_element
 {
-	fixed32_t m_x;
-	fixed32_t m_y;
+	Vec2f m_p;
 };
 
 struct font_curve_element : public font_line_element
 {
-	fixed32_t m_x1;
-	fixed32_t m_y1;
-	fixed32_t m_x2;
-	fixed32_t m_y2;
+	Vec2f m_p1;
+	Vec2f m_p2;
 };
 
 struct glyph_size

@@ -101,9 +101,8 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 	const fixed64_t gap = height >> 4;
 	const fixed32_t eps = 0.25;
 	const auto pixels = m_pixels;
-	fixed64_t ox = gap;
-	fixed64_t oy = 0;
-	Path *p;
+	auto o = Vec2F(gap);
+	Path *pth;
 	for (auto font_path : info)
 	{
 		if (font_path)
@@ -111,43 +110,34 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 			fixed64_t width = font_path->m_width;
 			auto font_data = ((uint8_t*)font_path) + sizeof(font_path);
 			auto font_data_end = font_data + font_path->m_len;
-			auto pos_x = ox;
-			auto pos_y = oy;
+			auto pos = o;
 			while (font_data != font_data_end)
 			{
 				auto font_line = (font_line_element*)font_data;
 				auto element_type = font_line->m_type;
-				fixed64_t x = font_line->m_x;
-				fixed64_t y = font_line->m_y;
-				x = ((x + ox) * pixels) >> 7;
-				y = ((y + oy) * pixels) >> 7;
+				auto p = Vec2F(font_line->m_p);
+				p = asr_v2(scale_v2(add_v2(p, o), pixels), 7);
 				switch (element_type)
 				{
 				case 2:
 				{
 					//curve to
-					p->pop_back();
+					pth->pop_back();
 					auto font_curve = (font_curve_element*)font_data;
-					fixed64_t x1 = font_curve->m_x1;
-					fixed64_t y1 = font_curve->m_y1;
-					fixed64_t x2 = font_curve->m_x2;
-					fixed64_t y2 = font_curve->m_y2;
-					x1 = ((x1 + ox) * pixels) >> 7;
-					y1 = ((y1 + oy) * pixels) >> 7;
-					x2 = ((x2 + ox) * pixels) >> 7;
-					y2 = ((y2 + oy) * pixels) >> 7;
-					p->gen_cubic(pos_x, pos_y, x, y, x1, y1, x2, y2, eps);
-					pos_x = x2;
-					pos_y = y2;
+					auto p1 = Vec2F(font_curve->m_p1);
+					auto p2 = Vec2F(font_curve->m_p2);
+					p1 = asr_v2(scale_v2(add_v2(p1, o), pixels), 7);
+					p2 = asr_v2(scale_v2(add_v2(p2, o), pixels), 7);
+					pth->gen_cubic(pos, p, p1, p2, eps);
+					pos = p2;
 					font_data += sizeof(font_curve_element);
 					break;
 				}
 				case 1:
 				{
 					//line to
-					p->push_back(x, y);
-					pos_x = x;
-					pos_y = y;
+					pth->push_back(p);
+					pos = p;
 					font_data += sizeof(font_line_element);
 					break;
 				}
@@ -155,23 +145,22 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 				{
 					//move to
 					paths.emplace_back(Path());
-					p = &paths.back();
-					p->push_back(x, y);
-					pos_x = x;
-					pos_y = y;
+					pth = &paths.back();
+					pth->push_back(p);
+					pos = p;
 					font_data += sizeof(font_line_element);
 					break;
 				}
 				}
 			}
-			ox += width + gap;
+			o.m_x += width + gap;
 		}
 		else
 		{
-			ox += (height >> 4) + gap;
+			o.m_x += (height >> 4) + gap;
 		}
 	}
-	size.m_w = (uint32_t(ox * pixels) >> 8) + 1;
+	size.m_w = (uint32_t(o.m_x * pixels) >> 8) + 1;
 	size.m_h = uint32_t(height * pixels) >> 8;
 	return paths;
 }
@@ -204,7 +193,7 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	sym_canvas->set_col(argb_white);
 	sym_canvas->set_canvas_flags(canvas_flag_antialias);
 	auto metrics = get_metrics();
-	sym_canvas->fpoly(paths, 0, metrics.m_ascent * 2, winding_odd_even);
+	sym_canvas->fpoly(paths, Vec2f(0, metrics.m_ascent * 2), winding_odd_even);
 
 	//take texture from canvas
 	sym_canvas->swap();

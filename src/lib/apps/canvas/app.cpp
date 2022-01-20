@@ -52,21 +52,21 @@ void Canvas_App::run()
 	//draw a polygon on the canvas !!!
 	auto path = Path();
 	path.gen_cubic(
-		10.0, 10.0,
-		250.0, 10.0,
-		10.0, 250.0,
-		250.0, 250.0, 0.25);
+		Vec2f(10.0, 10.0),
+		Vec2f(250.0, 10.0),
+		Vec2f(10.0, 250.0),
+		Vec2f(250.0, 250.0), 0.25);
 	path.gen_cubic(
-		250.0, 250.0,
-		250.0, 10.0,
-		10.0, 250.0,
-		10.0, 10.0, 0.25);
+		Vec2f(250.0, 250.0),
+		Vec2f(250.0, 10.0),
+		Vec2f(10.0, 250.0),
+		Vec2f(10.0, 10.0), 0.25);
 	auto polygon = std::vector<Path>{path};
 	canvas->set_canvas_flags(canvas_flag_antialias);
 	canvas->set_col(argb_green);
 	canvas->fbox(5, 5, 240, 240);
 	canvas->set_col(argb_black);
-	canvas->fpoly(polygon, 0.0, 0.0, winding_odd_even);
+	canvas->fpoly(polygon, Vec2f(0, 0), winding_odd_even);
 	canvas->swap();
 
 	//add to my GUI screen

@@ -177,25 +177,26 @@ Canvas *Canvas::span(int32_t coverage, int32_t x, int32_t y, int32_t x1)
 	return this;
 }
 
-edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int32_t scale)
+edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, Vec2f p, int32_t scale)
 {
 	edge_bounds bounds;
 	m_edges.clear();
-	x += fixed32_t(0.5);
-	y += fixed32_t(0.5);
+	p = add_v2(p, Vec2f(0.5, 0.5));
 	auto cy = m_cy * scale;
 	auto cy1 = m_cy1 * scale;
 	for (const auto &path : polygons)
 	{
 		auto len = path.size();
-		auto x2 = path[len - 2] + x;
-		int32_t y2 = (path[len - 1] + y) * scale;
+		auto p2 = add_v2(p, path[len - 1]);
+		auto x2 = p2.m_x;
+		int32_t y2 = p2.m_y * scale;
 		for (auto i = 0; i < len;)
 		{
 			auto x1 = x2;
 			auto y1 = y2;
-			x2 = path[i++] + x;
-			y2 = (path[i++] + y) * scale;
+			p2 = add_v2(p, path[i++]);
+			x2 = p2.m_x;
+			y2 = p2.m_y * scale;
 			bounds.m_min_x = std::min(bounds.m_min_x, int32_t(x2));
 			bounds.m_max_x = std::max(bounds.m_max_x, int32_t(x2));
 			if (y1 == y2) continue;
@@ -222,7 +223,7 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, fixed32_t x, fi
 	return bounds;
 }
 
-Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int winding)
+Canvas *Canvas::fpoly(const std::vector<Path> &polygons, Vec2f p, int winding)
 {
 	static auto sample_offsets = std::array<fixed32_t, 8>{
 		-0.25000, 0.37500, 0.00000, -0.37500, 0.25000, -0.12500, -0.50000, 0.12500};
@@ -242,7 +243,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 		96, 96, 112, 64, 80, 80, 96, 80, 96, 96, 112, 80, 96, 96, 112, 96, 112, 112,
 		128};
 	auto scale = (m_canvas_flags & canvas_flag_antialias) ? 8 : 1;
-	auto bounds = set_edges(polygons, x, y, scale);
+	auto bounds = set_edges(polygons, p, scale);
 	auto xs = bounds.m_min_x;
 	auto ys = bounds.m_min_y;
 	auto xe = bounds.m_max_x;
@@ -317,7 +318,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 					while (node->m_next)
 					{
 						node = node->m_next;
-						x = node->m_x + xo;
+						auto x = node->m_x + xo;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);
 						int32_t ix = x;
@@ -332,7 +333,7 @@ Canvas *Canvas::fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t 
 					while (node->m_next)
 					{
 						node = node->m_next;
-						x = node->m_x + xo;
+						auto x = node->m_x + xo;
 						auto w = node->m_w;
 						x = std::max(x, cx);
 						x = std::min(x, cx1);

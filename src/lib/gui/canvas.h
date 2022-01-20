@@ -71,8 +71,8 @@ public:
 	Canvas *fbox(int32_t x, int32_t y, int32_t w, int32_t h);
 	Canvas *span_noclip(int32_t coverage, int32_t x, int32_t y, int32_t x1);
 	Canvas *span(int32_t coverage, int32_t x, int32_t y, int32_t x1);
-	edge_bounds set_edges(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int32_t scale);
-	Canvas *fpoly(const std::vector<Path> &polygons, fixed32_t x, fixed32_t y, int winding);
+	edge_bounds set_edges(const std::vector<Path> &polygons, Vec2f p, int32_t scale);
+	Canvas *fpoly(const std::vector<Path> &polygons, Vec2f p, int winding);
 	std::shared_ptr<Pixmap> m_pixmap;
 	std::shared_ptr<Texture> m_texture;
 	std::vector<Edge> m_edges;
