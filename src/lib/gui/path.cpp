@@ -143,7 +143,15 @@ Path *Path::filter_polygon(fixed32_t tol)
 std::shared_ptr<Path> Path::stroke_polyline(fixed32_t radius, fixed32_t tol, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style)
 {
 	filter_polyline(0.5);
-	auto out = std::make_shared<Path>();
-	stroke_path_as_lines(out->m_points, radius, 64, join_style, cap1_style, cap2_style);
-	return out;
+	return std::make_shared<Path>(stroke_path(m_points, radius, 64, join_style, cap1_style, cap2_style));
+}
+
+std::pair<std::shared_ptr<Path>, std::shared_ptr<Path>> Path::stroke_polygon(fixed32_t radius, fixed32_t tol, uint32_t join_style)
+{
+	filter_polygon(0.5);
+	auto points = stroke_path(m_points, radius, 64, join_style, cap_butt, cap_butt);
+	auto mid = begin(points) + points.size() / 2;
+	return std::make_pair(
+		std::make_shared<Path>(begin(points), mid),
+		std::make_shared<Path>(mid, begin(points)));
 }
