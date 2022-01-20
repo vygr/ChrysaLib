@@ -8,6 +8,7 @@
 #ifdef _WIN32
 	#include <corecrt_math_defines.h>
 #endif
+#include <iostream>
 
 extern fixed32_t sqrt(const fixed32_t &n);
 extern fixed64_t sqrt(const fixed64_t &n);
@@ -646,7 +647,70 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 		step = -step;
 		index += step;
 	}
-	out_points.push_back(out_points[0]);
+	return out_points;
+}
+
+template <class T, class T1>
+auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t resolution, uint32_t join_style)
+{
+	auto out_points = std::vector<T>{};
+	auto len = static_cast<int>(path.size());
+	auto index = step > 0 ? 0 : len - 1;
+	auto p1 = path[(len + (index - (step * 2))) % len];
+	auto p2 = path[(len + (index - (step * 1))) % len];
+	auto l2_v = sub_v2(p2, p1);
+	auto l2_pv = perp_v2(l2_v);
+	auto l2_npv = norm_v2(l2_pv);
+	while ((index != -1) && (index != len))
+	{
+		p1 = p2;
+		auto l1_v = l2_v;
+		auto l1_npv = l2_npv;
+		p2 = path[index];
+		index += step;
+		l2_v = sub_v2(p2, p1);
+		l2_pv = perp_v2(l2_v);
+		l2_npv = norm_v2(l2_pv);
+		auto nbv = norm_v2(scale_v2(add_v2(l1_npv, l2_npv), 0.5f));
+		auto c = dot_v2(nbv, norm_v2(l1_v));
+		if (c <= 0.0) goto mitre_join;
+		switch (join_style)
+		{
+			case join_mitre:
+			{
+			mitre_join:
+				//mitre join
+				auto s = double(sin(acos(double(c))));
+				auto bv = scale_v2(nbv, radius/s);
+				out_points.push_back(add_v2(p1, bv));
+				break;
+			}
+			case join_bevel:
+			{
+				//bevel join
+				out_points.push_back(add_v2(p1, scale_v2(l1_npv, radius)));
+				out_points.push_back(add_v2(p1, scale_v2(l2_npv, radius)));
+				break;
+			}
+			default:
+			{
+				//round join
+				auto rv = scale_v2(l1_npv, radius);
+				auto rvx = rv.m_x;
+				auto rvy = rv.m_y;
+				auto theta = -double(acos(double(dot_v2(l1_npv, l2_npv))));
+				auto segs = int((theta/-M_PI)*resolution) + 1;
+				for (auto i = 0; i <= segs; ++i)
+				{
+					auto angle = (i * theta) / segs;
+					auto s = double(sin(angle));
+					auto c = double(cos(angle));
+					auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
+					out_points.push_back(add_v2(p1, rv));
+				}
+			}
+		}
+	}
 	return out_points;
 }
 

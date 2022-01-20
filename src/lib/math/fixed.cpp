@@ -205,7 +205,8 @@ fixed32_t fixed32_t::operator-(const fixed32_t &n) const
 
 fixed32_t fixed32_t::operator-() const
 {
-	return fixed32_t(-m_val);
+	fixed32_t result(*this);
+	return result *= -1;
 }
 
 fixed32_t &fixed32_t::operator*=(const fixed32_t &n)
@@ -300,12 +301,12 @@ fixed32_t abs(const fixed32_t &n)
 
 fixed32_t sqrt(const fixed32_t &n)
 {
-	return fixed32_t(std::sqrt(((double)n.m_val)/(1 << FP_SHIFT)));
+	return std::sqrt(double(n));
 }
 
 fixed32_t operator/(const double &n, const fixed32_t &f)
 {
-	return double(f) / n;
+	return n / double(f);
 }
 
 fixed32_t operator*(const double &n, const fixed32_t &f)

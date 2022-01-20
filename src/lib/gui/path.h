@@ -25,8 +25,8 @@ public:
 	Path *gen_cubic(Vec2f p1, Vec2f p2, Vec2f p3, Vec2f p4, fixed32_t tol);
 	Path *filter_polyline(fixed32_t tol);
 	Path *filter_polygon(fixed32_t tol);
-	std::shared_ptr<Path> stroke_polyline(fixed32_t radius, fixed32_t tol, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style);
-	std::pair<std::shared_ptr<Path>, std::shared_ptr<Path>> stroke_polygon(fixed32_t radius, fixed32_t tol, uint32_t join_style);
+	Path stroke_polyline(fixed32_t radius, fixed32_t tol, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style);
+	std::vector<Path> stroke_polygon(fixed32_t radius, fixed32_t tol, uint32_t join_style);
 	std::vector<Vec2f> m_points;
 };
 

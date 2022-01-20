@@ -61,7 +61,7 @@ void Canvas_App::run()
 		Vec2f(250.0, 10.0),
 		Vec2f(10.0, 250.0),
 		Vec2f(10.0, 10.0), 0.25);
-	auto polygon = std::vector<Path>{path};
+	auto polygon = path.stroke_polygon(5.0, 0.1, join_bevel);
 	canvas->set_canvas_flags(canvas_flag_antialias);
 	canvas->set_col(argb_green);
 	canvas->fbox(5, 5, 240, 240);
