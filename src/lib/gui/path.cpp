@@ -116,13 +116,24 @@ Path *Path::filter_polyline(fixed32_t tol)
 	if (m_points.size() > 1)
 	{
 		tol *= tol;
-		auto x1 = m_points[0];
-		auto y1 = m_points[1];
+		auto p1 = m_points[0];
+		m_points.erase(std::remove_if(begin(m_points) + 1, end(m_points), [&] (auto &p2)
+		{
+			if (distance_squared_v2(p1, p2) < tol) return true;
+			p1 = p2;
+			return false;
+		}), end(m_points));
 	}
 	return this;
 }
 
 Path *Path::filter_polygon(fixed32_t tol)
 {
+	filter_polyline(tol);
+	auto len = m_points.size();
+	if (len > 1 && distance_squared_v2(m_points[0], m_points[len - 1]) < tol)
+	{
+		m_points.pop_back();
+	}
 	return this;
 }
