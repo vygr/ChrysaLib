@@ -23,10 +23,15 @@ public:
 	operator uint32_t() const { return m_val >> FP_SHIFT; }
 	operator int64_t() const { return m_val >> FP_SHIFT; }
 	operator uint64_t() const { return m_val >> FP_SHIFT; }
+	operator double() const { return double(m_val) / (1 << FP_SHIFT); }
+	operator float() const { return float(m_val) / (1 << FP_SHIFT); }
 	bool operator==(const fixed32_t &n) const { return m_val == n.m_val; }
 	bool operator!=(const fixed32_t &n) const { return m_val != n.m_val; }
 	bool operator<(const fixed32_t &n) const { return m_val < n.m_val; }
 	bool operator<=(const fixed32_t &n) const { return m_val <= n.m_val; }
+	bool operator==(const double &n) const { return m_val == n * (1 << FP_SHIFT); }
+	bool operator<=(const double &n) const { return m_val <= n * (1 << FP_SHIFT); }
+	fixed32_t operator-() const;
 	fixed32_t &operator++();
 	fixed32_t operator++ (int);
 	fixed32_t &operator--();
@@ -38,16 +43,19 @@ public:
 	fixed32_t &operator*=(const fixed32_t &n);
 	fixed32_t &operator*=(const int32_t &n);
 	fixed32_t &operator*=(const uint32_t &n);
+	fixed32_t &operator*=(const double &n);
 	fixed32_t operator*(const fixed32_t &n) const;
 	fixed32_t operator*(const int32_t &n) const;
 	fixed32_t operator*(const uint32_t &n) const;
+	fixed32_t operator*(const double &n) const;
 	fixed32_t &operator/=(const fixed32_t &n);
 	fixed32_t &operator/=(const int32_t &n);
+	fixed32_t &operator/=(const double &n);
 	fixed32_t operator/(const fixed32_t &n) const;
 	fixed32_t operator/(const int32_t &n) const;
+	fixed32_t operator/(const double &n) const;
 	fixed32_t &operator>>=(const int &n);
 	fixed32_t operator>>(const int &n) const;
-	static fixed32_t abs(const fixed32_t &n);
 	int32_t m_val;
 };
 
@@ -66,9 +74,12 @@ public:
 	operator uint32_t() const { return m_val >> FP_SHIFT; }
 	operator int64_t() const { return m_val >> FP_SHIFT; }
 	operator uint64_t() const { return m_val >> FP_SHIFT; }
+	operator double() const { return double(m_val) / (1 << FP_SHIFT); }
+	operator float() const { return float(m_val) / (1 << FP_SHIFT); }
 	bool operator==(const fixed64_t &n) const { return m_val == n.m_val; }
 	bool operator!=(const fixed64_t &n) const { return m_val != n.m_val; }
 	bool operator<(const fixed64_t &n) const { return m_val < n.m_val; }
+	fixed64_t operator-() const;
 	fixed64_t &operator++();
 	fixed64_t operator++ (int);
 	fixed64_t &operator--();
@@ -91,7 +102,6 @@ public:
 	fixed64_t operator/(const int32_t &n) const;
 	fixed64_t &operator>>=(const int &n);
 	fixed64_t operator>>(const int &n) const;
-	static fixed64_t abs(const fixed64_t &n);
 	int64_t m_val;
 };
 

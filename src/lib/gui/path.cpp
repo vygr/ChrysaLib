@@ -1,6 +1,8 @@
 #include "path.h"
 #include <cstdlib>
 
+extern fixed32_t abs(const fixed32_t &n);
+
 Path *Path::push_back(const Vec2f &p)
 {
 	m_points.push_back(p);
@@ -28,8 +30,8 @@ Path *Path::gen_quadratic(Vec2f p1, Vec2f p2, Vec2f p3, fixed32_t tol)
 		auto p123 = asr_v2(add_v2(p12, p23), 1);
 
 		//flatness test
-		if (fixed32_t::abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
-			+ fixed32_t::abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y) <= tol)
+		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
+			+ abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y) <= tol)
 		{
 			//output point
 			push_back(p123);
@@ -76,10 +78,10 @@ Path *Path::gen_cubic(Vec2f p1, Vec2f p2, Vec2f p3, Vec2f p4, fixed32_t tol)
 		auto p1234 = asr_v2(add_v2(p123, p234), 1);
 
 		//flatness test
-		if (fixed32_t::abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
-			+ fixed32_t::abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y)
-			+ fixed32_t::abs(p2.m_x + p4.m_x - p3.m_x - p3.m_x)
-			+ fixed32_t::abs(p2.m_y + p4.m_y - p3.m_y - p3.m_y) <= tol)
+		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
+			+ abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y)
+			+ abs(p2.m_x + p4.m_x - p3.m_x - p3.m_x)
+			+ abs(p2.m_y + p4.m_y - p3.m_y - p3.m_y) <= tol)
 		{
 			//output point
 			push_back(p1234);
@@ -136,4 +138,12 @@ Path *Path::filter_polygon(fixed32_t tol)
 		m_points.pop_back();
 	}
 	return this;
+}
+
+std::shared_ptr<Path> Path::stroke_polyline(fixed32_t radius, fixed32_t tol, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style)
+{
+	filter_polyline(0.5);
+	auto out = std::make_shared<Path>();
+	stroke_path_as_lines(out->m_points, radius, 64, join_style, cap1_style, cap2_style);
+	return out;
 }

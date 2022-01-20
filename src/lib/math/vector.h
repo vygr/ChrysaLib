@@ -9,6 +9,11 @@
 	#include <corecrt_math_defines.h>
 #endif
 
+extern fixed32_t sqrt(const fixed32_t &n);
+extern fixed64_t sqrt(const fixed64_t &n);
+extern fixed32_t operator/(const double &n, const fixed32_t &f);
+extern fixed32_t operator*(const double &n, const fixed32_t &f);
+
 //////////////
 //vector types
 //////////////
@@ -91,7 +96,7 @@ auto manhattan_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
-	return double(fabs(dx) + fabs(dy));
+	return fabs(dx) + fabs(dy);
 }
 
 template <class T>
@@ -100,7 +105,7 @@ auto manhattan_distance_v3(const T &p1, const T &p2)
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
 	auto dz = p1.m_z - p2.m_z;
-	return double(fabs(dx) + fabs(dy) + fabs(dz));
+	return fabs(dx) + fabs(dy) + fabs(dz);
 }
 
 template <class T>
@@ -108,7 +113,7 @@ auto euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
-	return double(sqrt(dx * dx + dy * dy));
+	return sqrt(dx * dx + dy * dy);
 }
 
 template <class T>
@@ -117,7 +122,7 @@ auto euclidean_distance_v3(const T &p1, const T &p2)
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
 	auto dz = p1.m_z - p2.m_z;
-	return double(sqrt(dx * dx + dy * dy + dz * dz));
+	return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 template <class T>
@@ -125,7 +130,7 @@ auto squared_euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
-	return double(dx * dx + dy * dy);
+	return dx * dx + dy * dy;
 }
 
 template <class T>
@@ -134,7 +139,7 @@ auto squared_euclidean_distance_v3(const T &p1, const T &p2)
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
 	auto dz = p1.m_z - p2.m_z;
-	return double(dx * dx + dy * dy + dz * dz);
+	return dx * dx + dy * dy + dz * dz;
 }
 
 template <class T>
@@ -250,7 +255,7 @@ auto det_v2(const T &p1, const T &p2)
 template <class T>
 auto length_v2(const T &p)
 {
-	return double(sqrt(dot_v2(p, p)));
+	return sqrt(dot_v2(p, p));
 }
 
 template <class T>
@@ -299,7 +304,7 @@ auto distance_squared_to_line_v2(const T &p, const T &p1, const T &p2)
 }
 
 template <class T>
-auto collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
+bool collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
 {
 	auto av = sub_v2(l1_p2, l1_p1);
 	auto bv = sub_v2(l2_p2, l2_p1);
@@ -410,7 +415,7 @@ auto dot_v3(const T &p1, const T &p2)
 template <class T>
 auto length_v3(const T &p)
 {
-	return double(sqrt(dot_v3(p, p)));
+	return sqrt(dot_v3(p, p));
 }
 
 template <class T>
@@ -500,10 +505,25 @@ auto circle_as_trifan(const T &p, double radius, int resolution)
 	return out_points;
 }
 
-template <class T>
-auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capstyle, int joinstyle, int resolution)
+enum
 {
-	if (radius == 0.0) radius = 0.00000001;
+	cap_butt,
+	cap_square,
+	cap_tri,
+	cap_arrow,
+	cap_round,
+};
+
+enum
+{
+	join_mitre,
+	join_bevel,
+	join_round,
+};
+
+template <class T, class T1>
+auto stroke_path_as_lines(const std::vector<T> &path, T1 radius, uint32_t resolution, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style)
+{
 	auto index = 0;
 	auto step = 1;
 	auto out_points = std::vector<T>{};
@@ -517,16 +537,16 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 		auto l2_pv = perp_v2(l2_v);
 		auto l2_npv = norm_v2(l2_pv);
 		auto rv = scale_v2(l2_npv, radius);
-		switch (capstyle)
+		switch (step > 0 ? cap1_style : cap2_style)
 		{
-			case 0:
+			case cap_butt:
 			{
 				//butt cap
 				out_points.push_back(sub_v2(p1, rv));
 				out_points.push_back(add_v2(p1, rv));
 				break;
 			}
-			case 1:
+			case cap_square:
 			{
 				//square cap
 				auto p0 = add_v2(p1, perp_v2(rv));
@@ -534,7 +554,7 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 				out_points.push_back(add_v2(p0, rv));
 				break;
 			}
-			case 2:
+			case cap_tri:
 			{
 				//triangle cap
 				out_points.push_back(sub_v2(p1, rv));
@@ -570,18 +590,18 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 			auto nbv = norm_v2(scale_v2(add_v2(l1_npv, l2_npv), 0.5f));
 			auto c = dot_v2(nbv, norm_v2(l1_v));
 			if (c <= 0.0) goto mitre_join;
-			switch (joinstyle)
+			switch (join_style)
 			{
-				case 0:
+				case join_mitre:
 				{
 				mitre_join:
 					//mitre join
-					auto s = double(sin(acos(c)));
+					auto s = double(sin(acos(double(c))));
 					auto bv = scale_v2(nbv, radius/s);
 					out_points.push_back(add_v2(p1, bv));
 					break;
 				}
-				case 1:
+				case join_bevel:
 				{
 					//bevel join
 					out_points.push_back(add_v2(p1, scale_v2(l1_npv, radius)));
@@ -594,7 +614,7 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 					auto rv = scale_v2(l1_npv, radius);
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -double(acos(dot_v2(l1_npv, l2_npv)));
+					auto theta = -double(acos(double(dot_v2(l1_npv, l2_npv))));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{
@@ -615,10 +635,9 @@ auto thicken_path_as_lines(const std::vector<T> &path, double radius, int capsty
 	return out_points;
 }
 
-template <class T>
-auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int capstyle, int joinstyle, int resolution)
+template <class T, class T1>
+auto stroke_path_as_tristrip(const std::vector<T> &path, T1 radius, uint32_t resolution, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style)
 {
-	if (radius == 0.0) radius = 0.00000001f;
 	auto index = 0;
 	auto step = 1;
 	auto out_points = std::vector<T>{};
@@ -632,9 +651,9 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 		auto l2_pv = perp_v2(l2_v);
 		auto l2_npv = norm_v2(l2_pv);
 		auto rv = scale_v2(l2_npv, radius);
-		switch (capstyle)
+		switch (step > 0 ? cap1_style : cap2_style)
 		{
-			case 0:
+			case cap_butt:
 			{
 				//butt cap
 				out_points.push_back(p1);
@@ -643,7 +662,7 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 				out_points.push_back(add_v2(p1, rv));
 				break;
 			}
-			case 1:
+			case cap_square:
 			{
 				//square cap
 				auto p0 = add_v2(p1, perp_v2(rv));
@@ -653,7 +672,7 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 				out_points.push_back(add_v2(p0, rv));
 				break;
 			}
-			case 2:
+			case cap_tri:
 			{
 				//triangle cap
 				out_points.push_back(p1);
@@ -693,19 +712,19 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 			auto nbv = norm_v2(scale_v2(add_v2(l1_npv, l2_npv), 0.5f));
 			auto c = dot_v2(nbv, norm_v2(l1_v));
 			if (c <= 0.0) goto mitre_join;
-			switch (joinstyle)
+			switch (join_style)
 			{
-				case 0:
+				case join_mitre:
 				{
 				mitre_join:
 					//mitre join
-					auto s = double(sin(acos(c)));
+					auto s = double(sin(acos(double(c))));
 					auto bv = scale_v2(nbv, radius/s);
 					out_points.push_back(p1);
 					out_points.push_back(add_v2(p1, bv));
 					break;
 				}
-				case 1:
+				case join_bevel:
 				{
 					//bevel join
 					out_points.push_back(p1);
@@ -720,7 +739,7 @@ auto thicken_path_as_tristrip(const std::vector<T> &path, double radius, int cap
 					auto rv = scale_v2(l1_npv, radius);
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -double(acos(dot_v2(l1_npv, l2_npv)));
+					auto theta = -double(acos(double(dot_v2(l1_npv, l2_npv))));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{
