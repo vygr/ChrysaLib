@@ -183,7 +183,7 @@ Window *Window::event(const std::shared_ptr<Msg> &event)
 		}
 		else if (type == ev_type_exit)
 		{
-			target->mouse_enter(event);
+			target->mouse_exit(event);
 		}
 		else if (type == ev_type_action)
 		{
