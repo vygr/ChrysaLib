@@ -1,135 +1,128 @@
 #include "path.h"
 #include <cstdlib>
 
-Path *Path::push_back(fixed32_t x, fixed32_t y)
+Path *Path::push_back(const Vec2f &p)
 {
-	m_points.push_back(x);
-	m_points.push_back(y);
+	m_points.push_back(p);
 	return this;
 }
 
 Path *Path::pop_back()
 {
 	m_points.pop_back();
-	m_points.pop_back();
 	return this;
 }
 
-Path *Path::gen_quadratic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
-	fixed32_t p3x, fixed32_t p3y, fixed32_t tol)
+Path *Path::gen_quadratic(Vec2f p1, Vec2f p2, Vec2f p3, fixed32_t tol)
 {
-	auto stack = std::vector<fixed32_t>{};
+	auto stack = std::vector<Vec2f>{};
 
 	//output first point
-	push_back(p1x, p1y);
+	push_back(p1);
 
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12x = (p1x + p2x) / 2;
-		auto p12y = (p1y + p2y) / 2;
-		auto p23x = (p2x + p3x) / 2;
-		auto p23y = (p2y + p3y) / 2;
-
-		auto p123x = (p12x + p23x) / 2;
-		auto p123y = (p12y + p23y) / 2;
+		auto p12 = asr_v2(add_v2(p1, p2), 1);
+		auto p23 = asr_v2(add_v2(p2, p3), 1);
+		auto p123 = asr_v2(add_v2(p12, p23), 1);
 
 		//flatness test
-		if (fixed32_t::abs(p1x + p3x - p2x - p2x)
-			+ fixed32_t::abs(p1y + p3y - p2y - p2y) <= tol)
+		if (fixed32_t::abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
+			+ fixed32_t::abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y) <= tol)
 		{
 			//output point
-			push_back(p123x, p123y);
+			push_back(p123);
 		}
 		else
 		{
 			//continue subdivision
-			stack.push_back(p123x), stack.push_back(p123y);
-			stack.push_back(p23x), stack.push_back(p23y);
-			stack.push_back(p3x), stack.push_back(p3y);
-			stack.push_back(p1x), stack.push_back(p1y);
-			stack.push_back(p12x), stack.push_back(p12y);
-			stack.push_back(p123x), stack.push_back(p123y);
+			stack.push_back(p123);
+			stack.push_back(p23);
+			stack.push_back(p3);
+			stack.push_back(p1);
+			stack.push_back(p12);
+			stack.push_back(p123);
 		}
 
 		//finished ?
-		if (!stack.size()) break;
+		if (stack.empty()) break;
 
-		p3y = stack.back(), stack.pop_back();
-		p3x = stack.back(), stack.pop_back();
-		p2y = stack.back(), stack.pop_back();
-		p2x = stack.back(), stack.pop_back();
-		p1y = stack.back(), stack.pop_back();
-		p1x = stack.back(), stack.pop_back();
+		p3 = stack.back(), stack.pop_back();
+		p2 = stack.back(), stack.pop_back();
+		p1 = stack.back(), stack.pop_back();
 	}
 
 	//output last point
-	push_back(p3x, p3y);
+	push_back(p3);
 	return this;
 }
 
-Path *Path::gen_cubic(fixed32_t p1x, fixed32_t p1y, fixed32_t p2x, fixed32_t p2y,
-	fixed32_t p3x, fixed32_t p3y, fixed32_t p4x, fixed32_t p4y, fixed32_t tol)
+Path *Path::gen_cubic(Vec2f p1, Vec2f p2, Vec2f p3, Vec2f p4, fixed32_t tol)
 {
-	auto stack = std::vector<fixed32_t>{};
+	auto stack = std::vector<Vec2f>{};
 
 	//output first point
-	push_back(p1x, p1y);
+	push_back(p1);
 
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12x = (p1x + p2x) / 2;
-		auto p12y = (p1y + p2y) / 2;
-		auto p23x = (p2x + p3x) / 2;
-		auto p23y = (p2y + p3y) / 2;
-		auto p34x = (p3x + p4x) / 2;
-		auto p34y = (p3y + p4y) / 2;
-
-		auto p123x = (p12x + p23x) / 2;
-		auto p123y = (p12y + p23y) / 2;
-		auto p234x = (p23x + p34x) / 2;
-		auto p234y = (p23y + p34y) / 2;
-
-		auto p1234x = (p123x + p234x) / 2;
-		auto p1234y = (p123y + p234y) / 2;
+		auto p12 = asr_v2(add_v2(p1, p2), 1);
+		auto p23 = asr_v2(add_v2(p2, p3), 1);
+		auto p34 = asr_v2(add_v2(p3, p4), 1);
+		auto p123 = asr_v2(add_v2(p12, p23), 1);
+		auto p234 = asr_v2(add_v2(p23, p34), 1);
+		auto p1234 = asr_v2(add_v2(p123, p234), 1);
 
 		//flatness test
-		if (fixed32_t::abs(p1x + p3x - p2x - p2x)
-			+ fixed32_t::abs(p1y + p3y - p2y - p2y)
-			+ fixed32_t::abs(p2x + p4x - p3x - p3x)
-			+ fixed32_t::abs(p2y + p4y - p3y - p3y) <= tol)
+		if (fixed32_t::abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
+			+ fixed32_t::abs(p1.m_y + p3.m_y - p2.m_y - p2.m_y)
+			+ fixed32_t::abs(p2.m_x + p4.m_x - p3.m_x - p3.m_x)
+			+ fixed32_t::abs(p2.m_y + p4.m_y - p3.m_y - p3.m_y) <= tol)
 		{
 			//output point
-			push_back(p1234x, p1234y);
+			push_back(p1234);
 		}
 		else
 		{
 			//continue subdivision
-			stack.push_back(p1234x), stack.push_back(p1234y);
-			stack.push_back(p234x), stack.push_back(p234y);
-			stack.push_back(p34x), stack.push_back(p34y);
-			stack.push_back(p4x), stack.push_back(p4y);
-			stack.push_back(p1x), stack.push_back(p1y);
-			stack.push_back(p12x), stack.push_back(p12y);
-			stack.push_back(p123x), stack.push_back(p123y);
-			stack.push_back(p1234x), stack.push_back(p1234y);
+			stack.push_back(p1234);
+			stack.push_back(p234);
+			stack.push_back(p34);
+			stack.push_back(p4);
+			stack.push_back(p1);
+			stack.push_back(p12);
+			stack.push_back(p123);
+			stack.push_back(p1234);
 		}
 
 		//finished ?
-		if (!stack.size()) break;
+		if (stack.empty()) break;
 
-		p4y = stack.back(), stack.pop_back();
-		p4x = stack.back(), stack.pop_back();
-		p3y = stack.back(), stack.pop_back();
-		p3x = stack.back(), stack.pop_back();
-		p2y = stack.back(), stack.pop_back();
-		p2x = stack.back(), stack.pop_back();
-		p1y = stack.back(), stack.pop_back();
-		p1x = stack.back(), stack.pop_back();
+		p4 = stack.back(), stack.pop_back();
+		p3 = stack.back(), stack.pop_back();
+		p2 = stack.back(), stack.pop_back();
+		p1 = stack.back(), stack.pop_back();
 	}
 
 	//output last point
-	push_back(p4x, p4y);
+	push_back(p4);
+	return this;
+}
+
+Path *Path::filter_polyline(fixed32_t tol)
+{
+	if (m_points.size() > 1)
+	{
+		tol *= tol;
+		auto x1 = m_points[0];
+		auto y1 = m_points[1];
+	}
+	return this;
+}
+
+Path *Path::filter_polygon(fixed32_t tol)
+{
 	return this;
 }
