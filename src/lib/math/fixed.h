@@ -78,9 +78,11 @@ public:
 	fixed64_t &operator-=(const fixed64_t &n);
 	fixed64_t operator-(const fixed64_t &n) const;
 	fixed64_t &operator*=(const fixed64_t &n);
+	fixed64_t &operator*=(const double &n);
 	fixed64_t &operator*=(const int32_t &n);
 	fixed64_t &operator*=(const uint32_t &n);
 	fixed64_t operator*(const fixed64_t &n) const;
+	fixed64_t operator*(const double &n) const;
 	fixed64_t operator*(const int32_t &n) const;
 	fixed64_t operator*(const uint32_t &n) const;
 	fixed64_t &operator/=(const fixed64_t &n);

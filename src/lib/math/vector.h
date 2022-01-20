@@ -1,6 +1,7 @@
 #ifndef LIB_VECTOR_H
 #define LIB_VECTOR_H
 
+#include "fixed.h"
 #include <cmath>
 #include <vector>
 #include <tuple>
@@ -11,6 +12,11 @@
 //////////////
 //vector types
 //////////////
+
+struct Vec2f;
+struct Vec2F;
+struct Vec2d;
+struct Vec3d;
 
 struct Vec2d
 {
@@ -39,6 +45,41 @@ struct Vec3d
 	double m_x;
 	double m_y;
 	double m_z;
+};
+
+struct Vec2f
+{
+	Vec2f() : m_x(0), m_y(0) {}
+	Vec2f(fixed32_t x, fixed32_t y) : m_x(x), m_y(y) {}
+	Vec2f(fixed64_t x, fixed64_t y) : m_x(x), m_y(y) {}
+	Vec2f(double x, double y) : m_x(x), m_y(y) {}
+	Vec2f(const Vec2F &p);
+	bool operator==(const Vec2f &p) const {
+		return std::tie(m_x, m_y) == std::tie(p.m_x, p.m_y); }
+	bool operator!=(const Vec2f &p) const {
+		return std::tie(m_x, m_y) != std::tie(p.m_x, p.m_y); }
+	bool operator<(const Vec2f &p) const {
+		return std::tie(m_x, m_y) < std::tie(p.m_x, p.m_y); }
+	fixed32_t m_x;
+	fixed32_t m_y;
+};
+
+struct Vec2F
+{
+	Vec2F() : m_x(0), m_y(0) {}
+	Vec2F(fixed64_t x, fixed64_t y) : m_x(x), m_y(y) {}
+	Vec2F(fixed64_t x) : m_x(x), m_y(0) {}
+	Vec2F(fixed32_t x, fixed32_t y) : m_x(x), m_y(y) {}
+	Vec2F(double x, double y) : m_x(x), m_y(y) {}
+	Vec2F(const Vec2f &p);
+	bool operator==(const Vec2F &p) const {
+		return std::tie(m_x, m_y) == std::tie(p.m_x, p.m_y); }
+	bool operator!=(const Vec2F &p) const {
+		return std::tie(m_x, m_y) != std::tie(p.m_x, p.m_y); }
+	bool operator<(const Vec2F &p) const {
+		return std::tie(m_x, m_y) < std::tie(p.m_x, p.m_y); }
+	fixed64_t m_x;
+	fixed64_t m_y;
 };
 
 ///////////////////////
@@ -147,9 +188,45 @@ auto sub_v2(const T &p1, const T &p2)
 }
 
 template <class T>
-auto scale_v2(const T &p, double s)
+auto mul_v2(const T &p1, const T &p2)
+{
+	return T(p1.m_x * p2.m_x, p1.m_y * p2.m_y);
+}
+
+template <class T>
+auto div_v2(const T &p1, const T &p2)
+{
+	return T(p1.m_x / p2.m_x, p1.m_y / p2.m_y);
+}
+
+template <class T>
+auto scale_v2(const T &p, const double &s)
 {
 	return T(p.m_x * s, p.m_y * s);
+}
+
+template <class T>
+auto scale_v2(const T &p, const uint32_t &s)
+{
+	return T(p.m_x * s, p.m_y * s);
+}
+
+template <class T>
+auto scale_v2(const T &p, const fixed32_t &s)
+{
+	return T(p.m_x * s, p.m_y * s);
+}
+
+template <class T>
+auto scale_v2(const T &p, const fixed64_t &s)
+{
+	return T(p.m_x * s, p.m_y * s);
+}
+
+template <class T>
+auto asr_v2(const T &p, const int &s)
+{
+	return T(p.m_x >> s, p.m_y >> s);
 }
 
 template <class T>
@@ -276,7 +353,19 @@ auto mul_v3(const T &p1, const T &p2)
 }
 
 template <class T>
-auto scale_v3(const T &p, double s)
+auto scale_v3(const T &p, const double &s)
+{
+	return T(p.m_x * s, p.m_y * s, p.m_z * s);
+}
+
+template <class T>
+auto scale_v3(const T &p, const fixed32_t &s)
+{
+	return T(p.m_x * s, p.m_y * s, p.m_z * s);
+}
+
+template <class T>
+auto scale_v3(const T &p, const fixed64_t &s)
 {
 	return T(p.m_x * s, p.m_y * s, p.m_z * s);
 }

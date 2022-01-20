@@ -63,6 +63,12 @@ fixed64_t &fixed64_t::operator*=(const fixed64_t &n)
 	return *this;
 }
 
+fixed64_t &fixed64_t::operator*=(const double &n)
+{
+	m_val = int64_t(m_val * n) >> FP_SHIFT;
+	return *this;
+}
+
 fixed64_t &fixed64_t::operator*=(const int32_t &n)
 {
 	m_val *= n;
@@ -76,6 +82,12 @@ fixed64_t &fixed64_t::operator*=(const uint32_t &n)
 }
 
 fixed64_t fixed64_t::operator*(const fixed64_t &n) const
+{
+	fixed64_t result(*this);
+	return result *= n;
+}
+
+fixed64_t fixed64_t::operator*(const double &n) const
 {
 	fixed64_t result(*this);
 	return result *= n;
