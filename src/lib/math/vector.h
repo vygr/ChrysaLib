@@ -211,6 +211,12 @@ auto scale_v2(const T &p, const double &s)
 }
 
 template <class T>
+auto scale_v2(const T &p, const int32_t &s)
+{
+	return T(p.m_x * s, p.m_y * s);
+}
+
+template <class T>
 auto scale_v2(const T &p, const uint32_t &s)
 {
 	return T(p.m_x * s, p.m_y * s);
@@ -562,6 +568,15 @@ auto stroke_path_as_lines(const std::vector<T> &path, T1 radius, uint32_t resolu
 				out_points.push_back(add_v2(p1, rv));
 				break;
 			}
+			case cap_arrow:
+			{
+				//arrow cap
+				auto p0 = scale_v2(rv, 2);
+				out_points.push_back(sub_v2(p1, p0));
+				out_points.push_back(add_v2(p1, perp_v2(p0)));
+				out_points.push_back(add_v2(p1, p0));
+				break;
+			}
 			default:
 			{
 				//round cap
@@ -681,6 +696,15 @@ auto stroke_path_as_tristrip(const std::vector<T> &path, T1 radius, uint32_t res
 				out_points.push_back(add_v2(p1, perp_v2(rv)));
 				out_points.push_back(p1);
 				out_points.push_back(add_v2(p1, rv));
+				break;
+			}
+			case cap_arrow:
+			{
+				//arrow cap
+				auto p0 = scale_v2(rv, 2);
+				out_points.push_back(sub_v2(p1, p0));
+				out_points.push_back(add_v2(p1, perp_v2(p0)));
+				out_points.push_back(add_v2(p1, p0));
 				break;
 			}
 			default:

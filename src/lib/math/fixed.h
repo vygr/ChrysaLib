@@ -26,10 +26,10 @@ public:
 	operator double() const { return double(m_val) / (1 << FP_SHIFT); }
 	operator float() const { return float(m_val) / (1 << FP_SHIFT); }
 	bool operator==(const fixed32_t &n) const { return m_val == n.m_val; }
+	bool operator==(const double &n) const { return m_val == n * (1 << FP_SHIFT); }
 	bool operator!=(const fixed32_t &n) const { return m_val != n.m_val; }
 	bool operator<(const fixed32_t &n) const { return m_val < n.m_val; }
 	bool operator<=(const fixed32_t &n) const { return m_val <= n.m_val; }
-	bool operator==(const double &n) const { return m_val == n * (1 << FP_SHIFT); }
 	bool operator<=(const double &n) const { return m_val <= n * (1 << FP_SHIFT); }
 	fixed32_t operator-() const;
 	fixed32_t &operator++();
