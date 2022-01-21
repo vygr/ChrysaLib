@@ -304,6 +304,21 @@ fixed32_t sqrt(const fixed32_t &n)
 	return std::sqrt(double(n));
 }
 
+fixed32_t sin(const fixed32_t &n)
+{
+	return std::sin(double(n));
+}
+
+fixed32_t cos(const fixed32_t &n)
+{
+	return std::cos(double(n));
+}
+
+fixed32_t acos(const fixed32_t &n)
+{
+	return std::acos(double(n));
+}
+
 fixed32_t operator/(const double &n, const fixed32_t &f)
 {
 	return n / double(f);

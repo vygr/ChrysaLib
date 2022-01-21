@@ -14,6 +14,9 @@ extern fixed32_t sqrt(const fixed32_t &n);
 extern fixed64_t sqrt(const fixed64_t &n);
 extern fixed32_t operator/(const double &n, const fixed32_t &f);
 extern fixed32_t operator*(const double &n, const fixed32_t &f);
+extern fixed32_t sin(const fixed32_t &n);
+extern fixed32_t cos(const fixed32_t &n);
+extern fixed32_t acos(const fixed32_t &n);
 
 //////////////
 //vector types
@@ -92,24 +95,24 @@ struct Vec2F
 //distance metric stuff
 ///////////////////////
 
-template <class T>
+template <typename T>
 auto manhattan_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
-	return fabs(dx) + fabs(dy);
+	return std::abs(dx) + std::abs(dy);
 }
 
-template <class T>
+template <typename T>
 auto manhattan_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
 	auto dy = p1.m_y - p2.m_y;
 	auto dz = p1.m_z - p2.m_z;
-	return fabs(dx) + fabs(dy) + fabs(dz);
+	return std::abs(dx) + std::abs(dy) + std::abs(dz);
 }
 
-template <class T>
+template <typename T>
 auto euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
@@ -117,7 +120,7 @@ auto euclidean_distance_v2(const T &p1, const T &p2)
 	return sqrt(dx * dx + dy * dy);
 }
 
-template <class T>
+template <typename T>
 auto euclidean_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
@@ -126,7 +129,7 @@ auto euclidean_distance_v3(const T &p1, const T &p2)
 	return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-template <class T>
+template <typename T>
 auto squared_euclidean_distance_v2(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
@@ -134,7 +137,7 @@ auto squared_euclidean_distance_v2(const T &p1, const T &p2)
 	return dx * dx + dy * dy;
 }
 
-template <class T>
+template <typename T>
 auto squared_euclidean_distance_v3(const T &p1, const T &p2)
 {
 	auto dx = p1.m_x - p2.m_x;
@@ -143,25 +146,25 @@ auto squared_euclidean_distance_v3(const T &p1, const T &p2)
 	return dx * dx + dy * dy + dz * dz;
 }
 
-template <class T>
+template <typename T>
 auto chebyshev_distance_v2(const T &p1, const T &p2)
 {
-	auto dx = fabs(p1.m_x - p2.m_x);
-	auto dy = fabs(p1.m_y - p2.m_y);
+	auto dx = std::abs(p1.m_x - p2.m_x);
+	auto dy = std::abs(p1.m_y - p2.m_y);
 	return std::max(dx, dy);
 }
 
-template <class T>
+template <typename T>
 auto chebyshev_distance_v3(const T &p1, const T &p2)
 {
-	auto dx = fabs(p1.m_x - p2.m_x);
-	auto dy = fabs(p1.m_y - p2.m_y);
-	auto dz = fabs(p1.m_z - p2.m_z);
+	auto dx = std::abs(p1.m_x - p2.m_x);
+	auto dy = std::abs(p1.m_y - p2.m_y);
+	auto dz = std::abs(p1.m_z - p2.m_z);
 	auto d = std::max(dx, dy);
 	return std::max(d, dz);
 }
 
-template <class T>
+template <typename T>
 auto reciprocal_distance_v2(const T &p1, const T &p2)
 {
 	auto d = manhattan_distance_v2(p1, p2);
@@ -169,7 +172,7 @@ auto reciprocal_distance_v2(const T &p1, const T &p2)
 	return 1.0 / d;
 }
 
-template <class T>
+template <typename T>
 auto reciprocal_distance_v3(const T &p1, const T &p2)
 {
 	auto d = manhattan_distance_v3(p1, p2);
@@ -181,91 +184,91 @@ auto reciprocal_distance_v3(const T &p1, const T &p2)
 //specific lengths
 //////////////////
 
-template <class T>
+template <typename T>
 auto add_v2(const T &p1, const T &p2)
 {
 	return T(p1.m_x + p2.m_x, p1.m_y + p2.m_y);
 }
 
-template <class T>
+template <typename T>
 auto sub_v2(const T &p1, const T &p2)
 {
 	return T(p1.m_x - p2.m_x, p1.m_y - p2.m_y);
 }
 
-template <class T>
+template <typename T>
 auto mul_v2(const T &p1, const T &p2)
 {
 	return T(p1.m_x * p2.m_x, p1.m_y * p2.m_y);
 }
 
-template <class T>
+template <typename T>
 auto div_v2(const T &p1, const T &p2)
 {
 	return T(p1.m_x / p2.m_x, p1.m_y / p2.m_y);
 }
 
-template <class T>
+template <typename T>
 auto scale_v2(const T &p, const double &s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v2(const T &p, const int32_t &s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v2(const T &p, const uint32_t &s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v2(const T &p, const fixed32_t &s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v2(const T &p, const fixed64_t &s)
 {
 	return T(p.m_x * s, p.m_y * s);
 }
 
-template <class T>
+template <typename T>
 auto asr_v2(const T &p, const int &s)
 {
 	return T(p.m_x >> s, p.m_y >> s);
 }
 
-template <class T>
+template <typename T>
 auto perp_v2(const T &p)
 {
 	return T(-p.m_y, p.m_x);
 }
 
-template <class T>
+template <typename T>
 auto dot_v2(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_x + p1.m_y * p2.m_y;
 }
 
-template <class T>
+template <typename T>
 auto det_v2(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_y - p1.m_y * p2.m_x;
 }
 
-template <class T>
+template <typename T>
 auto length_v2(const T &p)
 {
 	return sqrt(dot_v2(p, p));
 }
 
-template <class T>
+template <typename T>
 auto norm_v2(const T &p)
 {
 	auto l = length_v2(p);
@@ -273,20 +276,20 @@ auto norm_v2(const T &p)
 	return scale_v2(p, 1.0 / l);
 }
 
-template <class T>
+template <typename T>
 auto distance_v2(const T &p1, const T &p2)
 {
 	return length_v2(sub_v2(p2, p1));
 }
 
-template <class T>
+template <typename T>
 auto distance_squared_v2(const T &p1, const T &p2)
 {
 	auto p = sub_v2(p2, p1);
 	return dot_v2(p, p);
 }
 
-template <class T>
+template <typename T>
 auto distance_to_line_v2(const T &p, const T &p1, const T &p2)
 {
 	auto lv = sub_v2(p2, p1);
@@ -298,7 +301,7 @@ auto distance_to_line_v2(const T &p, const T &p1, const T &p2)
 	return distance_v2(p, add_v2(p1, scale_v2(lv, c1/c2)));
 }
 
-template <class T>
+template <typename T>
 auto distance_squared_to_line_v2(const T &p, const T &p1, const T &p2)
 {
 	auto lv = sub_v2(p2, p1);
@@ -310,7 +313,7 @@ auto distance_squared_to_line_v2(const T &p, const T &p1, const T &p2)
 	return distance_squared_v2(p, add_v2(p1, scale_v2(lv, c1/c2)));
 }
 
-template <class T>
+template <typename T>
 bool collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l2_p2)
 {
 	auto av = sub_v2(l1_p2, l1_p1);
@@ -333,7 +336,7 @@ bool collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l
 	return true;
 }
 
-template <class T>
+template <typename T>
 bool collide_thick_lines_v2(const T &tl1_p1, const T &tl1_p2,
 	 						const T &tl2_p1, const T &tl2_p2, double r)
 {
@@ -346,43 +349,43 @@ bool collide_thick_lines_v2(const T &tl1_p1, const T &tl1_p2,
 	return false;
 }
 
-template <class T>
+template <typename T>
 auto add_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x + p2.m_x, p1.m_y + p2.m_y, p1.m_z + p2.m_z);
 }
 
-template <class T>
+template <typename T>
 auto sub_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x - p2.m_x, p1.m_y - p2.m_y, p1.m_z - p2.m_z);
 }
 
-template <class T>
+template <typename T>
 auto mul_v3(const T &p1, const T &p2)
 {
 	return T(p1.m_x * p2.m_x, p1.m_y * p2.m_y, p1.m_z * p2.m_z);
 }
 
-template <class T>
+template <typename T>
 auto scale_v3(const T &p, const double &s)
 {
 	return T(p.m_x * s, p.m_y * s, p.m_z * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v3(const T &p, const fixed32_t &s)
 {
 	return T(p.m_x * s, p.m_y * s, p.m_z * s);
 }
 
-template <class T>
+template <typename T>
 auto scale_v3(const T &p, const fixed64_t &s)
 {
 	return T(p.m_x * s, p.m_y * s, p.m_z * s);
 }
 
-template <class T>
+template <typename T>
 auto mod_v3(const T &p1, const T &p2)
 {
 	auto x = std::fmod(p1.m_x, p2.m_x);
@@ -394,7 +397,7 @@ auto mod_v3(const T &p1, const T &p2)
 	return T(x, y, z);
 }
 
-template <class T>
+template <typename T>
 auto frac_v3(const T &p)
 {
 	double intpart;
@@ -407,25 +410,25 @@ auto frac_v3(const T &p)
 	return T(x, y, z);
 }
 
-template <class T>
+template <typename T>
 auto floor_v3(const T &p)
 {
 	return T(std::floor(p.m_x), std::floor(p.m_y), std::floor(p.m_z));
 }
 
-template <class T>
+template <typename T>
 auto dot_v3(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_x + p1.m_y * p2.m_y + p1.m_z * p2.m_z;
 }
 
-template <class T>
+template <typename T>
 auto length_v3(const T &p)
 {
 	return sqrt(dot_v3(p, p));
 }
 
-template <class T>
+template <typename T>
 auto norm_v3(const T &p)
 {
 	auto l = length_v3(p);
@@ -433,13 +436,13 @@ auto norm_v3(const T &p)
 	return scale_v3(p, 1.0 / l);
 }
 
-template <class T>
+template <typename T>
 auto reflect_v3(const T &p, const T &n)
 {
 	return sub_v3(p, scale_v3(n, dot_v3(p, n) * 2.0));
 }
 
-template <class T>
+template <typename T>
 auto clamp_v3(const T &p1, const T &p2, const T &p3)
 {
 	return T(
@@ -452,7 +455,7 @@ auto clamp_v3(const T &p1, const T &p2, const T &p3)
 //generic path stuff
 ////////////////////
 
-template <class T>
+template <typename T>
 auto circle_as_lines(const T &p, double radius, int resolution)
 {
 	auto out_points = std::vector<T>{}; out_points.reserve(resolution+1);
@@ -470,7 +473,7 @@ auto circle_as_lines(const T &p, double radius, int resolution)
 	return out_points;
 }
 
-template <class T>
+template <typename T>
 auto torus_as_tristrip(const T &p, double radius1, double radius2, int resolution)
 {
 	auto out_points = std::vector<T>{}; out_points.reserve(resolution*2+2);
@@ -493,7 +496,7 @@ auto torus_as_tristrip(const T &p, double radius1, double radius2, int resolutio
 	return out_points;
 }
 
-template <class T>
+template <typename T>
 auto circle_as_trifan(const T &p, double radius, int resolution)
 {
 	auto out_points = std::vector<T>{}; out_points.reserve(resolution*2+2);
@@ -528,7 +531,7 @@ enum
 	join_round,
 };
 
-template <class T, class T1>
+template <typename T, typename T1>
 auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uint32_t join_style, uint32_t cap1_style, uint32_t cap2_style)
 {
 	auto index = 0;
@@ -585,9 +588,9 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 				auto rvy = rv.m_y;
 				for (auto i = 0; i <= resolution; ++i)
 				{
-					auto angle = (i * -M_PI) / resolution;
-					auto s = double(sin(angle));
-					auto c = double(cos(angle));
+					T1 angle = (i * -M_PI) / resolution;
+					auto s = sin(angle);
+					auto c = cos(angle);
 					auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
 					out_points.push_back(sub_v2(p1, rv));
 				}
@@ -630,13 +633,13 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 					auto rv = scale_v2(l1_npv, radius);
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -double(acos(double(dot_v2(l1_npv, l2_npv))));
+					auto theta = -(acos(dot_v2(l1_npv, l2_npv)));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{
-						auto angle = (i * theta) / segs;
-						auto s = double(sin(angle));
-						auto c = double(cos(angle));
+						T1 angle = (theta * i) / segs;
+						auto s = sin(angle);
+						auto c = cos(angle);
 						auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
 						out_points.push_back(add_v2(p1, rv));
 					}
@@ -650,7 +653,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 	return out_points;
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t resolution, uint32_t join_style)
 {
 	auto out_points = std::vector<T>{};
@@ -698,13 +701,13 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 				auto rv = scale_v2(l1_npv, radius);
 				auto rvx = rv.m_x;
 				auto rvy = rv.m_y;
-				auto theta = -double(acos(double(dot_v2(l1_npv, l2_npv))));
+				auto theta = -acos(dot_v2(l1_npv, l2_npv));
 				auto segs = int((theta/-M_PI)*resolution) + 1;
 				for (auto i = 0; i <= segs; ++i)
 				{
-					auto angle = (i * theta) / segs;
-					auto s = double(sin(angle));
-					auto c = double(cos(angle));
+					T1 angle = (theta * i) / segs;
+					auto s = sin(angle);
+					auto c = cos(angle);
 					auto rv = T(rvx*c - rvy*s, rvx*s + rvy*c);
 					out_points.push_back(add_v2(p1, rv));
 				}
