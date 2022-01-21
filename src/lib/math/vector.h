@@ -441,9 +441,9 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 			l2_v = p2 - p1;
 			l2_pv = l2_v.perp();
 			l2_npv = l2_pv.norm();
-			auto nbv = ((l1_npv + l2_npv) * 0.5f).norm();
+			auto nbv = ((l1_npv + l2_npv) * T1(0.5)).norm();
 			auto c = nbv.dot(l1_v.norm());
-			if (c <= 0.0) goto mitre_join;
+			if (c <= T1(0)) goto mitre_join;
 			switch (join_style)
 			{
 				case join_mitre:
@@ -509,9 +509,9 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 		l2_v = p2 - p1;
 		l2_pv = l2_v.perp();
 		l2_npv = l2_pv.norm();
-		auto nbv = ((l1_npv + l2_npv) * 0.5f).norm();
+		auto nbv = ((l1_npv + l2_npv) * T1(0.5)).norm();
 		auto c = nbv.dot(l1_v.norm());
-		if (c <= 0.0) goto mitre_join;
+		if (c <= T1(0)) goto mitre_join;
 		switch (join_style)
 		{
 			case join_mitre:
