@@ -15,6 +15,8 @@ struct Vec2F;
 struct Vec2d;
 struct Vec3d;
 
+extern fixed32_t abs(const fixed32_t &n);
+extern fixed64_t abs(const fixed64_t &n);
 extern fixed32_t sqrt(const fixed32_t &n);
 extern fixed64_t sqrt(const fixed64_t &n);
 extern fixed32_t operator/(const double &n, const fixed32_t &f);
@@ -44,6 +46,9 @@ struct Vec2d
 	Vec2d reflect(const Vec2d &n) const { return *this - n * (dot(n) * 2.0); }
 	Vec2d norm() { auto l = length(); if (l == 0.0) return Vec2d(0.0, 0.0); return *this * (1.0 / l); }
 	Vec2d perp() const { return Vec2d(-m_y, m_x); }
+	Vec2d abs() const { return Vec2d(std::abs(m_x), std::abs(m_y)); }
+	double sum() const { return m_x + m_y; }
+	double max() const { return std::max(m_x, m_y); }
 	double m_x;
 	double m_y;
 };
@@ -64,6 +69,9 @@ struct Vec3d
 	double length() const { return sqrt(dot(*this)); }
 	Vec3d reflect(const Vec3d &n) const { return *this - n * (dot(n) * 2.0); }
 	Vec3d norm() { auto l = length(); if (l == 0.0) return Vec3d(0.0, 0.0, 0.0); return *this * (1.0 / l); }
+	Vec3d abs() const { return Vec3d(std::abs(m_x), std::abs(m_y), std::abs(m_z)); }
+	double sum() const { return m_x + m_y + m_z; }
+	double max() const { return std::max(std::max(m_x, m_y), m_z); }
 	double m_x;
 	double m_y;
 	double m_z;
@@ -90,6 +98,9 @@ struct Vec2f
 	Vec2f norm() { auto l = length(); if (l == fixed32_t(0)) return Vec2f(0, 0); return *this * (fixed32_t(1.0) / l); }
 	Vec2f perp() const { return Vec2f(-m_y, m_x); }
 	Vec2f asr(const int &s) const { return Vec2f(m_x >> s, m_y >> s); }
+	Vec2f abs() const { return Vec2f(::abs(m_x), ::abs(m_y)); }
+	fixed32_t sum() const { return m_x + m_y; }
+	fixed32_t max() const { return std::max(m_x, m_y); }
 	fixed32_t m_x;
 	fixed32_t m_y;
 };
@@ -116,6 +127,9 @@ struct Vec2F
 	Vec2F norm() { auto l = length(); if (l == fixed64_t(0)) return Vec2f(0, 0); return *this * (fixed64_t(1.0) / l); }
 	Vec2F perp() const { return Vec2F(-m_y, m_x); }
 	Vec2F asr(const int &s) const { return Vec2F(m_x >> s, m_y >> s); }
+	Vec2F abs() const { return Vec2F(::abs(m_x), ::abs(m_y)); }
+	fixed64_t sum() const { return m_x + m_y; }
+	fixed64_t max() const { return std::max(m_x, m_y); }
 	fixed64_t m_x;
 	fixed64_t m_y;
 };
@@ -125,80 +139,28 @@ struct Vec2F
 ///////////////////////
 
 template <typename T>
-auto manhattan_distance_v2(const T &p1, const T &p2)
+auto manhattan_distance(const T &p1, const T &p2)
 {
-	auto dx = p1.m_x - p2.m_x;
-	auto dy = p1.m_y - p2.m_y;
-	return std::abs(dx) + std::abs(dy);
+	return (p1 - p2).abs().sum();
 }
 
 template <typename T>
-auto manhattan_distance_v3(const T &p1, const T &p2)
+auto euclidean_distance(const T &p1, const T &p2)
 {
-	auto d = p1 - p2;
-	return std::abs(d.m_x) + std::abs(d.m_y) + std::abs(d.m_z);
+	return (p1 - p2).length();
 }
 
 template <typename T>
-auto euclidean_distance_v2(const T &p1, const T &p2)
+auto squared_euclidean_distance(const T &p1, const T &p2)
 {
-	auto d = p1 - p2;
-	return sqrt(d.m_x * d.m_x + d.m_y * d.m_y);
+	auto p = p2 - p1;
+	return p.dot(p);
 }
 
 template <typename T>
-auto euclidean_distance_v3(const T &p1, const T &p2)
+auto chebyshev_distance(const T &p1, const T &p2)
 {
-	auto d = p1 - p2;
-	return sqrt(d.m_x * d.m_x + d.m_y * d.m_y + d.m_z * d.m_z);
-}
-
-template <typename T>
-auto squared_euclidean_distance_v2(const T &p1, const T &p2)
-{
-	auto d = p1 - p2;
-	return d.m_x * d.m_x + d.m_y * d.m_y;
-}
-
-template <typename T>
-auto squared_euclidean_distance_v3(const T &p1, const T &p2)
-{
-	auto d = p1 - p2;
-	return d.m_x * d.m_x + d.m_y * d.m_y + d.m_z * d.m_z;
-}
-
-template <typename T>
-auto chebyshev_distance_v2(const T &p1, const T &p2)
-{
-	auto dx = std::abs(p1.m_x - p2.m_x);
-	auto dy = std::abs(p1.m_y - p2.m_y);
-	return std::max(dx, dy);
-}
-
-template <typename T>
-auto chebyshev_distance_v3(const T &p1, const T &p2)
-{
-	auto dx = std::abs(p1.m_x - p2.m_x);
-	auto dy = std::abs(p1.m_y - p2.m_y);
-	auto dz = std::abs(p1.m_z - p2.m_z);
-	auto d = std::max(dx, dy);
-	return std::max(d, dz);
-}
-
-template <typename T>
-auto reciprocal_distance_v2(const T &p1, const T &p2)
-{
-	auto d = manhattan_distance_v2(p1, p2);
-	if (d == 0.0) return 1.0;
-	return 1.0 / d;
-}
-
-template <typename T>
-auto reciprocal_distance_v3(const T &p1, const T &p2)
-{
-	auto d = manhattan_distance_v3(p1, p2);
-	if (d == 0.0) return 1.0;
-	return 1.0 / d;
+	return (p1 - p2).abs().max();
 }
 
 //////////////////
