@@ -116,7 +116,7 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 				auto font_line = (font_line_element*)font_data;
 				auto element_type = font_line->m_type;
 				auto p = Vec2F(font_line->m_p);
-				p = asr_v2(scale_v2(add_v2(p, o), pixels), 7);
+				p = asr_v2((p + o) * pixels, 7);
 				switch (element_type)
 				{
 				case 2:
@@ -126,8 +126,8 @@ std::vector<Path> Font::glyph_paths(const std::vector<font_path*> &info, glyph_s
 					auto font_curve = (font_curve_element*)font_data;
 					auto p1 = Vec2F(font_curve->m_p1);
 					auto p2 = Vec2F(font_curve->m_p2);
-					p1 = asr_v2(scale_v2(add_v2(p1, o), pixels), 7);
-					p2 = asr_v2(scale_v2(add_v2(p2, o), pixels), 7);
+					p1 = asr_v2((p1 + o) * pixels, 7);
+					p2 = asr_v2((p2 + o) * pixels, 7);
 					pth->gen_cubic(pos, p, p1, p2, eps);
 					pos = p2;
 					font_data += sizeof(font_curve_element);

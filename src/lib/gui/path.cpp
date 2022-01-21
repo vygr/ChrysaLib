@@ -25,9 +25,9 @@ Path *Path::gen_quadratic(Vec2f p1, Vec2f p2, Vec2f p3, fixed32_t tol)
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12 = asr_v2(add_v2(p1, p2), 1);
-		auto p23 = asr_v2(add_v2(p2, p3), 1);
-		auto p123 = asr_v2(add_v2(p12, p23), 1);
+		auto p12 = asr_v2(p1 + p2, 1);
+		auto p23 = asr_v2(p2 + p3, 1);
+		auto p123 = asr_v2(p12 + p23, 1);
 
 		//flatness test
 		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
@@ -70,12 +70,12 @@ Path *Path::gen_cubic(Vec2f p1, Vec2f p2, Vec2f p3, Vec2f p4, fixed32_t tol)
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12 = asr_v2(add_v2(p1, p2), 1);
-		auto p23 = asr_v2(add_v2(p2, p3), 1);
-		auto p34 = asr_v2(add_v2(p3, p4), 1);
-		auto p123 = asr_v2(add_v2(p12, p23), 1);
-		auto p234 = asr_v2(add_v2(p23, p34), 1);
-		auto p1234 = asr_v2(add_v2(p123, p234), 1);
+		auto p12 = asr_v2(p1 + p2, 1);
+		auto p23 = asr_v2(p2 + p3, 1);
+		auto p34 = asr_v2(p3 + p4, 1);
+		auto p123 = asr_v2(p12 + p23, 1);
+		auto p234 = asr_v2(p23 + p34, 1);
+		auto p1234 = asr_v2(p123 + p234, 1);
 
 		//flatness test
 		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
@@ -149,7 +149,7 @@ Path Path::stroke_polyline(fixed32_t radius, fixed32_t tol, uint32_t join_style,
 std::vector<Path> Path::stroke_polygon(fixed32_t radius, fixed32_t tol, uint32_t join_style)
 {
 	filter_polygon(0.5);
-	auto path1 = Path(stroke_joins(m_points, 1, radius, 64, join_style));
-	auto path2 = Path(stroke_joins(m_points, -1, radius, 64, join_style));
-	return std::vector<Path>{std::move(path1), std::move(path2)};
+	return std::vector<Path>{
+		stroke_joins(m_points, 1, radius, 64, join_style),
+		stroke_joins(m_points, -1, radius, 64, join_style)};
 }

@@ -181,20 +181,20 @@ edge_bounds Canvas::set_edges(const std::vector<Path> &polygons, Vec2f p, int32_
 {
 	edge_bounds bounds;
 	m_edges.clear();
-	p = add_v2(p, Vec2f(0.5, 0.5));
+	p = p + Vec2f(0.5, 0.5);
 	auto cy = m_cy * scale;
 	auto cy1 = m_cy1 * scale;
 	for (const auto &path : polygons)
 	{
 		auto len = path.size();
-		auto p2 = add_v2(p, path[len - 1]);
+		auto p2 = p + path[len - 1];
 		auto x2 = p2.m_x;
 		int32_t y2 = p2.m_y * scale;
 		for (auto i = 0; i < len;)
 		{
 			auto x1 = x2;
 			auto y1 = y2;
-			p2 = add_v2(p, path[i++]);
+			p2 = p + path[i++];
 			x2 = p2.m_x;
 			y2 = p2.m_y * scale;
 			bounds.m_min_x = std::min(bounds.m_min_x, int32_t(x2));

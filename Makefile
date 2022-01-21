@@ -23,8 +23,10 @@ CXXFLAGS += -MMD
 
 all:	CXXFLAGS += -O2
 all:	hub_node files_node gui_node
-debug:	CXXFLAGS += -DDEBUG -g -O0
+debug:	CXXFLAGS += -DDEBUG -g -O2
 debug:	hub_node files_node gui_node
+debugo:	CXXFLAGS += -g -O2
+debugo:	hub_node files_node gui_node
 
 hub_node:	$(LIB_OBJ_FILES) $(NODE_OBJ_DIR)/hub/hub.o
 ifeq ($(OS),Darwin)
