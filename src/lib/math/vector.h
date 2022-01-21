@@ -39,6 +39,11 @@ struct Vec2d
 	Vec2d operator*(const Vec2d &p) const { return Vec2d(m_x * p.m_x, m_y * p.m_y); }
 	template <typename T> Vec2d operator*(const T &n) const { return Vec2d(m_x * n, m_y * n); }
 	Vec2d operator/(const Vec2d &p) const { return Vec2d(m_x / p.m_x, m_y / p.m_y); }
+	double dot(const Vec2d &p) const { return m_x * p.m_x + m_y * p.m_y; }
+	double length() const { return sqrt(dot(*this)); }
+	Vec2d reflect(const Vec2d &n) const { return *this - n * (dot(n) * 2.0); }
+	Vec2d norm() { auto l = length(); if (l == 0.0) return Vec2d(0.0, 0.0); return *this * (1.0 / l); }
+	Vec2d perp() const { return Vec2d(-m_y, m_x); }
 	double m_x;
 	double m_y;
 };
@@ -55,6 +60,10 @@ struct Vec3d
 	Vec3d operator*(const Vec3d &p) const { return Vec3d(m_x * p.m_x, m_y * p.m_y, m_z * p.m_z); }
 	template <typename T> Vec3d operator*(const T &n) const { return Vec3d(m_x * n, m_y * n, m_z * n); }
 	Vec3d operator/(const Vec3d &p) const { return Vec3d(m_x / p.m_x, m_y / p.m_y, m_z / p.m_z); }
+	double dot(const Vec3d &p) const { return m_x * p.m_x + m_y * p.m_y + m_z * p.m_z; }
+	double length() const { return sqrt(dot(*this)); }
+	Vec3d reflect(const Vec3d &n) const { return *this - n * (dot(n) * 2.0); }
+	Vec3d norm() { auto l = length(); if (l == 0.0) return Vec3d(0.0, 0.0, 0.0); return *this * (1.0 / l); }
 	double m_x;
 	double m_y;
 	double m_z;
@@ -75,6 +84,12 @@ struct Vec2f
 	Vec2f operator*(const Vec2f &p) const { return Vec2f(m_x * p.m_x, m_y * p.m_y); }
 	template <typename T> Vec2f operator*(const T &n) const { return Vec2f(m_x * n, m_y * n); }
 	Vec2f operator/(const Vec2f &p) const { return Vec2f(m_x / p.m_x, m_y / p.m_y); }
+	fixed32_t dot(const Vec2f &p) const { return m_x * p.m_x + m_y * p.m_y; }
+	fixed32_t length() const { return sqrt(dot(*this)); }
+	Vec2f reflect(const Vec2f &n) const { return *this - n * (dot(n) * fixed32_t(2.0)); }
+	Vec2f norm() { auto l = length(); if (l == fixed32_t(0)) return Vec2f(0, 0); return *this * (fixed32_t(1.0) / l); }
+	Vec2f perp() const { return Vec2f(-m_y, m_x); }
+	Vec2f asr(const int &s) const { return Vec2f(m_x >> s, m_y >> s); }
 	fixed32_t m_x;
 	fixed32_t m_y;
 };
@@ -95,6 +110,12 @@ struct Vec2F
 	Vec2F operator*(const Vec2F &p) const { return Vec2F(m_x * p.m_x, m_y * p.m_y); }
 	template <typename T> Vec2F operator*(const T &n) const { return Vec2F(m_x * n, m_y * n); }
 	Vec2F operator/(const Vec2F &p) const { return Vec2F(m_x / p.m_x, m_y / p.m_y); }
+	fixed64_t dot(const Vec2F &p) const { return m_x * p.m_x + m_y * p.m_y; }
+	fixed64_t length() const { return sqrt(dot(*this)); }
+	Vec2F reflect(const Vec2F &n) const { return *this - n * (dot(n) * fixed64_t(2.0)); }
+	Vec2F norm() { auto l = length(); if (l == fixed64_t(0)) return Vec2f(0, 0); return *this * (fixed64_t(1.0) / l); }
+	Vec2F perp() const { return Vec2F(-m_y, m_x); }
+	Vec2F asr(const int &s) const { return Vec2F(m_x >> s, m_y >> s); }
 	fixed64_t m_x;
 	fixed64_t m_y;
 };
@@ -185,94 +206,46 @@ auto reciprocal_distance_v3(const T &p1, const T &p2)
 //////////////////
 
 template <typename T>
-auto asr_v2(const T &p, const int &s)
-{
-	return T(p.m_x >> s, p.m_y >> s);
-}
-
-template <typename T>
-auto perp_v2(const T &p)
-{
-	return T(-p.m_y, p.m_x);
-}
-
-template <typename T>
-auto dot_v2(const T &p1, const T &p2)
-{
-	return p1.m_x * p2.m_x + p1.m_y * p2.m_y;
-}
-
-template <typename T>
 auto det_v2(const T &p1, const T &p2)
 {
 	return p1.m_x * p2.m_y - p1.m_y * p2.m_x;
 }
 
 template <typename T>
-auto length_v2(const T &p)
+auto distance(const T &p1, const T &p2)
 {
-	return sqrt(dot_v2(p, p));
+	return (p2 - p1).length();
 }
 
 template <typename T>
-auto norm_v2(const T &p)
-{
-	auto l = length_v2(p);
-	if (l == 0.0) return T(0.0, 0.0);
-	return p * (1.0 / l);
-}
-
-// template <>
-// auto norm_v2(const Vec2f &p)
-// {
-// 	auto l = length_v2(p);
-// 	if (l == fixed32_t(0)) return Vec2f(0, 0);
-// 	return scale_v2(p, fixed32_t(1.0) / l);
-// }
-
-// template <>
-// auto norm_v2(const Vec2F &p)
-// {
-// 	auto l = length_v2(p);
-// 	if (l == fixed64_t(0)) return Vec2F(0, 0);
-// 	return scale_v2(p, fixed64_t(1.0) / l);
-// }
-
-template <typename T>
-auto distance_v2(const T &p1, const T &p2)
-{
-	return length_v2(p2 - p1);
-}
-
-template <typename T>
-auto distance_squared_v2(const T &p1, const T &p2)
+auto distance_squared(const T &p1, const T &p2)
 {
 	auto p = p2 - p1;
-	return dot_v2(p, p);
+	return p.dot(p);
 }
 
 template <typename T>
-auto distance_to_line_v2(const T &p, const T &p1, const T &p2)
+auto distance_to_line(const T &p, const T &p1, const T &p2)
 {
 	auto lv = p2 - p1;
 	auto pv = p - p1;
-	auto c1 = dot_v2(pv, lv);
-	if (c1 <= 0.0) return distance_v2(p, p1);
-	auto c2 = dot_v2(lv, lv);
-	if (c2 <= c1) return distance_v2(p, p2);
-	return distance_v2(p, p1 + lv * (c1/c2));
+	auto c1 = pv.dot(lv);
+	if (c1 <= 0.0) return distance(p, p1);
+	auto c2 = lv.dot(lv);
+	if (c2 <= c1) return distance(p, p2);
+	return distance(p, p1 + lv * (c1/c2));
 }
 
 template <typename T>
-auto distance_squared_to_line_v2(const T &p, const T &p1, const T &p2)
+auto distance_squared_to_line(const T &p, const T &p1, const T &p2)
 {
 	auto lv = p2 - p1;
 	auto pv = p - p1;
-	auto c1 = dot_v2(pv, lv);
-	if (c1 <= 0.0) return distance_squared_v2(p, p1);
-	auto c2 = dot_v2(lv, lv);
-	if (c2 <= c1) return distance_squared_v2(p, p2);
-	return distance_squared_v2(p, p1 + lv * (c1/c2));
+	auto c1 = pv.dot(lv);
+	if (c1 <= 0.0) return distance_squared(p, p1);
+	auto c2 = lv.dot(lv);
+	if (c2 <= c1) return distance_squared(p, p2);
+	return distance_squared(p, p1 + lv * (c1/c2));
 }
 
 template <typename T>
@@ -299,15 +272,15 @@ bool collide_lines_v2(const T &l1_p1, const T &l1_p2, const T &l2_p1, const T &l
 }
 
 template <typename T>
-bool collide_thick_lines_v2(const T &tl1_p1, const T &tl1_p2,
-	 						const T &tl2_p1, const T &tl2_p2, double r)
+bool collide_thick_lines(const T &tl1_p1, const T &tl1_p2,
+	 					const T &tl2_p1, const T &tl2_p2, double r)
 {
 	if (collide_lines_v2(tl1_p1, tl1_p2, tl2_p1, tl2_p2)) return true;
 	r *= r;
-	if (distance_squared_to_line_v2(tl2_p1, tl1_p1, tl1_p2) <= r) return true;
-	if (distance_squared_to_line_v2(tl2_p2, tl1_p1, tl1_p2) <= r) return true;
-	if (distance_squared_to_line_v2(tl1_p1, tl2_p1, tl2_p2) <= r) return true;
-	if (distance_squared_to_line_v2(tl1_p2, tl2_p1, tl2_p2) <= r) return true;
+	if (distance_squared_to_line(tl2_p1, tl1_p1, tl1_p2) <= r) return true;
+	if (distance_squared_to_line(tl2_p2, tl1_p1, tl1_p2) <= r) return true;
+	if (distance_squared_to_line(tl1_p1, tl2_p1, tl2_p2) <= r) return true;
+	if (distance_squared_to_line(tl1_p2, tl2_p1, tl2_p2) <= r) return true;
 	return false;
 }
 
@@ -340,32 +313,6 @@ template <typename T>
 auto floor_v3(const T &p)
 {
 	return T(std::floor(p.m_x), std::floor(p.m_y), std::floor(p.m_z));
-}
-
-template <typename T>
-auto dot_v3(const T &p1, const T &p2)
-{
-	return p1.m_x * p2.m_x + p1.m_y * p2.m_y + p1.m_z * p2.m_z;
-}
-
-template <typename T>
-auto length_v3(const T &p)
-{
-	return sqrt(dot_v3(p, p));
-}
-
-template <typename T>
-auto norm_v3(const T &p)
-{
-	auto l = length_v3(p);
-	if (l == 0.0) return T(0.0, 0.0, 0.0);
-	return p * (1.0 / l);
-}
-
-template <typename T>
-auto reflect_v3(const T &p, const T &n)
-{
-	return p - n * (dot_v3(p, n) * 2.0);
 }
 
 template <typename T>
@@ -470,8 +417,8 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 		auto p2 = path[index];
 		index += step;
 		auto l2_v = p2 - p1;
-		auto l2_pv = perp_v2(l2_v);
-		auto l2_npv = norm_v2(l2_pv);
+		auto l2_pv = l2_v.perp();
+		auto l2_npv = l2_pv.norm();
 		auto rv = l2_npv * radius;
 		switch (step > 0 ? cap1_style : cap2_style)
 		{
@@ -485,7 +432,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 			case cap_square:
 			{
 				//square cap
-				auto p0 = p1 + perp_v2(rv);
+				auto p0 = p1 + rv.perp();
 				out_points.push_back(p0 - rv);
 				out_points.push_back(p0 + rv);
 				break;
@@ -494,7 +441,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 			{
 				//triangle cap
 				out_points.push_back(p1 - rv);
-				out_points.push_back(p1 + perp_v2(rv));
+				out_points.push_back(p1 + rv.perp());
 				out_points.push_back(p1 + rv);
 				break;
 			}
@@ -503,7 +450,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 				//arrow cap
 				auto p0 = rv * 2;
 				out_points.push_back(p1 - p0);
-				out_points.push_back(p1 + perp_v2(p0));
+				out_points.push_back(p1 + p0.perp());
 				out_points.push_back(p1 + p0);
 				break;
 			}
@@ -530,10 +477,10 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 			p2 = path[index];
 			index += step;
 			l2_v = p2 - p1;
-			l2_pv = perp_v2(l2_v);
-			l2_npv = norm_v2(l2_pv);
-			auto nbv = norm_v2((l1_npv + l2_npv) * 0.5f);
-			auto c = dot_v2(nbv, norm_v2(l1_v));
+			l2_pv = l2_v.perp();
+			l2_npv = l2_pv.norm();
+			auto nbv = ((l1_npv + l2_npv) * 0.5f).norm();
+			auto c = nbv.dot(l1_v.norm());
 			if (c <= 0.0) goto mitre_join;
 			switch (join_style)
 			{
@@ -559,7 +506,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 					auto rv = l1_npv * radius;
 					auto rvx = rv.m_x;
 					auto rvy = rv.m_y;
-					auto theta = -(acos(dot_v2(l1_npv, l2_npv)));
+					auto theta = -(acos(l1_npv.dot(l2_npv)));
 					auto segs = int((theta/-M_PI)*resolution) + 1;
 					for (auto i = 0; i <= segs; ++i)
 					{
@@ -588,8 +535,8 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 	auto p1 = path[(len + (index - (step * 2))) % len];
 	auto p2 = path[(len + (index - (step * 1))) % len];
 	auto l2_v = p2 - p1;
-	auto l2_pv = perp_v2(l2_v);
-	auto l2_npv = norm_v2(l2_pv);
+	auto l2_pv = l2_v.perp();
+	auto l2_npv = l2_pv.norm();
 	while ((index != -1) && (index != len))
 	{
 		p1 = p2;
@@ -598,10 +545,10 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 		p2 = path[index];
 		index += step;
 		l2_v = p2 - p1;
-		l2_pv = perp_v2(l2_v);
-		l2_npv = norm_v2(l2_pv);
-		auto nbv = norm_v2((l1_npv + l2_npv) * 0.5f);
-		auto c = dot_v2(nbv, norm_v2(l1_v));
+		l2_pv = l2_v.perp();
+		l2_npv = l2_pv.norm();
+		auto nbv = ((l1_npv + l2_npv) * 0.5f).norm();
+		auto c = nbv.dot(l1_v.norm());
 		if (c <= 0.0) goto mitre_join;
 		switch (join_style)
 		{
@@ -627,7 +574,7 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 				auto rv = l1_npv * radius;
 				auto rvx = rv.m_x;
 				auto rvy = rv.m_y;
-				auto theta = -acos(dot_v2(l1_npv, l2_npv));
+				auto theta = -acos(l1_npv.dot(l2_npv));
 				auto segs = int((theta/-M_PI)*resolution) + 1;
 				for (auto i = 0; i <= segs; ++i)
 				{

@@ -25,9 +25,9 @@ Path *Path::gen_quadratic(Vec2f p1, Vec2f p2, Vec2f p3, fixed32_t tol)
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12 = asr_v2(p1 + p2, 1);
-		auto p23 = asr_v2(p2 + p3, 1);
-		auto p123 = asr_v2(p12 + p23, 1);
+		auto p12 = (p1 + p2).asr(1);
+		auto p23 = (p2 + p3).asr(1);
+		auto p123 = (p12 + p23).asr(1);
 
 		//flatness test
 		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
@@ -70,12 +70,12 @@ Path *Path::gen_cubic(Vec2f p1, Vec2f p2, Vec2f p3, Vec2f p4, fixed32_t tol)
 	for (;;)
 	{
 		//calculate the mid-path
-		auto p12 = asr_v2(p1 + p2, 1);
-		auto p23 = asr_v2(p2 + p3, 1);
-		auto p34 = asr_v2(p3 + p4, 1);
-		auto p123 = asr_v2(p12 + p23, 1);
-		auto p234 = asr_v2(p23 + p34, 1);
-		auto p1234 = asr_v2(p123 + p234, 1);
+		auto p12 = (p1 + p2).asr(1);
+		auto p23 = (p2 + p3).asr(1);
+		auto p34 = (p3 + p4).asr(1);
+		auto p123 = (p12 + p23).asr(1);
+		auto p234 = (p23 + p34).asr(1);
+		auto p1234 = (p123 + p234).asr(1);
 
 		//flatness test
 		if (abs(p1.m_x + p3.m_x - p2.m_x - p2.m_x)
@@ -121,7 +121,7 @@ Path *Path::filter_polyline(fixed32_t tol)
 		auto p1 = m_points[0];
 		m_points.erase(std::remove_if(begin(m_points) + 1, end(m_points), [&] (auto &p2)
 		{
-			if (distance_squared_v2(p1, p2) < tol) return true;
+			if (distance_squared(p1, p2) < tol) return true;
 			p1 = p2;
 			return false;
 		}), end(m_points));
@@ -133,7 +133,7 @@ Path *Path::filter_polygon(fixed32_t tol)
 {
 	filter_polyline(tol);
 	auto len = m_points.size();
-	if (len > 1 && distance_squared_v2(m_points[0], m_points[len - 1]) < tol)
+	if (len > 1 && distance_squared(m_points[0], m_points[len - 1]) < tol)
 	{
 		m_points.pop_back();
 	}

@@ -21,7 +21,7 @@ const auto ez = Vec3d{0.0, 0.0, -eps};
 //the scene
 double scene(const Vec3d &p)
 {
-	return length_v3(frac_v3(p) - Vec3d{0.5, 0.5, 0.5}) - 0.35;
+	return (frac_v3(p) - Vec3d{0.5, 0.5, 0.5}).length() - 0.35;
 }
 
 double ray_march(const Vec3d &ray_origin, const Vec3d &ray_dir,
@@ -40,10 +40,7 @@ double ray_march(const Vec3d &ray_origin, const Vec3d &ray_dir,
 Vec3d get_normal(const Vec3d &p)
 {
 	const auto d = scene(p);
-	return norm_v3(Vec3d(
-		d - scene(p + ex),
-		d - scene(p + ey),
-		d - scene(p + ez)));
+	return Vec3d(d - scene(p + ex), d - scene(p + ey), d - scene(p + ez)).norm();
 }
 
 double shadow(const Vec3d &ray_origin, const Vec3d &ray_dir,
@@ -65,14 +62,14 @@ Vec3d lighting(const Vec3d &surface_pos, const Vec3d &surface_norm, const Vec3d 
 {
 	auto obj_color = floor_v3(mod_v3(surface_pos, Vec3d{2.0, 2.0, 2.0}));
 	auto light_vec = light_pos - surface_pos;
-	auto light_dis = length_v3(light_vec);
+	auto light_dis = light_vec.length();
 	auto light_norm = light_vec * (1.0 / light_dis);
 	auto light_atten = std::min(1.0 / (light_dis * light_dis * attenuation), 1.0);
-	auto ref = reflect_v3(light_norm * -1.0, surface_norm);
+	auto ref = (light_norm * -1.0).reflect(surface_norm);
 	auto ss = shadow(surface_pos, light_norm, min_distance, light_dis, shadow_softness);
 	auto light_col = Vec3d{1.0, 1.0, 1.0} * light_atten * ss;
-	auto diffuse = std::max(0.0, dot_v3(surface_norm, light_norm));
-	auto specular = std::max(0.0, dot_v3(ref, norm_v3(cam_pos - surface_pos)));
+	auto diffuse = std::max(0.0, surface_norm.dot(light_norm));
+	auto specular = std::max(0.0, ref.dot((cam_pos - surface_pos).norm()));
 	specular = specular * specular * specular * specular;
 	obj_color = obj_color * ((diffuse * (1.0 - ambient)) + ambient);
 	obj_color = obj_color + Vec3d{specular, specular, specular};
@@ -94,7 +91,7 @@ Vec3d scene_ray(Vec3d ray_origin, Vec3d ray_dir)
 	{
 		if (--i < 0) break;
 		ray_origin = surface_pos;
-		ray_dir = reflect_v3(ray_dir, surface_norm);
+		ray_dir = ray_dir.reflect(surface_norm);
 		l = ray_march(ray_origin, ray_dir, min_distance * 10.0, clipfar, min_distance, march_factor);
 		if (l >= clipfar) break;
 		surface_pos = ray_origin + ray_dir * l;
@@ -131,10 +128,7 @@ void Raymarch_App::render(Raymarch_Job_reply* body, uint32_t over_sample,
 			{
 				for (auto osx = 0; osx < over_sample; ++osx)
 				{
-					auto ray_dir = norm_v3(Vec3d(
-						dx + (osx * osx_itr),
-						dy + (osy * osy_itr),
-						0.0) - ray_origin);
+					auto ray_dir = (Vec3d(dx + (osx * osx_itr), dy + (osy * osy_itr), 0.0) - ray_origin).norm();
 					col_v3 = col_v3 + scene_ray(ray_origin, ray_dir);
 				}
 			}
