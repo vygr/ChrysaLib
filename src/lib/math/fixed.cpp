@@ -16,7 +16,7 @@ fixed64_t abs(const fixed64_t &n)
 
 fixed64_t sqrt(const fixed64_t &n)
 {
-	return fixed64_t(std::sqrt(((double)n.m_val) / (1 << FP_SHIFT)));
+	return std::sqrt(double(n));
 }
 
 //////////

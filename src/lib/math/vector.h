@@ -450,7 +450,7 @@ auto stroke_path(const std::vector<T> &path, T1 radius, uint32_t resolution, uin
 				{
 				mitre_join:
 					//mitre join
-					auto s = double(sin(acos(double(c))));
+					auto s = sin(acos(c));
 					auto bv = nbv * (radius/s);
 					out_points.push_back(p1 + bv);
 					break;
@@ -518,7 +518,7 @@ auto stroke_joins(const std::vector<T> &path, int32_t step, T1 radius, uint32_t 
 			{
 			mitre_join:
 				//mitre join
-				auto s = double(sin(acos(double(c))));
+				auto s = sin(acos(c));
 				auto bv = nbv * (radius/s);
 				out_points.push_back(p1 + bv);
 				break;
