@@ -18,15 +18,15 @@ LIB_OBJ_DIRS := $(patsubst $(LIB_DIR)/%,$(LIB_OBJ_DIR)/%,$(LIB_DIRS))
 OBJ_DIRS_CREATE := $(shell mkdir -p $(NODE_OBJ_DIRS) $(LIB_OBJ_DIRS))
 OS := $(shell uname)
 
-CPPFLAGS := -std=c++14 -D ASIO_STANDALONE
+CPPFLAGS := -std=c++17 -D ASIO_STANDALONE
 CXXFLAGS += -MMD
 
 all:	CXXFLAGS += -O2
 all:	hub_node files_node gui_node
 debug:	CXXFLAGS += -DDEBUG -g -O2
 debug:	hub_node files_node gui_node
-debugo:	CXXFLAGS += -g -O2
-debugo:	hub_node files_node gui_node
+debugo2:	CXXFLAGS += -g -O2
+debugo2:	hub_node files_node gui_node
 
 hub_node:	$(LIB_OBJ_FILES) $(NODE_OBJ_DIR)/hub/hub.o
 ifeq ($(OS),Darwin)
