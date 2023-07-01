@@ -23,7 +23,7 @@ std::shared_ptr<Property> Property::get_default(const char *prop)
 		{"env_title_border", std::make_shared<Property>(1)},
 		{"env_title_buttons_border", std::make_shared<Property>(1)},
 		{"env_window_font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 18))},
-		{"env_title_font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 20))},
+		{"env_title_font", std::make_shared<Property>(Font::open("fonts/OpenSans-Bold.ctf", 20))},
 		{"env_body_font", std::make_shared<Property>(Font::open("fonts/OpenSans-Regular.ctf", 14))},
 		{"env_title_buttons_font", std::make_shared<Property>(Font::open("fonts/Entypo.ctf", 22))},
 		{"env_toolbar_font", std::make_shared<Property>(Font::open("fonts/Entypo.ctf", 28))},

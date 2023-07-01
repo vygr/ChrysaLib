@@ -34,8 +34,9 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		-framework Security \
 		$(shell sdl2-config --libs) \
-		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
+		/usr/local/Cellar/libusb/1.0.26/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
@@ -50,8 +51,9 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		-framework Security \
 		$(shell sdl2-config --libs) \
-		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
+		/usr/local/Cellar/libusb/1.0.26/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
@@ -66,8 +68,9 @@ ifeq ($(OS),Darwin)
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
+		-framework Security \
 		$(shell sdl2-config --libs) \
-		/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.a
+		/usr/local/Cellar/libusb/1.0.26/lib/libusb-1.0.a
 endif
 ifeq ($(OS),Linux)
 	c++ -o $@ $^ \
