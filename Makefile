@@ -1,34 +1,62 @@
 SRC_DIR := ./src
-OBJ_DIR := ./obj
-NODE_DIR := $(SRC_DIR)/nodes
-NODE_OBJ_DIR := $(OBJ_DIR)/nodes
-LIB_DIR := $(SRC_DIR)/lib
-LIB_OBJ_DIR := $(OBJ_DIR)/lib
+OBJ_DIR := $(SRC_DIR)/obj
 
-NODE_FILES := $(shell find $(NODE_DIR) -name "*.cpp")
-NODE_DIRS := $(shell find $(NODE_DIR) -type d)
-LIB_FILES := $(shell find $(LIB_DIR) -name "*.cpp")
-LIB_DIRS := $(shell find $(LIB_DIR) -type d)
+SRC_DIRS := $(shell find $(SRC_DIR) -type d | grep -v "/obj")
+OBJ_DIRS := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(SRC_DIRS))
+OBJ_DIRS_CREATE := $(shell mkdir -p $(OBJ_DIRS))
 
-NODE_OBJ_FILES := $(patsubst $(NODE_DIR)/%.cpp,$(NODE_OBJ_DIR)/%.o,$(NODE_FILES))
-NODE_OBJ_DIRS := $(patsubst $(NODE_DIR)/%,$(NODE_OBJ_DIR)/%,$(NODE_DIRS))
-LIB_OBJ_FILES := $(patsubst $(LIB_DIR)/%.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_FILES))
-LIB_OBJ_DIRS := $(patsubst $(LIB_DIR)/%,$(LIB_OBJ_DIR)/%,$(LIB_DIRS))
+NODE_FILES := $(shell find $(SRC_DIR)/nodes -name "*.cpp")
+NODE_FILES += $(shell find $(SRC_DIR)/nodes -name "*.c")
 
-OBJ_DIRS_CREATE := $(shell mkdir -p $(NODE_OBJ_DIRS) $(LIB_OBJ_DIRS))
+LIB_FILES := $(shell find $(SRC_DIR)/lib -name "*.cpp")
+LIB_FILES += $(shell find $(SRC_DIR)/lib -name "*.c")
+LIB_FILES += $(shell find $(SRC_DIR)/host -name "*.cpp")
+LIB_FILES += $(shell find $(SRC_DIR)/host -name "*.c")
+
+NODE_OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(NODE_FILES))
+NODE_OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(NODE_OBJ_FILES))
+
+LIB_OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(LIB_FILES))
+LIB_OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(LIB_OBJ_FILES))
+
+OBJ_FILES := $(NODE_OBJ_FILES)
+OBJ_FILES += $(LIB_OBJ_FILES)
+
 OS := $(shell uname)
+CPPFLAGS := -std=c++17
+CFLAGS += -MMD -D ASIO_STANDALONE
+HGUI := $(shell echo $(GUI) | tr '[:upper:]' '[:lower:]')
 
-CPPFLAGS := -std=c++17 -D ASIO_STANDALONE
-CXXFLAGS += -MMD
+HOST_GUI := 0
+ifeq ($(HGUI),sdl)
+	HOST_GUI := 0
+endif
+ifeq ($(HGUI),fb)
+	HOST_GUI := 1
+endif
+ifeq ($(HGUI),raw)
+	HOST_GUI := 2
+endif
 
-all:	CXXFLAGS += -O2
-all:	hub_node files_node gui_node
-debug:	CXXFLAGS += -DDEBUG -g -O2
-debug:	hub_node files_node gui_node
-debugo2:	CXXFLAGS += -g -O2
-debugo2:	hub_node files_node gui_node
+all:	CFLAGS += -O2
+all:	hostenv hub_node gui_node files_node
+debug:	CFLAGS += -DDEBUG -g -O2
+debug:	hostenv hub_node gui_node files_node
+debugo2:	CFLAGS += -g -O2
+debugo2:	hostenv hub_node gui_node files_node
 
-hub_node:	$(LIB_OBJ_FILES) $(NODE_OBJ_DIR)/hub/hub.o
+hostenv:
+ifeq ($(HOST_GUI),0)
+	@echo Building sdl GUI driver.
+endif
+ifeq ($(HOST_GUI),1)
+	@echo Building fb GUI driver.
+endif
+ifeq ($(HOST_GUI),2)
+	@echo Building raw GUI driver.
+endif
+
+hub_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/hub/hub.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -45,7 +73,7 @@ ifeq ($(OS),Linux)
 		-L/usr/local/lib -lusb-1.0
 endif
 
-gui_node:	$(LIB_OBJ_FILES) $(NODE_OBJ_DIR)/gui/gui.o
+gui_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/gui/gui.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -62,7 +90,7 @@ ifeq ($(OS),Linux)
 		-L/usr/local/lib -lusb-1.0
 endif
 
-files_node:	$(LIB_OBJ_FILES) $(NODE_OBJ_DIR)/files/files.o
+files_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/files/files.o
 ifeq ($(OS),Darwin)
 	c++ -o $@ $^ \
 		-F/Library/Frameworks \
@@ -79,37 +107,28 @@ ifeq ($(OS),Linux)
 		-L/usr/local/lib -lusb-1.0
 endif
 
-$(LIB_OBJ_DIR)/%.o : $(LIB_DIR)/%.cpp
-ifeq ($(OS),Darwin)
-	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp
+ifeq ($(GUI),fb)
+	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I/usr/local/include/libusb-1.0/
+else
+	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
 		-I/usr/local/include/libusb-1.0/ \
-		$(shell sdl2-config --cflags) \
-		-o $@ $<
-endif
-ifeq ($(OS),Linux)
-	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
-		-I/usr/local/include/libusb-1.0/ \
-		$(shell sdl2-config --cflags) \
-		-o $@ $<
+		$(shell sdl2-config --cflags)
 endif
 
-$(NODE_OBJ_DIR)/%.o : $(NODE_DIR)/%.cpp
-ifeq ($(OS),Darwin)
-	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+ifeq ($(GUI),fb)
+	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I/usr/local/include/libusb-1.0/
+else
+	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
 		-I/usr/local/include/libusb-1.0/ \
-		$(shell sdl2-config --cflags) \
-		-o $@ $<
-endif
-ifeq ($(OS),Linux)
-	c++ $(CPPFLAGS) $(CXXFLAGS) -c \
-		-I/usr/local/include/libusb-1.0/ \
-		$(shell sdl2-config --cflags) \
-		-o $@ $<
+		$(shell sdl2-config --cflags)
 endif
 
 clean:
-	rm -f hub_node files_node gui_node $(shell find . -name "*.o") $(shell find . -name "*.d")
+	rm -f hub_node gui_node files_node
 	rm -rf $(OBJ_DIR)/
 
--include $(LIB_OBJ_FILES:.o=.d)
--include $(NODE_OBJ_FILES:.o=.d)
+-include $(OBJ_FILES:.o=.d)
