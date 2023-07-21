@@ -54,7 +54,7 @@ endif
 ifeq ($(HOST_GUI),2)
 	@echo Building raw GUI driver.
 endif
-	mkdir -p $(OBJ_DIRS)
+	@mkdir -p $(OBJ_DIRS)
 
 hub_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/hub/hub.o
 ifeq ($(OS),Darwin)
@@ -128,7 +128,7 @@ else
 endif
 
 clean:
-	rm -f hub_node gui_node files_node
-	rm -rf $(OBJ_DIR)/
+	@rm -f hub_node gui_node files_node
+	@rm -rf $(OBJ_DIR)/
 
 -include $(OBJ_FILES:.o=.d)
