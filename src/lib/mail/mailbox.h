@@ -68,7 +68,7 @@ private:
 };
 
 //mailbox for thread data exchange.
-//abilty for a thread to post an object into a receiver thread que.
+//ability for a thread to post an object into a receiver thread que.
 //the sending thread does not block and the receiver can read or filter the que
 //as it wishes.
 template<class T>

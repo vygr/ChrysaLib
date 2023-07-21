@@ -24,7 +24,7 @@ void Link::run_send()
 		}
 		else
 		{
-			//send a ping to get the Dev_ID exchanged
+			//send a ping to get the Node_ID exchanged
 			send(std::make_shared<Msg>());
 		}
 	}

@@ -27,7 +27,7 @@ public:
 	struct Event_directory : public Event
 	{
 		Net_ID m_src;
-		Dev_ID m_via;
+		Node_ID m_via;
 		uint32_t m_hops;
 		char m_data[];
 	};

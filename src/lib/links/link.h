@@ -11,11 +11,11 @@ class Router;
 //they scan the outgoing msg que for packets that go to their destination.
 //a link sends the header and body to the destination.
 //included is the hash of the link buffer for error detection plus
-//the Dev_ID of the peer who sent it.
+//the Node_ID of the peer who sent it.
 struct Link_Buf
 {
 	uint32_t m_hash = 0;
-	Dev_ID m_dev_id;
+	Node_ID m_dev_id;
 	Msg_Header m_msg_header;
 	uint8_t m_msg_body[MAX_PACKET_SIZE] = {0};
 };
@@ -46,7 +46,7 @@ protected:
 	virtual std::shared_ptr<Msg> receive() = 0;
 	std::thread m_thread_send;
 	std::thread m_thread_receive;
-	Dev_ID m_remote_dev_id;
+	Node_ID m_remote_dev_id;
 	Link_Buf m_send_buf;
 	Link_Buf m_receive_buf;
 };

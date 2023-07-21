@@ -51,7 +51,7 @@ void Kernel_Service::run()
 					auto event_body = (Event_directory*)body;
 					auto via = event_body->m_via;
 					//fill in the new via and increment the distance as we flood out !
-					event_body->m_via = global_router->get_dev_id();
+					event_body->m_via = global_router->get_node_id();
 					event_body->m_hops++;
 					for (auto &peer : global_router->get_peers())
 					{
@@ -165,7 +165,7 @@ void Kernel_Service::exit()
 	//kernel will exit !!!
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event));
 	auto event_body = (Kernel_Service::Event*)msg->begin();
-	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_exit;
 	global_router->send(msg);
 }
@@ -178,7 +178,7 @@ Net_ID Kernel_Service::start_task(std::shared_ptr<Task> task)
 	auto reply_mbox = global_router->validate(reply_id);
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_start_task));
 	auto event_body = (Kernel_Service::Event_start_task*)msg->begin();
-	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_start_task;
 	event_body->m_reply = reply_id;
 	event_body->m_task = task;
@@ -196,7 +196,7 @@ void Kernel_Service::stop_task(std::shared_ptr<Task> task)
 	//kernel will call stop_thread
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_stop_task));
 	auto event_body = (Kernel_Service::Event_stop_task*)msg->begin();
-	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_stop_task;
 	event_body->m_task = task;
 	global_router->send(msg);
@@ -208,7 +208,7 @@ void Kernel_Service::join_task(std::shared_ptr<Task> task)
 	//kernel will call join_thread
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_stop_task));
 	auto event_body = (Kernel_Service::Event_stop_task*)msg->begin();
-	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_stop_task;
 	event_body->m_task = task;
 	global_router->send(msg);
@@ -219,7 +219,7 @@ void Kernel_Service::timed_mail(const Net_ID &reply, std::chrono::milliseconds t
 	//timed mail request
 	auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_timed_mail));
 	auto event_body = (Kernel_Service::Event_timed_mail*)msg->begin();
-	msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+	msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 	event_body->m_evt = Kernel_Service::evt_timed_mail;
 	event_body->m_mbox = reply;
 	event_body->m_timeout = timeout;
@@ -241,7 +241,7 @@ void Kernel_Service::callback(std::function<void()> callback)
 		Sync sync;
 		auto msg = std::make_shared<Msg>(sizeof(Kernel_Service::Event_callback));
 		auto event_body = (Kernel_Service::Event_callback*)msg->begin();
-		msg->set_dest(Net_ID(global_router->get_dev_id(), Mailbox_ID{0}));
+		msg->set_dest(Net_ID(global_router->get_node_id(), Mailbox_ID{0}));
 		event_body->m_evt = Kernel_Service::evt_callback;
 		event_body->m_sync = &sync;
 		event_body->m_callback = callback;

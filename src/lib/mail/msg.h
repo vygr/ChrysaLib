@@ -32,8 +32,8 @@ struct Msg_Header
 	//the destination id info.
 	//fill in before Router::send(msg) with msg->set_dest(Net_ID)
 	Net_ID m_dest;
-	//the folowing are filled in automatically.
-	//the source id info (combo of src parcel id and source dev id...)
+	//the following are filled in automatically.
+	//the source id info (combo of src parcel id and source node id...)
 	//this is NOT the thing that sent the msg !!! it's system level information !
 	Net_ID m_src;
 	//info describing this packet

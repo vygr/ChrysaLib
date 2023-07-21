@@ -11,7 +11,7 @@
 Net_ID Router::alloc()
 {
 	//allocate a new net id and enter the associated mailbox into the validation map.
-	//it gets the next mailbox id that does not allready exist and which will not repeat
+	//it gets the next mailbox id that does not already exist and which will not repeat
 	//for a very long time.
 	std::lock_guard<std::mutex> l(m_mutex);
 	while (m_next_mailbox_id.m_id == MAX_ID
@@ -19,7 +19,7 @@ Net_ID Router::alloc()
 	auto id = m_next_mailbox_id;
 	m_mailboxes[id];
 	m_next_mailbox_id.m_id++;
-	return Net_ID(m_device_id, id);
+	return Net_ID(m_node_id, id);
 }
 
 void Router::free(const Net_ID &id)
@@ -112,11 +112,11 @@ void Router::run()
 		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
 		event_body->m_evt = Kernel_Service::evt_directory;
 		event_body->m_src = global_router->alloc_src();
-		event_body->m_via = global_router->get_dev_id();
+		event_body->m_via = global_router->get_node_id();
 		event_body->m_hops = 0;
 		{
 			std::lock_guard<std::mutex> l(m_mutex);
-			auto &dir_struct = m_directory[global_router->get_dev_id()];
+			auto &dir_struct = m_directory[global_router->get_node_id()];
 			for (auto &entry : dir_struct.m_services) body->append(entry).append("\n");
 		}
 		//broadcast to the list of known router peers
@@ -149,7 +149,7 @@ std::string Router::declare(const Net_ID &id, const std::string &service, const 
 	auto entry = service + "," + id.to_string() + "," + params;
 	auto wake = this;
 	std::lock_guard<std::mutex> l(m_mutex);
-	m_directory[global_router->get_dev_id()].m_services.insert(entry);
+	m_directory[global_router->get_node_id()].m_services.insert(entry);
 	m_wake_mbox.post(wake);
 	return entry;
 }
@@ -160,7 +160,7 @@ void Router::forget(const std::string &entry)
 	//wake the manager thread to make it flood out the new state.
 	auto wake = this;
 	std::lock_guard<std::mutex> l(m_mutex);
-	m_directory[global_router->get_dev_id()].m_services.erase(entry);
+	m_directory[global_router->get_node_id()].m_services.erase(entry);
 	m_wake_mbox.post(wake);
 }
 
@@ -170,7 +170,7 @@ bool Router::update_dir(const std::string &body)
 	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
 	auto event_body_end = &(*begin(body)) + body.size();
 	std::lock_guard<std::mutex> l(m_mutex);
-	auto &dir_struct = m_directory[event_body->m_src.m_device_id];
+	auto &dir_struct = m_directory[event_body->m_src.m_node_id];
 	//not a new session, so ignore !
 	if (event_body->m_src.m_mailbox_id.m_id <= dir_struct.m_session) return false;
 	dir_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
@@ -193,7 +193,7 @@ void Router::purge_dir()
 	auto itr = begin(m_directory);
 	while (itr != end (m_directory))
 	{
-		if (global_router->get_dev_id() != itr->first
+		if (global_router->get_node_id() != itr->first
 			&& now - itr->second.m_time_modified >= std::chrono::milliseconds(MAX_DIRECTORY_AGE))
 		{
 			itr = m_directory.erase(itr);
@@ -218,12 +218,12 @@ std::vector<std::string> Router::enquire(const std::string &prefix)
 	return services;
 }
 
-std::vector<std::string> Router::enquire(const Dev_ID &dev_id, const std::string &prefix)
+std::vector<std::string> Router::enquire(const Node_ID &id, const std::string &prefix)
 {
 	//return vector of all service entires for given device with this prefix
 	auto services = std::vector<std::string>{};
 	std::lock_guard<std::mutex> l(m_mutex);
-	auto &set = m_directory[dev_id].m_services;
+	auto &set = m_directory[id].m_services;
 	std::copy_if(cbegin(set), cend(set), std::inserter(services, services.end()), [&] (auto &&s)
 	{
 		return strncmp(s.c_str(), prefix.c_str(), prefix.size()) == 0;
@@ -241,7 +241,7 @@ void Router::send(std::shared_ptr<Msg> &msg)
 	//it does all the fragmentation, reconstruction and forwarding required.
 	std::lock_guard<std::mutex> l(m_mutex);
 	//is message for this device ?
-	if (msg->m_header.m_dest.m_device_id == m_device_id)
+	if (msg->m_header.m_dest.m_node_id == m_node_id)
 	{
 		//yes so validate the mbox id
 		auto mbox = validate_no_lock(msg->m_header.m_dest.m_mailbox_id);
@@ -304,7 +304,7 @@ std::shared_ptr<Msg> Router::read(const Net_ID &id)
 
 Net_ID Router::alloc_src_no_lock()
 {
-	auto src = Net_ID(m_device_id, m_next_parcel_id);
+	auto src = Net_ID(m_node_id, m_next_parcel_id);
 	m_next_parcel_id.m_id++;
 	return src;
 }
@@ -320,7 +320,7 @@ bool Router::update_route(const std::string &body)
 	//update our routing table based on this ping message body
 	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
 	std::lock_guard<std::mutex> l(m_mutex);
-	auto &route_struct = m_routes[event_body->m_src.m_device_id];
+	auto &route_struct = m_routes[event_body->m_src.m_node_id];
 	//ignore if it's from an old session !
 	if (event_body->m_src.m_mailbox_id.m_id < route_struct.m_session) return false;
 	if (event_body->m_src.m_mailbox_id.m_id != route_struct.m_session)
@@ -356,7 +356,7 @@ void Router::purge_routes()
 	//purge routing tables
 	for (auto itr = begin(m_routes); itr != end (m_routes);)
 	{
-		if (m_device_id != itr->first
+		if (m_node_id != itr->first
 			&& now - itr->second.m_time >= std::chrono::milliseconds(MAX_ROUTE_AGE))
 		{
 			itr = m_routes.erase(itr);
@@ -383,15 +383,15 @@ void Router::purge_routes()
 	}
 }
 
-std::shared_ptr<Msg> Router::get_next_msg(const Dev_ID &dest, std::chrono::milliseconds timeout)
+std::shared_ptr<Msg> Router::get_next_msg(const Node_ID &dest, std::chrono::milliseconds timeout)
 {
 	//get next message bound for the destination device else nullptr
 	auto poll_que = [&]() -> std::shared_ptr<Msg>
 	{
 		auto itr = std::find_if(begin(m_outgoing_msg_que), end(m_outgoing_msg_que), [&] (const auto &qi)
 		{
-			if (dest == qi.m_msg->m_header.m_dest.m_device_id) return true;
-			auto &route_struct = m_routes[qi.m_msg->m_header.m_dest.m_device_id];
+			if (dest == qi.m_msg->m_header.m_dest.m_node_id) return true;
+			auto &route_struct = m_routes[qi.m_msg->m_header.m_dest.m_node_id];
 			return route_struct.m_vias.find(dest) != end(route_struct.m_vias);
 		});
 		if (itr == end(m_outgoing_msg_que)) return nullptr;
@@ -407,7 +407,7 @@ std::shared_ptr<Msg> Router::get_next_msg(const Dev_ID &dest, std::chrono::milli
 	return msg;
 }
 
-void Router::add_link(Link *link, const Dev_ID &id)
+void Router::add_link(Link *link, const Node_ID &id)
 {
 	//new link driver entry that can send to given peer
 	std::lock_guard<std::mutex> l(m_mutex);
@@ -422,10 +422,10 @@ void Router::sub_link(Link *link)
 	if (itr != end(m_links)) m_links.erase(itr);
 }
 
-std::vector<Dev_ID> Router::get_peers()
+std::vector<Node_ID> Router::get_peers()
 {
 	//get a list of all current peer devices
-	auto peers = std::vector<Dev_ID>{};
+	auto peers = std::vector<Node_ID>{};
 	std::lock_guard<std::mutex> l(m_mutex);
 	for (auto &link : m_links)
 	{

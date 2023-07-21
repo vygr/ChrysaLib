@@ -3,7 +3,6 @@ OBJ_DIR := $(SRC_DIR)/obj
 
 SRC_DIRS := $(shell find $(SRC_DIR) -type d | grep -v "/obj")
 OBJ_DIRS := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(SRC_DIRS))
-OBJ_DIRS_CREATE := $(shell mkdir -p $(OBJ_DIRS))
 
 NODE_FILES := $(shell find $(SRC_DIR)/nodes -name "*.cpp")
 NODE_FILES += $(shell find $(SRC_DIR)/nodes -name "*.c")
@@ -55,6 +54,7 @@ endif
 ifeq ($(HOST_GUI),2)
 	@echo Building raw GUI driver.
 endif
+	mkdir -p $(OBJ_DIRS)
 
 hub_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/hub/hub.o
 ifeq ($(OS),Darwin)
