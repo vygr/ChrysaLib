@@ -34,7 +34,7 @@ favorite `tar` application.
 Go into the new extracted folder via the terminal and type:
 
 ```text
-autogen.sh
+./autogen.sh
 ./configure
 make all
 sudo make install
