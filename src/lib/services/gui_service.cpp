@@ -50,6 +50,8 @@ void GUI_Service::run()
 	{
 		SDL_Rect r = {0, 0, m_screen->m_w, m_screen->m_h};
 		host_gui_init(&r, 0);
+		m_screen->m_w = r.w;
+		m_screen->m_h = r.h;
 	});
 
 	//start up launcher task
