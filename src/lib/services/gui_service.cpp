@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <string.h>
 
 #include "../apps/launcher/app.h"
 
