@@ -181,9 +181,8 @@ void GUI_Service::run()
 			if ((View::m_gui_flags & view_flag_dirty_all) != 0)
 			{
 				host_gui_begin_composite();
-				composite();
+				auto r = composite();
 				host_gui_end_composite();
-				SDL_Rect r = {0, 0, m_screen->m_w, m_screen->m_h};
 				host_gui_flush(&r);
 				View::m_gui_flags &= ~view_flag_dirty_all;
 			}
@@ -213,7 +212,7 @@ void GUI_Service::run()
 	Kernel_Service::exit();
 }
 
-void GUI_Service::composite()
+SDL_Rect GUI_Service::composite()
 {
 	//iterate through views back to front
 	//create visible region at root
@@ -331,6 +330,9 @@ void GUI_Service::composite()
 			return true;
 		});
 
+	//save the flush bounds
+	auto bounds = m_screen->m_dirty.bounds();
+
 	//iterate through views front to back
 	//distribute visible region
 	auto draw_list = std::forward_list<View*>{};
@@ -408,6 +410,10 @@ void GUI_Service::composite()
 		view->draw(view->m_ctx);
 		view->m_dirty.free();
 	}
+
+	//return flush bounds
+	return (SDL_Rect{bounds.m_x, bounds.m_y,
+		bounds.m_x1 - bounds.m_x, bounds.m_y1 - bounds.m_y});
 }
 
 GUI_Service *GUI_Service::quit(const SDL_Event &e)

@@ -47,7 +47,7 @@ public:
 		: Service()
 	{}
 	void run() override;
-	void composite();
+	SDL_Rect composite();
 	View *set_mouse_id();
 	GUI_Service *quit(const SDL_Event &e);
 	GUI_Service *key_down(const SDL_KeyboardEvent &e);
