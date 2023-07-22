@@ -36,7 +36,7 @@ view_size Canvas::pref_size()
 	return view_size{m_pixmap->m_w / m_scale, m_pixmap->m_h / m_scale};
 }
 
-Canvas *Canvas::swap()
+Canvas *Canvas::swap(uint64_t m)
 {
 	//scale the pixmap if needed
 	auto pixmap = m_pixmap;
@@ -47,7 +47,7 @@ Canvas *Canvas::swap()
 	}
 
 	//upload then grab the texture
-	pixmap->upload();
+	pixmap->upload(m);
 	m_texture = pixmap->m_texture;
 	dirty();
 	return this;

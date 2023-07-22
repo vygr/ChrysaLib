@@ -3,9 +3,7 @@
 
 #include "service.h"
 #include "../gui/view.h"
-#include <SDL.h>
-
-class SDL_Renderer;
+#include "../../host/sdl_dummy.h"
 
 //gui service
 class GUI_Service : public Service
@@ -49,7 +47,7 @@ public:
 		: Service()
 	{}
 	void run() override;
-	void composit();
+	void composite();
 	View *set_mouse_id();
 	GUI_Service *quit(const SDL_Event &e);
 	GUI_Service *key_down(const SDL_KeyboardEvent &e);
@@ -63,9 +61,6 @@ public:
 	uint32_t m_mouse_buttons = 0;
 	int64_t m_mouse_id = 0;
 	std::shared_ptr<View> m_screen;
-	SDL_Window *m_sdl_window = nullptr;
-	SDL_Texture *m_texture = nullptr;
-	static SDL_Renderer *m_renderer;
 };
 
 #endif

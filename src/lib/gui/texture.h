@@ -2,12 +2,13 @@
 #define TEXTURE_H
 
 #include "../services/kernel_service.h"
-#include <SDL.h>
+
+extern void host_gui_destroy_texture(void *t);
 
 class Texture
 {
 public:
-	Texture(SDL_Texture *handle, int32_t w, int32_t h)
+	Texture(void *handle, int32_t w, int32_t h)
 		: m_handle(handle)
 		, m_w(w)
 		, m_h(h)
@@ -16,10 +17,10 @@ public:
 	{
 		Kernel_Service::callback([&]()
 		{
-			SDL_DestroyTexture(m_handle);
+			host_gui_destroy_texture(m_handle);
 		});
 	}
-	SDL_Texture *m_handle;
+	void *m_handle;
 	int32_t m_w;
 	int32_t m_h;
 };

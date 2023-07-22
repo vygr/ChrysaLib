@@ -67,7 +67,7 @@ void Canvas_App::run()
 	canvas->fbox(5, 5, 240, 240);
 	canvas->set_col(argb_black);
 	canvas->fpoly(polygon, Vec2f(0, 0), winding_odd_even);
-	canvas->swap();
+	canvas->swap(0);
 
 	//add to my GUI screen
 	window->change(locate(window->pref_size()));

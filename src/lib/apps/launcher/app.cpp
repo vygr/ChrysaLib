@@ -25,9 +25,6 @@ void Launcher_App::run()
 				ui_grid(button_grid, ({
 					{"grid_height", 1},
 					{"font", Font::open("fonts/Entypo.ctf", 22)}}))
-					ui_button(close_button, ({
-						{"text", to_utf8(0xea19)}}))
-					ui_end
 				ui_end
 				ui_title(title, ({
 					{"text", "Launcher"}}))

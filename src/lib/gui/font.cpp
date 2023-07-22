@@ -196,7 +196,7 @@ std::shared_ptr<Texture> Font::sym_texture(const std::string &utf8)
 	sym_canvas->fpoly(paths, Vec2f(0, metrics.m_ascent * 2), winding_odd_even);
 
 	//take texture from canvas
-	sym_canvas->swap();
+	sym_canvas->swap(1);
 	m_sym_map[utf8] = sym_canvas->m_texture;
 	return sym_canvas->m_texture;
 }

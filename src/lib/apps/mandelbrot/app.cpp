@@ -37,7 +37,7 @@ void Mandelbrot_App::run()
 	//clear canvas to black
 	canvas->set_col(argb_black);
 	canvas->fill();
-	canvas->swap();
+	canvas->swap(0);
 
 	//add to my GUI screen
 	window->change(locate(window->pref_size()));
@@ -143,7 +143,7 @@ void Mandelbrot_App::run()
 			if (m_dirty)
 			{
 				m_dirty = false;
-				canvas->swap();
+				canvas->swap(0);
 			}
 			break;
 		}

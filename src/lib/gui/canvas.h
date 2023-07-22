@@ -61,7 +61,7 @@ public:
 	Canvas(std::shared_ptr<Pixmap> pixmap);
 	view_size pref_size() override;
 	Canvas *draw(const Ctx &ctx) override;
-	Canvas *swap();
+	Canvas *swap(uint64_t m);
 	Canvas *set_clip(int32_t x, int32_t y, int32_t x1, int32_t y1);
 	Canvas *set_col(uint32_t col) { m_col = col; return this; };
 	Canvas *set_canvas_flags(uint32_t flags) { m_canvas_flags = flags; return this; };

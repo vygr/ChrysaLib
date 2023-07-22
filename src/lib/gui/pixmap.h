@@ -10,7 +10,7 @@ class Pixmap
 {
 public:
 	Pixmap(int32_t w, int32_t h);
-	void upload();
+	void upload(uint64_t m);
 	Pixmap *fill(uint32_t col);
 	Pixmap *as_argb();
 	Pixmap *as_premul();

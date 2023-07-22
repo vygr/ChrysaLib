@@ -10,11 +10,17 @@
 
 #include "../apps/launcher/app.h"
 
+extern void host_gui_init(SDL_Rect *rect, uint64_t flags);
+extern void host_gui_deinit();
+extern uint64_t host_gui_poll_event(void *event);
+extern void host_gui_begin_composite();
+extern void host_gui_end_composite();
+extern void host_gui_flush(const SDL_Rect *rect);
+extern void host_gui_resize(uint64_t w, uint64_t h);
+
 //////
 // gui
 //////
-
-SDL_Renderer *GUI_Service::m_renderer = nullptr;
 
 void GUI_Service::run()
 {
@@ -31,17 +37,8 @@ void GUI_Service::run()
 	//init SDL
 	Kernel_Service::callback([&]()
 	{
-		SDL_SetMainReady();
-		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-		//create window
-		m_sdl_window = SDL_CreateWindow("GUI Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screen->m_w, m_screen->m_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-		//hide host cursor
-		//SDL_ShowCursor(0);
-		//renderer
-		m_renderer = SDL_CreateRenderer(m_sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-		m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
-		//set blend mode
-		SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+		SDL_Rect r = {0, 0, m_screen->m_w, m_screen->m_h};
+		host_gui_init(&r, 0);
 	});
 
 	//start up launcher task
@@ -150,7 +147,7 @@ void GUI_Service::run()
 		{
 			std::lock_guard<std::recursive_mutex> lock(View::m_mutex);
 			SDL_Event e;
-			while (SDL_PollEvent(&e))
+			while (host_gui_poll_event(&e))
 			{
 				if (e.type == SDL_QUIT) quit(e);
 				else if (e.type == SDL_KEYDOWN) key_down((SDL_KeyboardEvent&)e);
@@ -164,18 +161,17 @@ void GUI_Service::run()
 			if ((View::m_gui_flags & view_flag_screen) != 0)
 			{
 				//resize back buffer and then do full redraw
-				SDL_DestroyTexture(m_texture);
-				m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, m_screen->m_w, m_screen->m_h);
+				host_gui_resize(m_screen->m_w, m_screen->m_h);
 				m_screen->dirty_all();
 				View::m_gui_flags &= ~view_flag_screen;
 			}
 			if ((View::m_gui_flags & view_flag_dirty_all) != 0)
 			{
-				SDL_SetRenderTarget(m_renderer, m_texture);
-				composit();
-				SDL_SetRenderTarget(m_renderer, 0);
-				SDL_RenderCopy(m_renderer, m_texture, 0, 0);
-				SDL_RenderPresent(m_renderer);
+				host_gui_begin_composite();
+				composite();
+				host_gui_end_composite();
+				SDL_Rect r = {0, 0, m_screen->m_w, m_screen->m_h};
+				host_gui_flush(&r);
 				View::m_gui_flags &= ~view_flag_dirty_all;
 			}
 
@@ -191,9 +187,7 @@ void GUI_Service::run()
 
 	Kernel_Service::callback([&]()
 	{
-		//quit SDL
-		SDL_DestroyWindow(m_sdl_window);
-		SDL_Quit();
+		host_gui_deinit();
 	});
 
 	//forget myself
@@ -206,7 +200,7 @@ void GUI_Service::run()
 	Kernel_Service::exit();
 }
 
-void GUI_Service::composit()
+void GUI_Service::composite()
 {
 	//iterate through views back to front
 	//create visible region at root
@@ -388,7 +382,6 @@ void GUI_Service::composit()
 			{
 				view.m_ctx.m_view = &view;
 				view.m_ctx.m_region = &view.m_dirty;
-				view.m_ctx.m_renderer = m_renderer;
 				draw_list.push_front(&view);
 			}
 			return true;

@@ -37,7 +37,7 @@ void Raymarch_App::run()
 	//clear canvas to black
 	canvas->set_col(argb_black);
 	canvas->fill();
-	canvas->swap();
+	canvas->swap(0);
 
 	//add to my GUI screen
 	window->change(locate(window->pref_size()));
@@ -128,7 +128,7 @@ void Raymarch_App::run()
 			if (m_dirty)
 			{
 				m_dirty = false;
-				canvas->swap();
+				canvas->swap(0);
 			}
 			break;
 		}
@@ -158,7 +158,7 @@ void Raymarch_App::run()
 						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
 						canvas->set_col(argb_black);
 						canvas->fill();
-						canvas->swap();
+						canvas->swap(0);
 						reset();
 					}
 					else if (mouse_body->m_buttons == 3)
@@ -169,7 +169,7 @@ void Raymarch_App::run()
 						auto ry = mouse_body->m_ry - (size.m_h - CANVAS_HEIGHT) / 2;
 						canvas->set_col(argb_black);
 						canvas->fill();
-						canvas->swap();
+						canvas->swap(0);
 						reset();
 					}
 				}

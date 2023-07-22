@@ -1,6 +1,13 @@
 #include "ctx.h"
 #include "view.h"
-#include <SDL.h>
+#include "../../host/sdl_dummy.h"
+
+extern void host_gui_box(const SDL_Rect *rect);
+extern void host_gui_filled_box(const SDL_Rect *rect);
+extern void host_gui_set_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+extern void host_gui_set_texture_color(void *t, uint8_t r, uint8_t g, uint8_t b);
+extern void host_gui_blit(void *t, const SDL_Rect *srect, const SDL_Rect *drect);
+extern void host_gui_set_clip(const SDL_Rect *rect);
 
 uint32_t Ctx::darker(uint32_t col) const
 {
@@ -20,7 +27,7 @@ const Ctx &Ctx::set_color(uint32_t col) const
 	uint8_t r = (col >> 16) & 0xff;
 	uint8_t g = (col >> 8) & 0xff;
 	uint8_t b = col & 0xff;
-	SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
+	host_gui_set_color(r, g, b, a);
 	return *this;
 }
 
@@ -46,9 +53,9 @@ const Ctx &Ctx::box(int32_t x, int32_t y, int32_t w, int32_t h) const
 		clip_rect.y = rect.m_y;
 		clip_rect.w = rect.m_x1 - rect.m_x;
 		clip_rect.h = rect.m_y1 - rect.m_y;
-		SDL_RenderSetClipRect(m_renderer, &clip_rect);
+		host_gui_set_clip(&clip_rect);
 		//and draw
-		SDL_RenderDrawRect(m_renderer, &drect);
+		host_gui_box(&drect);
 	}
 	return *this;
 }
@@ -75,14 +82,14 @@ const Ctx &Ctx::filled_box(int32_t x, int32_t y, int32_t w, int32_t h) const
 		clip_rect.y = rect.m_y;
 		clip_rect.w = rect.m_x1 - rect.m_x;
 		clip_rect.h = rect.m_y1 - rect.m_y;
-		SDL_RenderSetClipRect(m_renderer, &clip_rect);
+		host_gui_set_clip(&clip_rect);
 		//and draw
-		SDL_RenderFillRect(m_renderer, &drect);
+		host_gui_filled_box(&drect);
 	}
 	return *this;
 }
 
-const Ctx &Ctx::blit(SDL_Texture *texture, uint32_t col, int32_t x, int32_t y, int32_t w, int32_t h) const
+const Ctx &Ctx::blit(void *texture, uint32_t col, int32_t x, int32_t y, int32_t w, int32_t h) const
 {
 	SDL_Rect drect;
 	SDL_Rect srect;
@@ -101,7 +108,7 @@ const Ctx &Ctx::blit(SDL_Texture *texture, uint32_t col, int32_t x, int32_t y, i
 	uint8_t r = (col >> 16) & 0xff;
 	uint8_t g = (col >> 8) & 0xff;
 	uint8_t b = col & 0xff;
-	SDL_SetTextureColorMod(texture, r, g, b);
+	host_gui_set_texture_color(texture, r, g, b);
 
 	for (auto &rect : m_region->m_region)
 	{
@@ -115,9 +122,9 @@ const Ctx &Ctx::blit(SDL_Texture *texture, uint32_t col, int32_t x, int32_t y, i
 		clip_rect.y = rect.m_y;
 		clip_rect.w = rect.m_x1 - rect.m_x;
 		clip_rect.h = rect.m_y1 - rect.m_y;
-		SDL_RenderSetClipRect(m_renderer, &clip_rect);
+		host_gui_set_clip(&clip_rect);
 		//and draw
-		SDL_RenderCopy(m_renderer, texture, &srect, &drect);
+		host_gui_blit(texture, &srect, &drect);
 	}
 	return *this;
 }
