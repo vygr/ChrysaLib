@@ -34,10 +34,11 @@ struct Node_ID
 	//create from a strong random pool
 	static auto alloc()
 	{
+		static std::random_device rd;
+		static std::mt19937 rng(rd());
+		static std::uniform_int_distribution<int> dist(0, 255);
 		Node_ID id;
-		std::random_device rd;
-		std::uniform_int_distribution<int32_t> dist(0, 256);
-		for (auto &c : id.m_id) c = dist(rd);
+		for (auto &c : id.m_id) c = dist(rng);
 		return id;
 	}
 	std::array<uint8_t, 16> m_id = {0};
