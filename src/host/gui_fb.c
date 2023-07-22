@@ -105,11 +105,11 @@ static void catch_signals(int signo)
 #define unassert(a)
 #endif
 
-void host_gui_begin_composite(void)
+void host_gui_begin_composite()
 {
 }
 
-void host_gui_end_composite(void)
+void host_gui_end_composite()
 {
 }
 
