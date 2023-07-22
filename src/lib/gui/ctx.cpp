@@ -2,12 +2,21 @@
 #include "view.h"
 #include "../../host/sdl_dummy.h"
 
+#if _HOST_GUI == 1
+extern "C" void host_gui_box(const SDL_Rect *rect);
+extern "C" void host_gui_filled_box(const SDL_Rect *rect);
+extern "C" void host_gui_set_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+extern "C" void host_gui_set_texture_color(void *t, uint8_t r, uint8_t g, uint8_t b);
+extern "C" void host_gui_blit(void *t, const SDL_Rect *srect, const SDL_Rect *drect);
+extern "C" void host_gui_set_clip(const SDL_Rect *rect);
+#else
 extern void host_gui_box(const SDL_Rect *rect);
 extern void host_gui_filled_box(const SDL_Rect *rect);
 extern void host_gui_set_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 extern void host_gui_set_texture_color(void *t, uint8_t r, uint8_t g, uint8_t b);
 extern void host_gui_blit(void *t, const SDL_Rect *srect, const SDL_Rect *drect);
 extern void host_gui_set_clip(const SDL_Rect *rect);
+#endif
 
 uint32_t Ctx::darker(uint32_t col) const
 {

@@ -3,7 +3,11 @@
 
 #include "../services/kernel_service.h"
 
+#if _HOST_GUI == 1
+extern "C" void host_gui_destroy_texture(void *t);
+#else
 extern void host_gui_destroy_texture(void *t);
+#endif
 
 class Texture
 {

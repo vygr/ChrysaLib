@@ -11,6 +11,15 @@
 
 #include "../apps/launcher/app.h"
 
+#if _HOST_GUI == 1
+extern "C" void host_gui_init(SDL_Rect *rect, uint64_t flags);
+extern "C" void host_gui_deinit();
+extern "C" uint64_t host_gui_poll_event(void *event);
+extern "C" void host_gui_begin_composite();
+extern "C" void host_gui_end_composite();
+extern "C" void host_gui_flush(const SDL_Rect *rect);
+extern "C" void host_gui_resize(uint64_t w, uint64_t h);
+#else
 extern void host_gui_init(SDL_Rect *rect, uint64_t flags);
 extern void host_gui_deinit();
 extern uint64_t host_gui_poll_event(void *event);
@@ -18,6 +27,7 @@ extern void host_gui_begin_composite();
 extern void host_gui_end_composite();
 extern void host_gui_flush(const SDL_Rect *rect);
 extern void host_gui_resize(uint64_t w, uint64_t h);
+#endif
 
 //////
 // gui
