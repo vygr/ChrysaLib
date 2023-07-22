@@ -143,19 +143,6 @@ std::string to_utf8(uint32_t c)
 	return utf8;
 }
 
-// (defun num-to-utf8 (_)
-// 	; (num-to-utf8 num) -> str
-// 	(cond
-// 		((>= _ 0x10000)
-// 			(char (+ 0x808080f0 (>> _ 18) (logand (>> _ 4) 0x3f00)
-// 				(logand (<< _ 10) 0x3f0000) (logand (<< _ 24) 0x3f000000)) 4))
-// 		((>= _ 0x800)
-// 			(char (+ 0x8080e0 (>> _ 12) (logand (<< _ 2) 0x3f00)
-// 				(logand (<< _ 16) 0x3f0000)) 3))
-// 		((>= _ 0x80)
-// 			(char (+ 0x80c0 (>> _ 6) (logand (<< _ 8) 0x3f00)) 2))
-// 		(t  (char _))))
-
 uint32_t from_utf8(uint8_t **data)
 {
 	auto next_utf8 = [=] (uint8_t **data, int cnt, int c) -> int
