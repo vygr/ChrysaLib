@@ -4,9 +4,9 @@
 #include <algorithm>
 
 #if _HOST_GUI == 1
-extern "C" uint64_t host_gui_create_texture(uint32_t *data, uint64_t w, uint64_t h, uint64_t s, uint64_t m);
+extern "C" void *host_gui_create_texture(uint32_t *data, uint64_t w, uint64_t h, uint64_t s, uint64_t m);
 #else
-extern uint64_t host_gui_create_texture(uint32_t *data, uint64_t w, uint64_t h, uint64_t s, uint64_t m);
+extern void *host_gui_create_texture(uint32_t *data, uint64_t w, uint64_t h, uint64_t s, uint64_t m);
 #endif
 
 Pixmap::Pixmap(int32_t w, int32_t h)
