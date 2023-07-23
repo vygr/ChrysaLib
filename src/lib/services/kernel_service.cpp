@@ -5,6 +5,7 @@
 #include <algorithm>
 
 extern std::thread::id global_kernel_thread_id;
+extern uint32_t arg_v;
 
 /////////
 // kernel
@@ -14,7 +15,8 @@ void Kernel_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
-	//auto entry = global_router->declare(m_net_id, "kernel", "Kernel_Service v0.1");
+	auto entry = std::string{};
+	if (arg_v > 1) entry = global_router->declare(m_net_id, "kernel", "Kernel_Service v0.1");
 
 	//current time
 	auto now = std::chrono::high_resolution_clock::now();
@@ -156,7 +158,7 @@ void Kernel_Service::run()
 	}
 
 	//forget myself
-	//global_router->forget(entry);
+	if (arg_v > 1) global_router->forget(entry);
 }
 
 void Kernel_Service::exit()
