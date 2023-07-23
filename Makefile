@@ -64,9 +64,8 @@ ifeq ($(OS),Darwin)
 		-framework IOKit \
 		-framework Security \
 		$(shell sdl2-config --libs) \
-		$(shell brew --cellar)/libusb/1.0.26/lib/libusb-1.0.a
-endif
-ifeq ($(OS),Linux)
+		$(shell brew --cellar libusb)/1.0.26/lib/libusb-1.0.a
+else
 	c++ -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
@@ -81,9 +80,8 @@ ifeq ($(OS),Darwin)
 		-framework IOKit \
 		-framework Security \
 		$(shell sdl2-config --libs) \
-		$(shell brew --cellar)/libusb/1.0.26/lib/libusb-1.0.a
-endif
-ifeq ($(OS),Linux)
+		$(shell brew --cellar libusb)/1.0.26/lib/libusb-1.0.a
+else
 	c++ -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
@@ -98,9 +96,8 @@ ifeq ($(OS),Darwin)
 		-framework IOKit \
 		-framework Security \
 		$(shell sdl2-config --libs) \
-		$(shell brew --cellar)/libusb/1.0.26/lib/libusb-1.0.a
-endif
-ifeq ($(OS),Linux)
+		$(shell brew --cellar libusb)/1.0.26/lib/libusb-1.0.a
+else
 	c++ -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
@@ -108,6 +105,16 @@ ifeq ($(OS),Linux)
 endif
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp
+ifeq ($(OS),Darwin)
+ifeq ($(GUI),fb)
+	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I$(shell brew --prefix)/include/libusb-1.0/
+else
+	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I$(shell brew --prefix)/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags)
+endif
+else
 ifeq ($(GUI),fb)
 	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
 		-I/usr/local/include/libusb-1.0/
@@ -116,8 +123,19 @@ else
 		-I/usr/local/include/libusb-1.0/ \
 		$(shell sdl2-config --cflags)
 endif
+endif
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+ifeq ($(OS),Darwin)
+ifeq ($(GUI),fb)
+	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I$(shell brew --prefix)/include/libusb-1.0/
+else
+	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
+		-I$(shell brew --prefix)/include/libusb-1.0/ \
+		$(shell sdl2-config --cflags)
+endif
+else
 ifeq ($(GUI),fb)
 	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
 		-I/usr/local/include/libusb-1.0/
@@ -125,6 +143,7 @@ else
 	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
 		-I/usr/local/include/libusb-1.0/ \
 		$(shell sdl2-config --cflags)
+endif
 endif
 
 clean:
