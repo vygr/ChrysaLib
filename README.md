@@ -22,7 +22,7 @@ and go offline, things just keep on keeping on !
 
 ### Linux via apt-get
 
-`sudo apt-get install libasio-dev libsdl2-dev`
+`sudo apt-get install libasio-dev libsdl2-dev libudev-dev autoconf`
 
 `libusb`
 
