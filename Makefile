@@ -108,11 +108,11 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp
 ifeq ($(OS),Darwin)
 ifeq ($(GUI),fb)
 	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
-		-I$(shell brew --prefix asio)/include/asio \
+		-I$(shell brew --prefix asio)/include/ \
 		-I$(shell brew --prefix libusb)/include/libusb-1.0/
 else
 	c++ -c -o $@ $< $(CFLAGS) $(CPPFLAGS) -D_HOST_GUI=$(HOST_GUI) \
-		-I$(shell brew --prefix asio)/include/asio \
+		-I$(shell brew --prefix asio)/include/ \
 		-I$(shell brew --prefix libusb)/include/libusb-1.0/ \
 		$(shell sdl2-config --cflags)
 endif
@@ -131,11 +131,11 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 ifeq ($(OS),Darwin)
 ifeq ($(GUI),fb)
 	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
-		-I$(shell brew --prefix asio)/include/asio \
+		-I$(shell brew --prefix asio)/include/ \
 		-I$(shell brew --prefix libusb)/include/libusb-1.0/
 else
 	cc -c -o $@ $< $(CFLAGS) -D_HOST_GUI=$(HOST_GUI) \
-		-I$(shell brew --prefix asio)/include/asio \
+		-I$(shell brew --prefix asio)/include/ \
 		-I$(shell brew --prefix libusb)/include/libusb-1.0/ \
 		$(shell sdl2-config --cflags)
 endif
