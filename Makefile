@@ -80,7 +80,7 @@ ifeq ($(OS),Darwin)
 		-framework IOKit \
 		-framework Security \
 		$(shell sdl2-config --libs) \
-		$(shell brew --cellar libusb)/1.0.26/lib/libusb-1.0.a
+		$(shell brew --prefix libusb)/lib/libusb-1.0.a
 else
 	c++ -o $@ $^ \
 		-pthread \
@@ -96,7 +96,7 @@ ifeq ($(OS),Darwin)
 		-framework IOKit \
 		-framework Security \
 		$(shell sdl2-config --libs) \
-		$(shell brew --cellar libusb)/1.0.26/lib/libusb-1.0.a
+		$(shell brew --prefix libusb)/lib/libusb-1.0.a
 else
 	c++ -o $@ $^ \
 		-pthread \
