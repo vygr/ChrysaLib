@@ -13,7 +13,6 @@ extern uint32_t arg_v;
 ///////////
 
 uint32_t jenkins_hash(const uint8_t *key, size_t len);
-void obfuscate(uint8_t *key, size_t len);
 
 std::string get_usb_dev_inst_path(libusb_device *device)
 {
@@ -166,12 +165,11 @@ void USB_Link::close()
 //send msg header and body down the link
 bool USB_Link::send(const std::shared_ptr<Msg> &msg)
 {
-	//pack msg into send buffer, calculate the hash and obfuscate
+	//pack msg into send buffer, calculate the hash
 	memcpy(&m_send_buf.m_dev_id, &global_router->get_node_id(), sizeof(Node_ID));
 	memcpy((uint8_t*)&m_send_buf.m_msg_header, &msg->m_header, sizeof(Msg_Header));
 	memcpy(m_send_buf.m_msg_body, msg->begin() + msg->m_header.m_data_offset, msg->m_header.m_frag_length);
 	m_send_buf.m_hash = jenkins_hash((uint8_t*)&m_send_buf.m_dev_id, offsetof(Link_Buf, m_msg_body) - offsetof(Link_Buf, m_dev_id) + msg->m_header.m_frag_length);
-	obfuscate((uint8_t*)&m_send_buf, offsetof(Link_Buf, m_msg_body) + msg->m_header.m_frag_length);
 
 	//send the buffer down the link
 	auto error = 0;
@@ -198,8 +196,7 @@ std::shared_ptr<Msg> USB_Link::receive()
 	} while (m_running && error != LIBUSB_SUCCESS && error != LIBUSB_ERROR_NO_DEVICE);
 	if (error != LIBUSB_SUCCESS) return nullptr;
 
-	//un-obfuscate and calculate the hash
-	obfuscate((uint8_t*)&m_receive_buf, len);
+	//calculate the hash
 	auto hash = jenkins_hash((uint8_t*)&m_receive_buf.m_dev_id, len - offsetof(Link_Buf, m_dev_id));
 	if (hash != m_receive_buf.m_hash)
 	{
