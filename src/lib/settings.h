@@ -5,8 +5,9 @@
 
 //max mailbox id
 const uint32_t MAX_ID = 4294967295;
-//maximum packet size
-const uint32_t MAX_PACKET_SIZE = 4096;
+//maximum packet size, should match ChrysaLisp lk_data_size
+//if your going to integrate things !
+const uint32_t MAX_PACKET_SIZE = 4056;
 //number of file chunks that can be in flight
 const uint32_t FILE_CHUNK_WINDOW_SIZE = 32;
 //ip link server port
