@@ -1,6 +1,7 @@
 #include "../../lib/services/kernel_service.h"
 #include "../../lib/links/ip_link.h"
 #include "../../lib/links/usb_link.h"
+#include "../../lib/links/shm_link.h"
 #include <iostream>
 #include <sstream>
 
@@ -20,9 +21,10 @@ void ss_reset(std::stringstream &ss, std::string s)
 
 int32_t main(int32_t argc, char *argv[])
 {
-	//process comand args
+	//process command args
 	std::string arg_ip;
 	std::string arg_usb;
+	std::string arg_shm;
 	auto arg_t = 0U;
 	std::vector<std::string> arg_dial;
 	std::stringstream ss;
@@ -35,6 +37,7 @@ int32_t main(int32_t argc, char *argv[])
 			while (!opt.empty() && opt[0] == '-') opt.erase(0, 1);
 			if (opt == "ip") arg_ip = "server";
 			else if (opt == "usb") arg_usb = "on";
+			else if (opt == "shmem") arg_shm = "on";
 			else if (opt == "t")
 			{
 				if (++i >= argc) goto help;
@@ -57,6 +60,7 @@ int32_t main(int32_t argc, char *argv[])
 				std::cout << "-t ms:    exit timeout, default 0, ie never\n";
 				std::cout << "-usb:     start the usb link manager\n";
 				std::cout << "-ip:      start the ip link manager server\n";
+				std::cout << "-shmem:   start the shmem link manager server\n";
 				exit(0);
 			}
 		}
@@ -75,6 +79,7 @@ int32_t main(int32_t argc, char *argv[])
 	std::shared_ptr<Kernel_Service> m_kernel;
 	std::unique_ptr<USB_Link_Manager> m_usb_link_manager;
 	std::unique_ptr<IP_Link_Manager> m_ip_link_manager;
+	std::unique_ptr<SHM_Link_Manager> m_shm_link_manager;
 
 	//startup, kernel is first service so it gets Mailbox_ID 0
 	std::cout << std::endl;
@@ -88,6 +93,12 @@ int32_t main(int32_t argc, char *argv[])
 		if (arg_v > 1) std::cout << "Starting USB link manager" << std::endl;
 		m_usb_link_manager = std::make_unique<USB_Link_Manager>();
 		m_usb_link_manager->start_thread();
+	}
+	if (arg_shm != "")
+	{
+		if (arg_v > 1) std::cout << "Starting Shmem link manager" << std::endl;
+		m_shm_link_manager = std::make_unique<SHM_Link_Manager>();
+		m_shm_link_manager->start_thread();
 	}
 	if (arg_ip != "" || !arg_dial.empty())
 	{
@@ -138,9 +149,11 @@ int32_t main(int32_t argc, char *argv[])
 	}
 
 	//shutdown
+	if (m_shm_link_manager) m_shm_link_manager->stop_thread();
 	if (m_usb_link_manager) m_usb_link_manager->stop_thread();
 	if (m_ip_link_manager) m_ip_link_manager->stop_thread();
 	m_kernel->stop_thread();
+	if (m_shm_link_manager) m_shm_link_manager->join_thread();
 	if (m_usb_link_manager) m_usb_link_manager->join_thread();
 	if (m_ip_link_manager) m_ip_link_manager->join_thread();
 	m_kernel->join_thread();

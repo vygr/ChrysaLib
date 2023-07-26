@@ -7,6 +7,10 @@
 
 #include <inttypes.h>
 
+//hard values for now matching sys/link/class.inc
+const uint32_t lk_data_size = 4056;
+const uint32_t lk_page_size = 4096;
+
 enum
 {
 	mmap_data,
@@ -61,10 +65,6 @@ struct stamp
 	uint32_t m_total_length;
 	uint32_t m_pad;
 };
-
-//hard values for now matching sys/link/class.inc
-const uint32_t lk_data_size = 4056;
-const uint32_t lk_page_size = 4096;
 
 enum
 {
