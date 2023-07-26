@@ -10,10 +10,10 @@
 struct Msg_Header
 {
 	Msg_Header() {}
-	Msg_Header(uint32_t total_len)
-		: m_frag_length(total_len)
-		, m_total_length(total_len)
+	Msg_Header(uint32_t frag_len)
+		: m_frag_length(frag_len)
 	{}
+	//only use by link drivers !
 	Msg_Header(const Msg_Header &header)
 		: m_dest(header.m_dest)
 		, m_src(header.m_src)
@@ -21,7 +21,14 @@ struct Msg_Header
 		, m_frag_offset(header.m_frag_offset)
 		, m_total_length(header.m_total_length)
 	{}
-	Msg_Header(const Net_ID &dst, const Net_ID &src, uint32_t total_len, uint32_t frag_len, uint32_t frag_offset)
+	//only use to create received parcel !
+	Msg_Header(uint32_t total_len, uint32_t frag_len)
+		: m_frag_length(frag_len)
+		, m_total_length(total_len)
+	{}
+	//only use to create parcel fragments !
+	Msg_Header(const Net_ID &dst, const Net_ID &src,
+			uint32_t total_len, uint32_t frag_len, uint32_t frag_offset)
 		: m_dest(dst)
 		, m_src(src)
 		, m_frag_length(frag_len)
@@ -56,23 +63,31 @@ public:
 		: m_header((uint32_t)data->size())
 		, m_data(data)
 	{}
-	Msg(std::shared_ptr<std::string> data, const Net_ID &dst, const Net_ID &src, uint32_t frag_len, uint32_t frag_offset)
-		: m_header(dst, src, (uint32_t)data->size(), frag_len, frag_offset)
-		, m_data(data)
-	{}
 	//the fill constructors used here wastes time, need to work out how to
 	//tell C++ to allocate the buffer but not bother to zero it !
-	Msg(size_t length)
-		: m_header((uint32_t)length)
-		, m_data(std::make_shared<std::string>(length, '\0'))
+	Msg(uint32_t frag_len)
+		: m_header(frag_len)
+		, m_data(std::make_shared<std::string>(frag_len, '\0'))
 	{}
+	//only use by link drivers !
 	Msg(const Msg_Header &header, const uint8_t *buf)
 		: m_header(header)
 		, m_data(std::make_shared<std::string>((const char*)buf, header.m_frag_length))
 	{}
+	//only use to create received parcel !
+	Msg(uint32_t total_len, uint32_t frag_len)
+		: m_header(total_len, frag_len)
+		, m_data(std::make_shared<std::string>(total_len, '\0'))
+	{}
+	//only use to create parcel fragments !
+	Msg(std::shared_ptr<std::string> data, const Net_ID &dst, const Net_ID &src,
+			uint32_t total_len, uint32_t frag_len, uint32_t frag_offset)
+		: m_header(dst, src, total_len, frag_len, frag_offset)
+		, m_data(data)
+	{}
 	//can be compared ! Very important when using mbox->filter() method to roll up etc
 	bool operator==(const Msg &p) const { return *m_data == *p.m_data; }
-	//return the begining and end of the body data
+	//return the beginning and end of the body data
 	auto begin() { return m_data->size() ? &(*m_data->begin()) : nullptr; }
 	auto end() { return begin() + m_data->size(); }
 	//set destination Net_ID, the delivery address
@@ -81,14 +96,14 @@ public:
 	auto append(const std::string &data)
 	{
 		m_data->append(data);
-		m_header.m_frag_length = m_header.m_total_length = (uint32_t)m_data->size();
+		m_header.m_frag_length = (uint32_t)m_data->size();
 		return this;
 	}
 	//append some raw bytes to the body data
 	auto append(const char *data, uint32_t len)
 	{
 		m_data->append(data, len);
-		m_header.m_frag_length = m_header.m_total_length = (uint32_t)m_data->size();
+		m_header.m_frag_length = (uint32_t)m_data->size();
 		return this;
 	}
 	//msg info

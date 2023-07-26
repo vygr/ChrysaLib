@@ -1,6 +1,7 @@
 #ifndef LINK_H
 #define LINK_H
 
+#include "../../host/pii.h"
 #include "../mail/msg.h"
 #include "../settings.h"
 #include <thread>
@@ -17,7 +18,7 @@ struct Link_Buf
 	uint32_t m_hash = 0;
 	Node_ID m_dev_id;
 	Msg_Header m_msg_header;
-	uint8_t m_msg_body[MAX_PACKET_SIZE] = {0};
+	uint8_t m_msg_body[lk_data_size] = {0};
 };
 
 class Link

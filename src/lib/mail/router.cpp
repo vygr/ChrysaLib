@@ -1,3 +1,4 @@
+#include "../../host/pii.h"
 #include "router.h"
 #include "../settings.h"
 #include "../services/kernel_service.h"
@@ -246,21 +247,21 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		//yes so validate the mbox id
 		auto mbox = validate_no_lock(msg->m_header.m_dest.m_mailbox_id);
 		if (!mbox) return;
-		//is this only a fragment of parcel ?
-		if (msg->m_header.m_frag_length < msg->m_header.m_total_length)
+		//is this only a fragment of a parcel ?
+		if (msg->m_header.m_total_length > msg->m_header.m_frag_length)
 		{
-			//look up parcel, create if not found, parcel.first will be 0 if just created.
+			//look up parcel, create if not found.
 			auto &parcel = m_parcels[msg->m_header.m_src];
 			if (!parcel.m_msg)
 			{
-				//timestamp for purgeing
+				//timestamp for purging
 				auto now = std::chrono::high_resolution_clock::now();
-				parcel = Que_Item{now, std::make_shared<Msg>(msg->m_header.m_total_length)};
+				parcel = Que_Item{now, std::make_shared<Msg>(msg->m_header.m_total_length, msg->m_header.m_total_length)};
 			}
 			//fill in this slice, do we now have it all ?
 			memcpy(parcel.m_msg->begin() + msg->m_header.m_frag_offset, msg->begin(), msg->m_header.m_frag_length);
-			msg->m_header.m_total_length -= msg->m_header.m_frag_length;
-			if (msg->m_header.m_total_length) return;
+			parcel.m_msg->m_header.m_total_length -= msg->m_header.m_frag_length;
+			if (parcel.m_msg->m_header.m_total_length) return;
 			//got it all now, so remove it and post the full message
 			auto src = msg->m_header.m_src;
 			auto dst = msg->m_header.m_dest;
@@ -275,14 +276,15 @@ void Router::send(std::shared_ptr<Msg> &msg)
 	{
 		//going off device, so do we need to break it down to the max packet size ?
 		auto now = std::chrono::high_resolution_clock::now();
-		if (msg->m_header.m_frag_length > MAX_PACKET_SIZE)
+		if (msg->m_header.m_frag_length > lk_data_size)
 		{
 			//yes, ok que msgs that reference slices of the data buffer
 			auto src = alloc_src_no_lock();
+			auto total_size = (uint32_t)msg->m_data->size();
 			for (auto frag_offset = 0u; frag_offset < msg->m_header.m_frag_length;)
 			{
-				auto frag_size = std::min(MAX_PACKET_SIZE, msg->m_header.m_frag_length - frag_offset);
-				m_outgoing_msg_que.emplace_back(Que_Item{now, std::make_shared<Msg>(msg->m_data, msg->m_header.m_dest, src, frag_size, frag_offset)});
+				auto frag_size = std::min(lk_data_size, msg->m_header.m_frag_length - frag_offset);
+				m_outgoing_msg_que.emplace_back(Que_Item{now, std::make_shared<Msg>(msg->m_data, msg->m_header.m_dest, src, total_size, frag_size, frag_offset)});
 				frag_offset += frag_size;
 			}
 		}

@@ -1,3 +1,4 @@
+#include "../../host/pii.h"
 #include "file_service.h"
 #include <fstream>
 #include <iostream>
@@ -83,7 +84,7 @@ void File_Service::run()
 					//with an ack window based flow control
 					auto offset = uint64_t(0);
 					auto num_packets = 0u;
-					auto length = (uint64_t)(MAX_PACKET_SIZE - sizeof(send_file_chunk));
+					auto length = (uint64_t)(lk_data_size - sizeof(send_file_chunk));
 					while (offset < total)
 					{
 						//header
