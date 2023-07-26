@@ -109,7 +109,7 @@ private:
 	std::condition_variable m_cv;
 	const Node_ID m_node_id;
 	Mailbox_ID m_next_parcel_id;
-	std::map<Net_ID, std::pair<uint32_t, Que_Item>> m_parcels;
+	std::map<Net_ID, Que_Item> m_parcels;
 	std::list<Que_Item> m_outgoing_msg_que;
 	std::map<Link*, Node_ID> m_links;
 	std::map<Node_ID, Route> m_routes;

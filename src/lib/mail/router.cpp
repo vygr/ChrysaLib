@@ -251,20 +251,20 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		{
 			//look up parcel, create if not found, parcel.first will be 0 if just created.
 			auto &parcel = m_parcels[msg->m_header.m_src];
-			if (!parcel.second.m_msg)
+			if (!parcel.m_msg)
 			{
 				//timestamp for purgeing
 				auto now = std::chrono::high_resolution_clock::now();
-				parcel.second = Que_Item{now, std::make_shared<Msg>(msg->m_header.m_total_length)};
+				parcel = Que_Item{now, std::make_shared<Msg>(msg->m_header.m_total_length)};
 			}
 			//fill in this slice, do we now have it all ?
-			memcpy(parcel.second.m_msg->begin() + msg->m_header.m_frag_offset, msg->begin(), msg->m_header.m_frag_length);
-			parcel.first += msg->m_header.m_frag_length;
-			if (parcel.first != msg->m_header.m_total_length) return;
+			memcpy(parcel.m_msg->begin() + msg->m_header.m_frag_offset, msg->begin(), msg->m_header.m_frag_length);
+			msg->m_header.m_total_length -= msg->m_header.m_frag_length;
+			if (msg->m_header.m_total_length) return;
 			//got it all now, so remove it and post the full message
 			auto src = msg->m_header.m_src;
 			auto dst = msg->m_header.m_dest;
-			msg = std::move(parcel.second.m_msg);
+			msg = std::move(parcel.m_msg);
 			msg->set_dest(dst);
 			m_parcels.erase(src);
 		}
@@ -375,7 +375,7 @@ void Router::purge_routes()
 	}
 	for (auto itr = begin(m_parcels); itr != end (m_parcels);)
 	{
-		if (now - itr->second.second.m_time >= std::chrono::milliseconds(MAX_PARCEL_AGE))
+		if (now - itr->second.m_time >= std::chrono::milliseconds(MAX_PARCEL_AGE))
 		{
 			itr = m_parcels.erase(itr);
 		}
