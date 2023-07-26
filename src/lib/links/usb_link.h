@@ -48,6 +48,8 @@ protected:
 private:
 	USBDeviceInstance m_device_instance;
 	libusb_device_handle *m_libusb_device_handle;
+	Link_Buf m_send_buf;
+	Link_Buf m_receive_buf;
 };
 
 class USB_Link_Manager : public Link_Manager

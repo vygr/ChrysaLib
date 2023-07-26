@@ -48,8 +48,6 @@ protected:
 	std::thread m_thread_send;
 	std::thread m_thread_receive;
 	Node_ID m_remote_dev_id;
-	Link_Buf m_send_buf;
-	Link_Buf m_receive_buf;
 };
 
 //link managers are responsible for the discovery and management of a link subclass.

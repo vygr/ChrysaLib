@@ -14,6 +14,8 @@ protected:
 	virtual bool send(const std::shared_ptr<Msg> &msg) override;
 	virtual std::shared_ptr<Msg> receive() override;
 private:
+	Link_Buf m_send_buf;
+	Link_Buf m_receive_buf;
 };
 
 class SHM_Link_Manager : public Link_Manager
