@@ -46,8 +46,8 @@ struct Msg_Header
 	//info describing this packet
 	uint32_t m_frag_length = 0;
 	uint32_t m_frag_offset = 0;
-	uint32_t m_data_offset = 0;
 	uint32_t m_total_length = 0;
+	uint32_t m_data_offset = 0;
 };
 
 //message is just a header and body data.
