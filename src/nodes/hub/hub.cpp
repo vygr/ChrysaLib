@@ -37,7 +37,7 @@ int32_t main(int32_t argc, char *argv[])
 			while (!opt.empty() && opt[0] == '-') opt.erase(0, 1);
 			if (opt == "ip") arg_ip = "server";
 			else if (opt == "usb") arg_usb = "on";
-			else if (opt == "shmem") arg_shm = "on";
+			else if (opt == "shm") arg_shm = "on";
 			else if (opt == "t")
 			{
 				if (++i >= argc) goto help;
@@ -60,7 +60,7 @@ int32_t main(int32_t argc, char *argv[])
 				std::cout << "-t ms:    exit timeout, default 0, ie never\n";
 				std::cout << "-usb:     start the usb link manager\n";
 				std::cout << "-ip:      start the ip link manager server\n";
-				std::cout << "-shmem:   start the shmem link manager server\n";
+				std::cout << "-shm:     start the shmem link manager server\n";
 				exit(0);
 			}
 		}
@@ -96,7 +96,7 @@ int32_t main(int32_t argc, char *argv[])
 	}
 	if (arg_shm != "")
 	{
-		if (arg_v > 1) std::cout << "Starting Shmem link manager" << std::endl;
+		if (arg_v > 1) std::cout << "Starting SHMem link manager" << std::endl;
 		m_shm_link_manager = std::make_unique<SHM_Link_Manager>();
 		m_shm_link_manager->start_thread();
 	}
