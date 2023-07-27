@@ -14,7 +14,7 @@ void Link::run_send()
 	while (m_running)
 	{
 		//do we have outgoing messages ?
-		out_msg = global_router->get_next_msg(m_remote_dev_id, std::chrono::milliseconds(LINK_PING_RATE));
+		out_msg = global_router->get_next_msg(m_remote_node_id, std::chrono::milliseconds(LINK_PING_RATE));
 		if (!m_running) break;
 		if (out_msg)
 		{

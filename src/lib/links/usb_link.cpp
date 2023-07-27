@@ -166,10 +166,10 @@ void USB_Link::close()
 bool USB_Link::send(const std::shared_ptr<Msg> &msg)
 {
 	//pack msg into send buffer, calculate the hash
-	memcpy(&m_send_buf.m_dev_id, &global_router->get_node_id(), sizeof(Node_ID));
+	memcpy(&m_send_buf.m_node_id, &global_router->get_node_id(), sizeof(Node_ID));
 	memcpy((uint8_t*)&m_send_buf.m_msg_header, &msg->m_header, sizeof(Msg_Header));
 	memcpy(m_send_buf.m_msg_body, msg->begin() + msg->m_header.m_data_offset, msg->m_header.m_frag_length);
-	m_send_buf.m_hash = jenkins_hash((uint8_t*)&m_send_buf.m_dev_id, offsetof(Link_Buf, m_msg_body) - offsetof(Link_Buf, m_dev_id) + msg->m_header.m_frag_length);
+	m_send_buf.m_hash = jenkins_hash((uint8_t*)&m_send_buf.m_node_id, offsetof(Link_Buf, m_msg_body) - offsetof(Link_Buf, m_node_id) + msg->m_header.m_frag_length);
 
 	//send the buffer down the link
 	auto error = 0;
@@ -197,7 +197,7 @@ std::shared_ptr<Msg> USB_Link::receive()
 	if (error != LIBUSB_SUCCESS) return nullptr;
 
 	//calculate the hash
-	auto hash = jenkins_hash((uint8_t*)&m_receive_buf.m_dev_id, len - offsetof(Link_Buf, m_dev_id));
+	auto hash = jenkins_hash((uint8_t*)&m_receive_buf.m_node_id, len - offsetof(Link_Buf, m_node_id));
 	if (hash != m_receive_buf.m_hash)
 	{
 		//error with crc hash !!!
@@ -211,11 +211,11 @@ std::shared_ptr<Msg> USB_Link::receive()
 	//refresh who we are connected to in a unplug/plug scenario.
 	//if the peer device id changes we need to swap the link on the router !
 	//the software equivelent of pulling the lead out and plugging another one in.
-	if (m_receive_buf.m_dev_id != m_remote_dev_id)
+	if (m_receive_buf.m_node_id != m_remote_node_id)
 	{
-		m_remote_dev_id = m_receive_buf.m_dev_id;
+		m_remote_node_id = m_receive_buf.m_node_id;
 		global_router->sub_link(this);
-		global_router->add_link(this, m_remote_dev_id);
+		global_router->add_link(this, m_remote_node_id);
 	}
 	return msg;
 }
