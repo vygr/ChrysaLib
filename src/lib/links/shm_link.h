@@ -19,18 +19,18 @@ public:
 		, m_name(name)
 	{
 		//open shared memory file
-		m_shmem_handle = pii_open_shared(m_name.data(), sizeof(lk_shmem));
+		m_handle = pii_open_shared(m_name.data(), sizeof(lk_shmem));
 		//map shared object
-		m_shmem = (lk_shmem*)pii_mmap(sizeof(lk_shmem), m_shmem_handle, +mmap_shared);
+		m_shmem = (lk_shmem*)pii_mmap(sizeof(lk_shmem), m_handle, mmap_shared);
 		//put my towel down if seams available
 		if (!m_shmem->m_towel) m_shmem->m_towel = global_router->get_node_id().m_node.m_node1;
 	}
 	virtual ~SHM_Link()
 	{
 		//unmap object
-		pii_munmap(m_shmem, sizeof(lk_shmem), +mmap_shared);
+		pii_munmap(m_shmem, sizeof(lk_shmem), mmap_shared);
 		//close it
-		pii_close_shared(m_name.data(), m_shmem_handle);
+		pii_close_shared(m_name.data(), m_handle);
 	}
 protected:
 	virtual bool send(const std::shared_ptr<Msg> &msg) override;
@@ -42,7 +42,7 @@ private:
 	lk_buf *m_in_start, *m_in_end;
 	lk_buf *m_out_start, *m_out_end;
 	lk_shmem *m_shmem;
-	int64_t m_shmem_handle;
+	int64_t m_handle;
 	const std::string m_name;
 };
 
