@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include "../../host/pii.h"
 #include <string>
 #include <array>
 #include <random>
@@ -41,7 +42,11 @@ struct Node_ID
 		for (auto &c : id.m_id) c = dist(rng);
 		return id;
 	}
-	std::array<uint8_t, 16> m_id = {0};
+	union
+	{
+		std::array<uint8_t, 16> m_id = {0};
+		node_id m_node;
+	};
 };
 
 #endif
