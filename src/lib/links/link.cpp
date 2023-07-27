@@ -25,7 +25,9 @@ void Link::run_send()
 		else
 		{
 			//send a ping to get the Node_ID exchanged
-			send(std::make_shared<Msg>());
+			auto ping = std::make_shared<Msg>();
+			ping->m_header.m_total_length = 0xffffffff;
+			send(ping);
 		}
 	}
 	//post any not sent message back to the router
@@ -40,7 +42,7 @@ void Link::run_receive()
 		//get any msg from the link and send if not a ping
 		if (auto in_msg = receive())
 		{
-			if (in_msg->m_header.m_frag_length) global_router->send(in_msg);
+			if (in_msg->m_header.m_total_length != 0xffffffff) global_router->send(in_msg);
 		}
 		else
 		{

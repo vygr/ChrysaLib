@@ -83,7 +83,7 @@ bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 
 	//send msg to the link
 	m_out->m_peer_node_id = global_router->get_node_id().m_node;
-	m_out->m_task_count = 1000000;
+	m_out->m_task_count = 1000000; //a very big wall !
 	m_out->m_frag_length = msg->m_header.m_frag_length;
 	m_out->m_frag_offset = msg->m_header.m_frag_offset;
 	m_out->m_total_length = msg->m_header.m_total_length;
@@ -122,6 +122,9 @@ std::shared_ptr<Msg> SHM_Link::receive()
 	head.m_total_length = m_in->m_total_length;
 	head.m_dest.m_net = m_in->m_dest;
 	head.m_src.m_net = m_in->m_src;
+	std::cout << "receive frag length: " << head.m_frag_length << std::endl;
+	std::cout << "receive frag offset: " << head.m_frag_offset << std::endl;
+	std::cout << "receive total_length: " << head.m_total_length << std::endl;
 	auto msg = std::make_shared<Msg>(head, (const uint8_t*)m_in->m_data);
 	std::cout << "receive msg" << std::endl;
 
