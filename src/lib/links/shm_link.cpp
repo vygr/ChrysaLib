@@ -62,7 +62,7 @@ void SHM_Link::run_receive()
 	{
 		m_in = &m_shmem->m_chan_1.m_msg0;
 	}
-	m_in_start = m_out;
+	m_in_start = m_in;
 	m_in_end = (lk_buf*)((char*)m_in + sizeof(lk_chan));
 
 	//link driver receive loop
