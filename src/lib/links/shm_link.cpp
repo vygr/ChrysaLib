@@ -73,11 +73,13 @@ void SHM_Link::run_receive()
 bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 {
 	//wait for slot ready
+	std::cout << "send wait" << std::endl;
 	while (m_running && (m_out->m_status == lk_chan_status_busy))
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(LINK_PING_RATE));
 	}
 	if (!m_running) return false;
+	std::cout << "send ready" << std::endl;
 
 	//send msg to the link
 	m_out->m_peer_node_id = global_router->get_node_id().m_node;
@@ -88,11 +90,14 @@ bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 	m_out->m_dest = msg->m_header.m_dest.m_net;
 	m_out->m_src = msg->m_header.m_src.m_net;
 	memcpy(&m_out->m_data, msg->begin() + msg->m_header.m_data_offset, msg->m_header.m_frag_length);
+	std::cout << "send msg" << std::endl;
 
 	//set busy and move on to next buffer
 	m_out->m_status = lk_chan_status_busy;
 	m_out = (lk_buf*)((char*)m_out + sizeof(lk_buf));
 	if (m_out == m_out_end) m_out = m_out_start;
+
+	std::cout << "send busy" << std::endl;
 
 	return true;
 }
@@ -100,11 +105,13 @@ bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 std::shared_ptr<Msg> SHM_Link::receive()
 {
 	//wait for slot ready
+	std::cout << "receive wait" << std::endl;
 	while (m_running && (m_in->m_status == lk_chan_status_ready))
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(LINK_PING_RATE));
 	}
 	if (!m_running) return nullptr;
+	std::cout << "receive ready" << std::endl;
 
 	//receive msg from the link
 	Msg_Header head;
@@ -112,20 +119,25 @@ std::shared_ptr<Msg> SHM_Link::receive()
 	remote.m_node = m_in->m_peer_node_id;
 	head.m_frag_length = m_in->m_frag_length;
 	head.m_frag_offset = m_in->m_frag_offset;
+	head.m_total_length = m_in->m_total_length;
 	head.m_dest.m_net = m_in->m_dest;
 	head.m_src.m_net = m_in->m_src;
 	auto msg = std::make_shared<Msg>(head, (const uint8_t*)m_in->m_data);
+	std::cout << "receive msg" << std::endl;
 
 	//set ready and move on to next buffer
 	m_in->m_status = lk_chan_status_ready;
 	m_in = (lk_buf*)((char*)m_in + sizeof(lk_buf));
 	if (m_in == m_in_end) m_in = m_in_start;
 
+	std::cout << "receive busy" << std::endl;
+
 	//refresh who we are connected to in a unplug/plug scenario.
 	//if the peer node id changes we need to swap the link on the router !
 	//the software equivelent of pulling the lead out and plugging another one in.
 	if (remote != m_remote_node_id)
 	{
+		std::cout << "receive new link" << std::endl;
 		m_remote_node_id = remote;
 		global_router->sub_link(this);
 		global_router->add_link(this, m_remote_node_id);
