@@ -22,14 +22,14 @@ struct Node_ID
 	{
 		auto s = std::string{};
 		s.reserve(m_id.size() * 2);
-		for (auto &c : m_id) s.push_back((c >> 4) + 'a'), s.push_back((c & 0xf) + 'a');
+		for (auto &c : m_id) s.push_back((c & 0xf) + 'a'), s.push_back((c >> 4) + 'a');
 		return s;
 	}
 	static auto from_string(const std::string &s)
 	{
 		Node_ID id;
 		auto itr = begin(s);
-		for (auto &c : id.m_id) c = ((*itr++ - 'a') << 4) + (*itr++ - 'a');
+		for (auto &c : id.m_id) c = (*itr++ - 'a') + ((*itr++ - 'a') << 4);
 		return id;
 	}
 	//create from a strong random pool

@@ -20,7 +20,7 @@ void ss_reset(std::stringstream &ss, std::string s)
 
 int32_t main(int32_t argc, char *argv[])
 {
-	//process comand args
+	//process command args
 	auto arg_t = 0U;
 	std::vector<std::string> arg_dial;
 	std::stringstream ss;

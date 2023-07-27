@@ -29,14 +29,14 @@ struct Mailbox_ID
 	{
 		auto s = std::string{};
 		s.reserve(sizeof(m_id) * 2);
-		for (auto i = 32 - 4; i >= 0; i -= 4) s.push_back(((m_id >> i) & 0xf) + 'a');
+		for (auto i = 0; i < 32; i += 4) s.push_back(((m_id >> i) & 0xf) + 'a');
 		return s;
 	}
 	static auto from_string(const std::string &s)
 	{
 		Mailbox_ID id;
 		auto itr = begin(s);
-		for (auto i = 32 - 4; i >= 0; i -= 4) id.m_id += (*itr++ - 'a') << i;
+		for (auto i = 0; i < 32; i += 4) id.m_id += (*itr++ - 'a') << i;
 		return id;
 	}
 	uint32_t m_id = 0;

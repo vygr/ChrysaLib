@@ -134,10 +134,9 @@ int32_t main(int32_t argc, char *argv[])
 				for (auto &e : entries)
 				{
 					auto fields = split_string(e, ",");
-					std::cout << "Service: '" << fields[0];
-					std::cout << "', Info: '" << fields[2];
-					std::cout << "', Net_ID: '" << fields[1];
-					std::cout << "'" << std::endl;
+					std::cout << fields[0] << ", ";
+					std::cout << fields[1] << ", ";
+					std::cout << fields[2] << std::endl;
 				}
 			}
 		}
