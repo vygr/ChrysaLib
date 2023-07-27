@@ -220,7 +220,7 @@ std::shared_ptr<Msg> IP_Link::receive()
 	auto msg = std::make_shared<Msg>(m_receive_buf.m_msg_header, m_receive_buf.m_msg_body);
 
 	//refresh who we are connected to in a unplug/plug scenario.
-	//if the peer device id changes we need to swap the link on the router !
+	//if the peer node id changes we need to swap the link on the router !
 	//the software equivelent of pulling the lead out and plugging another one in.
 	if (m_receive_buf.m_node_id != m_remote_node_id)
 	{

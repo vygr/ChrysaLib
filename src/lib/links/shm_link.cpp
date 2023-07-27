@@ -122,7 +122,7 @@ std::shared_ptr<Msg> SHM_Link::receive()
 	if (m_in == m_in_end) m_in = m_in_start;
 
 	//refresh who we are connected to in a unplug/plug scenario.
-	//if the peer device id changes we need to swap the link on the router !
+	//if the peer node id changes we need to swap the link on the router !
 	//the software equivelent of pulling the lead out and plugging another one in.
 	if (remote != m_remote_node_id)
 	{
