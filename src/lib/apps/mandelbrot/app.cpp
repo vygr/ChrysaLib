@@ -45,7 +45,7 @@ void Mandelbrot_App::run()
 
 	//select and init workers
 	m_select = alloc_select(select_size);
-	m_entry = global_router->declare(m_select[select_worker], "mandel_worker", "Mandelbrot v0.01");
+	m_entry = global_router->declare(m_select[select_worker], "MANDEL_WORKER", "Mandelbrot v0.01");
 	reset();
 
 	//event loop

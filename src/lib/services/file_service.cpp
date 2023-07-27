@@ -19,7 +19,7 @@ void File_Service::run()
 {
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
-	auto entry = global_router->declare(m_net_id, "file_service", "File Service v0.1");
+	auto entry = global_router->declare(m_net_id, "FILE_SERVICE", "File Service v0.1");
 
 	//event loop
 	while (m_running)

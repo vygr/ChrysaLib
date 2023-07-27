@@ -45,7 +45,7 @@ void Raymarch_App::run()
 
 	//select and init workers
 	m_select = alloc_select(select_size);
-	m_entry = global_router->declare(m_select[select_worker], "raymarch_worker", "Raymarch v0.01");
+	m_entry = global_router->declare(m_select[select_worker], "RAYMARCH_WORKER", "Raymarch v0.01");
 	reset();
 
 	//event loop
