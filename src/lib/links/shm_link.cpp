@@ -16,6 +16,8 @@ void SHM_Link_Manager::run()
 	//start up a new link
 	m_links.emplace_back(std::make_unique<SHM_Link>("000-000"));
 	m_links.back()->start_threads();
+	m_links.emplace_back(std::make_unique<SHM_Link>("001-001"));
+	m_links.back()->start_threads();
 
 	while (m_running)
 	{
