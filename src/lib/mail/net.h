@@ -48,8 +48,8 @@ struct Net_ID
 	{
 		return m_node_id.to_string() + m_mailbox_id.to_string();
 	}
-	Node_ID m_node_id;
 	Mailbox_ID m_mailbox_id;
+	Node_ID m_node_id;
 };
 
 #endif
