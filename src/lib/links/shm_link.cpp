@@ -35,17 +35,17 @@ void SHM_Link_Manager::run()
 
 void SHM_Link::run_send()
 {
-	// //assign tx channel
-	// if (m_shmem->m_towel == global_router->get_node_id().m_node.m_node1)
-	// {
-	// 	m_out = &m_shmem->m_chan_1.m_msg0;
-	// }
-	// else
-	// {
-	// 	m_out = &m_shmem->m_chan_2.m_msg0;
-	// }
-	// m_out_start = m_out;
-	// m_out_end = (lk_buf*)((char*)m_out + sizeof(lk_chan));
+	//assign tx channel
+	if (m_shmem->m_towel == global_router->get_node_id().m_node_id.m_node1)
+	{
+		m_out = &m_shmem->m_chan_1.m_msg0;
+	}
+	else
+	{
+		m_out = &m_shmem->m_chan_2.m_msg0;
+	}
+	m_out_start = m_out;
+	m_out_end = (lk_buf*)((char*)m_out + sizeof(lk_chan));
 
 	//link driver send loop
 	Link::run_send();
@@ -54,16 +54,16 @@ void SHM_Link::run_send()
 void SHM_Link::run_receive()
 {
 	//assign rx channel
-	// if (m_shmem->m_towel == global_router->get_node_id().m_node.m_node1)
-	// {
-	// 	m_in = &m_shmem->m_chan_2.m_msg0;
-	// }
-	// else
-	// {
-	// 	m_in = &m_shmem->m_chan_1.m_msg0;
-	// }
-	// m_in_start = m_in;
-	// m_in_end = (lk_buf*)((char*)m_in + sizeof(lk_chan));
+	if (m_shmem->m_towel == global_router->get_node_id().m_node_id.m_node1)
+	{
+		m_in = &m_shmem->m_chan_2.m_msg0;
+	}
+	else
+	{
+		m_in = &m_shmem->m_chan_1.m_msg0;
+	}
+	m_in_start = m_in;
+	m_in_end = (lk_buf*)((char*)m_in + sizeof(lk_chan));
 
 	//link driver receive loop
 	Link::run_receive();
@@ -75,7 +75,7 @@ bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 	//wait for slot ready
 	while (m_running && (m_out->m_status == lk_chan_status_busy))
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(LINK_PING_RATE));
+		std::this_thread::sleep_for(std::chrono::milliseconds(SELECT_POLLING_RATE));
 	}
 	if (!m_running) return false;
 
@@ -106,7 +106,7 @@ std::shared_ptr<Msg> SHM_Link::receive()
 	//wait for slot ready
 	while (m_running && (m_in->m_status == lk_chan_status_ready))
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(LINK_PING_RATE));
+		std::this_thread::sleep_for(std::chrono::milliseconds(SELECT_POLLING_RATE));
 	}
 	if (!m_running) return nullptr;
 
