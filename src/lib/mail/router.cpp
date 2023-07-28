@@ -111,7 +111,7 @@ void Router::run()
 		//flood service directory to the network
 		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_directory), '\0');
 		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
-		event_body->m_evt = Kernel_Service::evt_directory;
+		event_body->m_evt = Kernel_Service::evt_ping;
 		event_body->m_src = global_router->alloc_src();
 		event_body->m_via = global_router->get_node_id();
 		event_body->m_hops = 0;

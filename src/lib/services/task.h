@@ -25,7 +25,7 @@ public:
 		//free the task mailbox
 		global_router->free(m_net_id);
 	}
-	//responce handling
+	//response handling
 	void start_thread();
 	void stop_thread();
 	void join_thread();

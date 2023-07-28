@@ -17,11 +17,11 @@ public:
 	enum
 	{
 		evt_exit, //must be first !
-		evt_directory,
+		evt_callback,
+		evt_ping,
 		evt_start_task,
 		evt_stop_task,
 		evt_join_task,
-		evt_callback,
 		evt_timed_mail,
 	};
 	struct Event_directory : public Event

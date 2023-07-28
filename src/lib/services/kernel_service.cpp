@@ -43,7 +43,7 @@ void Kernel_Service::run()
 				m_running = false;
 				break;
 			}
-			case evt_directory:
+			case evt_ping:
 			{
 				//directory update, flood filling
 				if (global_router->update_route(*msg->m_data)
