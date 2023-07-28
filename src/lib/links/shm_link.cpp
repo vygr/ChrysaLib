@@ -80,17 +80,17 @@ bool SHM_Link::send(const std::shared_ptr<Msg> &msg)
 	if (!m_running) return false;
 
 	//send msg to the link
-	// m_out->m_peer_node_id = global_router->get_node_id().m_node;
-	// m_out->m_task_count = 1000000; //a very big wall !
-	// m_out->m_frag_length = msg->m_header.m_frag_length;
-	// m_out->m_frag_offset = msg->m_header.m_frag_offset;
-	// m_out->m_total_length = msg->m_header.m_total_length;
-	// m_out->m_dest.m_mbox_id = msg->m_header.m_dest.m_mailbox_id.m_id;
-	// m_out->m_dest.m_node_id.m_node1 = msg->m_header.m_dest.m_node_id.m_node.m_node1;
-	// m_out->m_dest.m_node_id.m_node2 = msg->m_header.m_dest.m_node_id.m_node.m_node2;
-	// m_out->m_src.m_mbox_id = msg->m_header.m_src.m_mailbox_id.m_id;
-	// m_out->m_src.m_node_id.m_node1 = msg->m_header.m_src.m_node_id.m_node.m_node1;
-	// m_out->m_src.m_node_id.m_node2 = msg->m_header.m_src.m_node_id.m_node.m_node2;
+	m_out->m_peer_node_id = global_router->get_node_id().m_node_id;
+	m_out->m_task_count = 1000000; //a very big wall !
+	m_out->m_frag_length = msg->m_header.m_frag_length;
+	m_out->m_frag_offset = msg->m_header.m_frag_offset;
+	m_out->m_total_length = msg->m_header.m_total_length;
+	m_out->m_dest.m_mbox_id = msg->m_header.m_dest.m_mailbox_id.m_id;
+	m_out->m_dest.m_node_id.m_node1 = msg->m_header.m_dest.m_node_id.m_node_id.m_node1;
+	m_out->m_dest.m_node_id.m_node2 = msg->m_header.m_dest.m_node_id.m_node_id.m_node2;
+	m_out->m_src.m_mbox_id = msg->m_header.m_src.m_mailbox_id.m_id;
+	m_out->m_src.m_node_id.m_node1 = msg->m_header.m_src.m_node_id.m_node_id.m_node1;
+	m_out->m_src.m_node_id.m_node2 = msg->m_header.m_src.m_node_id.m_node_id.m_node2;
 	memcpy(&m_out->m_data, msg->begin() + msg->m_header.m_data_offset, msg->m_header.m_frag_length);
 
 	//set busy and move on to next buffer
@@ -113,16 +113,16 @@ std::shared_ptr<Msg> SHM_Link::receive()
 	//receive msg from the link
 	Msg_Header head;
 	Node_ID remote;
-	// remote.m_node = m_in->m_peer_node_id;
-	// head.m_frag_length = m_in->m_frag_length;
-	// head.m_frag_offset = m_in->m_frag_offset;
-	// head.m_total_length = m_in->m_total_length;
-	// head.m_dest.m_mailbox_id.m_id = m_in->m_dest.m_mbox_id;
-	// head.m_dest.m_node_id.m_node.m_node1 = m_in->m_dest.m_node_id.m_node1;
-	// head.m_dest.m_node_id.m_node.m_node2 = m_in->m_dest.m_node_id.m_node2;
-	// head.m_src.m_mailbox_id.m_id = m_in->m_src.m_mbox_id;
-	// head.m_src.m_node_id.m_node.m_node1 = m_in->m_src.m_node_id.m_node1;
-	// head.m_src.m_node_id.m_node.m_node2 = m_in->m_src.m_node_id.m_node2;
+	remote.m_node_id = m_in->m_peer_node_id;
+	head.m_frag_length = m_in->m_frag_length;
+	head.m_frag_offset = m_in->m_frag_offset;
+	head.m_total_length = m_in->m_total_length;
+	head.m_dest.m_mailbox_id.m_id = m_in->m_dest.m_mbox_id;
+	head.m_dest.m_node_id.m_node_id.m_node1 = m_in->m_dest.m_node_id.m_node1;
+	head.m_dest.m_node_id.m_node_id.m_node2 = m_in->m_dest.m_node_id.m_node2;
+	head.m_src.m_mailbox_id.m_id = m_in->m_src.m_mbox_id;
+	head.m_src.m_node_id.m_node_id.m_node1 = m_in->m_src.m_node_id.m_node1;
+	head.m_src.m_node_id.m_node_id.m_node2 = m_in->m_src.m_node_id.m_node2;
 	auto msg = std::make_shared<Msg>(head, (const uint8_t*)m_in->m_data);
 
 	//set ready and move on to next buffer
