@@ -91,7 +91,7 @@ int32_t main(int32_t argc, char *argv[])
 	auto start = std::chrono::high_resolution_clock::now();
 	for (;;)
 	{
-		//could do somthing here, like monitoring etc
+		//could do something here, like monitoring etc
 
 		//are we done ?
 		auto finish = std::chrono::high_resolution_clock::now();

@@ -40,16 +40,16 @@ struct Net_ID
 	static auto from_string(const std::string &s)
 	{
 		Net_ID id;
-		id.m_mailbox_id = Mailbox_ID::from_string(s.substr(0,8));
-		id.m_node_id = Node_ID::from_string(s.substr(8,24));
+		id.m_node_id = Node_ID::from_string(s.substr(0,32));
+		id.m_mailbox_id = Mailbox_ID::from_string(s.substr(32,16));
 		return id;
 	}
 	auto to_string() const
 	{
-		return m_mailbox_id.to_string() + m_node_id.to_string();
+		return m_node_id.to_string() + m_mailbox_id.to_string();
 	}
-	Mailbox_ID m_mailbox_id;
 	Node_ID m_node_id;
+	Mailbox_ID m_mailbox_id;
 };
 
 #endif

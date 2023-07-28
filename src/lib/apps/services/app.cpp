@@ -127,11 +127,6 @@ void Services_App::run()
 			//any changes to service directory
 			Kernel_Service::timed_mail(select[select_timer], std::chrono::milliseconds(100), 0);
 			auto entries = global_router->enquire("");
-			// //filter out "kernel" services as they all have one.
-			// entries.erase(std::remove_if(begin(entries), end(entries), [&] (auto &s)
-			// {
-			// 	return strncmp(s.c_str(), "kernel,", 7) == 0;
-			// }), end(entries));
 			if (entries != old_entries)
 			{
 				old_entries = entries;

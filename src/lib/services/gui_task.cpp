@@ -13,7 +13,7 @@ Net_ID &GUI_Task::my_gui()
 {
 	//return my GUI node
 	if (m_gui_id != Net_ID()) return m_gui_id;
-	auto filter = "gui," + global_router->get_node_id().to_string();
+	auto filter = "GUI_SERVICE," + global_router->get_node_id().to_string();
 	auto services = global_router->enquire(filter);
 	if (services.empty()) return m_gui_id;
 	auto fields = split_string(services[0], ",");

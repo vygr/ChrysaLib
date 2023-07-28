@@ -199,7 +199,7 @@ void Raymarch_App::reset()
 	m_select[select_reply] = global_router->alloc();
 
 	//create farm, will kill old one
-	m_farm = std::make_unique<Farm>("raymarch_worker",
+	m_farm = std::make_unique<Farm>("RAYMARCH_WORKER",
 		JOB_LIMIT,
 		std::chrono::milliseconds(JOB_TIMEOUT),
 		[&] (auto &worker, std::shared_ptr<Msg> job)
