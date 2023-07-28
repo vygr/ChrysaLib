@@ -1,7 +1,6 @@
 #ifndef NET_H
 #define NET_H
 
-#include "../../host/pii.h"
 #include "node.h"
 #include "mailbox.h"
 
@@ -49,15 +48,8 @@ struct Net_ID
 	{
 		return m_mailbox_id.to_string() + m_node_id.to_string();
 	}
-	union
-	{
-		struct
-		{
-			Mailbox_ID m_mailbox_id;
-			Node_ID m_node_id;
-		};
-		net_id m_net;
-	};
+	Mailbox_ID m_mailbox_id;
+	Node_ID m_node_id;
 };
 
 #endif

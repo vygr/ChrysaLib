@@ -23,7 +23,7 @@ public:
 		//map shared object
 		m_shmem = (lk_shmem*)pii_mmap(sizeof(lk_shmem), m_handle, mmap_shared);
 		//put my towel down if seams available
-		if (!m_shmem->m_towel) m_shmem->m_towel = global_router->get_node_id().m_node.m_node1;
+//		if (!m_shmem->m_towel) m_shmem->m_towel = global_router->get_node_id().m_node.m_node1;
 	}
 	virtual ~SHM_Link()
 	{
