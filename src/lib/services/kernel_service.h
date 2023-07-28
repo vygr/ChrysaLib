@@ -31,10 +31,11 @@ public:
 	};
 	struct Event_ping : public Event
 	{
-		Net_ID m_src;
 		Node_ID m_via;
+		Node_ID m_origin;
+		uint32_t m_session;
 		uint32_t m_hops;
-		char m_data[];
+		char m_services[];
 	};
 	struct Event_start_task : public Event
 	{

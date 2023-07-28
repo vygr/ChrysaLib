@@ -112,8 +112,9 @@ void Router::run()
 		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_ping), '\0');
 		auto event_body = (Kernel_Service::Event_ping*)&*(body->begin());
 		event_body->m_evt = Kernel_Service::evt_ping;
-		event_body->m_src = global_router->alloc_src();
+		event_body->m_origin = global_router->get_node_id();
 		event_body->m_via = global_router->get_node_id();
+		event_body->m_session = global_router->alloc_session();
 		event_body->m_hops = 0;
 		{
 			std::lock_guard<std::mutex> l(m_mutex);
@@ -171,15 +172,15 @@ bool Router::update_dir(const std::string &body)
 	auto event_body = (Kernel_Service::Event_ping*)&(*begin(body));
 	auto event_body_end = &(*begin(body)) + body.size();
 	std::lock_guard<std::mutex> l(m_mutex);
-	auto &dir_struct = m_directory[event_body->m_src.m_node_id];
+	auto &dir_struct = m_directory[event_body->m_origin];
 	//not a new session, so ignore !
-	if (event_body->m_src.m_mailbox_id.m_id <= dir_struct.m_session) return false;
-	dir_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
+	if (event_body->m_session <= dir_struct.m_session) return false;
+	dir_struct.m_session = event_body->m_session;
 	dir_struct.m_time_modified = std::chrono::high_resolution_clock::now();
 	dir_struct.m_services.clear();
 	//split the body into separate service entry strings.
 	//insert them into the directory.
-	for (auto &entry : split_string(std::string((const char*)event_body->m_data, event_body_end), "\n"))
+	for (auto &entry : split_string(std::string((const char*)event_body->m_services, event_body_end), "\n"))
 	{
 		dir_struct.m_services.insert(entry);
 	}
@@ -279,7 +280,7 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		if (msg->m_header.m_frag_length > lk_data_size)
 		{
 			//yes, ok que msgs that reference slices of the data buffer
-			auto src = alloc_src_no_lock();
+			Net_ID src{m_node_id, alloc_session_no_lock()};
 			auto total_size = (uint32_t)msg->m_data->size();
 			for (auto frag_offset = 0u; frag_offset < msg->m_header.m_frag_length;)
 			{
@@ -304,17 +305,17 @@ std::shared_ptr<Msg> Router::read(const Net_ID &id)
 	return mbox->read();
 }
 
-Net_ID Router::alloc_src_no_lock()
+uint32_t Router::alloc_session_no_lock()
 {
-	auto src = Net_ID(m_node_id, m_next_parcel_id);
-	m_next_parcel_id.m_id++;
-	return src;
+	auto s = m_next_parcel_id;
+	m_next_parcel_id++;
+	return s;
 }
 
-Net_ID Router::alloc_src()
+uint32_t Router::alloc_session()
 {
 	std::lock_guard<std::mutex> l(m_mutex);
-	return alloc_src_no_lock();
+	return alloc_session_no_lock();
 }
 
 bool Router::update_route(const std::string &body)
@@ -322,13 +323,13 @@ bool Router::update_route(const std::string &body)
 	//update our routing table based on this ping message body
 	auto event_body = (Kernel_Service::Event_ping*)&(*begin(body));
 	std::lock_guard<std::mutex> l(m_mutex);
-	auto &route_struct = m_routes[event_body->m_src.m_node_id];
+	auto &route_struct = m_routes[event_body->m_origin];
 	//ignore if it's from an old session !
-	if (event_body->m_src.m_mailbox_id.m_id < route_struct.m_session) return false;
-	if (event_body->m_src.m_mailbox_id.m_id != route_struct.m_session)
+	if (event_body->m_session < route_struct.m_session) return false;
+	if (event_body->m_session != route_struct.m_session)
 	{
 		//new session, so purge and create a new entry
-		route_struct.m_session = event_body->m_src.m_mailbox_id.m_id;
+		route_struct.m_session = event_body->m_session;
 		route_struct.m_time = std::chrono::high_resolution_clock::now();
 		route_struct.m_hops = event_body->m_hops;
 		route_struct.m_vias.clear();

@@ -102,13 +102,13 @@ private:
 	void purge_routes();
 	void purge_dir();
 	Mbox<std::shared_ptr<Msg>> *validate_no_lock(const Net_ID &id);
-	Net_ID alloc_src_no_lock();
-	Net_ID alloc_src();
+	uint32_t alloc_session_no_lock();
+	uint32_t alloc_session();
 	std::mutex m_mutex;
 	std::thread m_thread;
 	std::condition_variable m_cv;
 	const Node_ID m_node_id;
-	Mailbox_ID m_next_parcel_id;
+	uint32_t m_next_parcel_id;
 	std::map<Net_ID, Que_Item> m_parcels;
 	std::list<Que_Item> m_outgoing_msg_que;
 	std::map<Link*, Node_ID> m_links;
