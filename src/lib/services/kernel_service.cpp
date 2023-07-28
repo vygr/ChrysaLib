@@ -50,7 +50,7 @@ void Kernel_Service::run()
 					&& global_router->update_dir(*msg->m_data))
 				{
 					//new session so flood to peers
-					auto event_body = (Event_directory*)body;
+					auto event_body = (Event_ping*)body;
 					auto via = event_body->m_via;
 					//fill in the new via and increment the distance as we flood out !
 					event_body->m_via = global_router->get_node_id();

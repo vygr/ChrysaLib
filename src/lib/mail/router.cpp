@@ -109,8 +109,8 @@ void Router::run()
 		if (!m_running) break;
 
 		//flood service directory to the network
-		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_directory), '\0');
-		auto event_body = (Kernel_Service::Event_directory*)&*(body->begin());
+		auto body = std::make_shared<std::string>(sizeof(Kernel_Service::Event_ping), '\0');
+		auto event_body = (Kernel_Service::Event_ping*)&*(body->begin());
 		event_body->m_evt = Kernel_Service::evt_ping;
 		event_body->m_src = global_router->alloc_src();
 		event_body->m_via = global_router->get_node_id();
@@ -168,7 +168,7 @@ void Router::forget(const std::string &entry)
 bool Router::update_dir(const std::string &body)
 {
 	//update our service directory based on this ping message body
-	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
+	auto event_body = (Kernel_Service::Event_ping*)&(*begin(body));
 	auto event_body_end = &(*begin(body)) + body.size();
 	std::lock_guard<std::mutex> l(m_mutex);
 	auto &dir_struct = m_directory[event_body->m_src.m_node_id];
@@ -320,7 +320,7 @@ Net_ID Router::alloc_src()
 bool Router::update_route(const std::string &body)
 {
 	//update our routing table based on this ping message body
-	auto event_body = (Kernel_Service::Event_directory*)&(*begin(body));
+	auto event_body = (Kernel_Service::Event_ping*)&(*begin(body));
 	std::lock_guard<std::mutex> l(m_mutex);
 	auto &route_struct = m_routes[event_body->m_src.m_node_id];
 	//ignore if it's from an old session !

@@ -24,7 +24,12 @@ public:
 		evt_join_task,
 		evt_timed_mail,
 	};
-	struct Event_directory : public Event
+	struct Event_callback : public Event
+	{
+		Sync *m_sync;
+		std::function<void()> m_callback;
+	};
+	struct Event_ping : public Event
 	{
 		Net_ID m_src;
 		Node_ID m_via;
@@ -47,11 +52,6 @@ public:
 	struct Event_join_task : public Event
 	{
 		std::shared_ptr<Task> m_task;
-	};
-	struct Event_callback : public Event
-	{
-		Sync *m_sync;
-		std::function<void()> m_callback;
 	};
 	struct Event_timed_mail : public Event
 	{
