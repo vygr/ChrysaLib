@@ -39,6 +39,8 @@ struct Node_ID
 	{
 		Node_ID id;
 		pii_random((char*)&id, sizeof(id));
+		//c++ nodes have bit 0 clear !
+		id.m_id[0] &= 0xfe;
 		return id;
 	}
 	union
