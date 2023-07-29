@@ -4,6 +4,7 @@
 #include "../../host/pii.h"
 #include "../mail/router.h"
 #include "link.h"
+#include <cstring>
 
 extern int64_t pii_open_shared(const char *path, size_t len);
 extern int64_t pii_close_shared(const char *path, int64_t hndl);
