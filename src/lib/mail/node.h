@@ -6,6 +6,8 @@
 #include <array>
 #include <random>
 
+extern void pii_random(char* addr, size_t len);
+
 //node ID, any true random bits will do.
 //the Node_ID provides each device with a unique identity.
 //within reason a 128bit crypto random value will ensure that
@@ -35,11 +37,8 @@ struct Node_ID
 	//create from a strong random pool
 	static auto alloc()
 	{
-		static std::random_device rd;
-		static std::mt19937 rng(rd());
-		static std::uniform_int_distribution<int> dist(0, 255);
 		Node_ID id;
-		for (auto &c : id.m_id) c = dist(rng);
+		pii_random((char*)&id, sizeof(id));
 		return id;
 	}
 	union

@@ -22,6 +22,7 @@ public:
 		m_handle = pii_open_shared(m_name.data(), sizeof(lk_shmem));
 		//map shared object
 		m_shmem = (lk_shmem*)pii_mmap(sizeof(lk_shmem), m_handle, mmap_shared);
+		memset(m_shmem, 0, sizeof(lk_shmem));
 		//put my towel down if seams available
 		if (!m_shmem->m_towel) m_shmem->m_towel = global_router->get_node_id().m_node_id.m_node1;
 	}

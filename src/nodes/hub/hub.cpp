@@ -60,7 +60,7 @@ int32_t main(int32_t argc, char *argv[])
 				std::cout << "-t ms:    exit timeout, default 0, ie never\n";
 				std::cout << "-usb:     start the usb link manager\n";
 				std::cout << "-ip:      start the ip link manager server\n";
-				std::cout << "-shm:     start the shmem link manager server\n";
+				std::cout << "-shm:     start the shmem link manager server, (CLB-L1, CLB-L2)\n";
 				exit(0);
 			}
 		}
