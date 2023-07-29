@@ -114,7 +114,7 @@ void Router::run()
 		event_body->m_evt = Kernel_Service::evt_ping;
 		event_body->m_origin = global_router->get_node_id();
 		event_body->m_via = global_router->get_node_id();
-		event_body->m_session = global_router->alloc_session();
+		event_body->m_session = global_router->alloc_parcel_id();
 		event_body->m_hops = 0;
 		{
 			std::lock_guard<std::mutex> l(m_mutex);
@@ -280,7 +280,7 @@ void Router::send(std::shared_ptr<Msg> &msg)
 		if (msg->m_header.m_frag_length > lk_data_size)
 		{
 			//yes, ok que msgs that reference slices of the data buffer
-			Net_ID src{m_node_id, alloc_session_no_lock()};
+			Net_ID src{m_node_id, alloc_parcel_id_no_lock()};
 			auto total_size = (uint32_t)msg->m_data->size();
 			for (auto frag_offset = 0u; frag_offset < msg->m_header.m_frag_length;)
 			{
@@ -305,17 +305,17 @@ std::shared_ptr<Msg> Router::read(const Net_ID &id)
 	return mbox->read();
 }
 
-uint32_t Router::alloc_session_no_lock()
+uint32_t Router::alloc_parcel_id_no_lock()
 {
 	auto s = m_next_parcel_id;
 	m_next_parcel_id++;
 	return s;
 }
 
-uint32_t Router::alloc_session()
+uint32_t Router::alloc_parcel_id()
 {
 	std::lock_guard<std::mutex> l(m_mutex);
-	return alloc_session_no_lock();
+	return alloc_parcel_id_no_lock();
 }
 
 bool Router::update_route(const std::string &body)
