@@ -119,7 +119,11 @@ void Router::run()
 		{
 			std::lock_guard<std::mutex> l(m_mutex);
 			auto &dir_struct = m_directory[global_router->get_node_id()];
-			for (auto &entry : dir_struct.m_services) body->append(entry).append("\n");
+			for (auto &entry : dir_struct.m_services)
+			{
+				//only '*' prefix services are broadcast
+				if (entry[0] == '*') body->append(entry).append("\n");
+			}
 		}
 		//broadcast to the list of known router peers
 		for (auto &peer : global_router->get_peers())

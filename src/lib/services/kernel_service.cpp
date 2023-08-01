@@ -16,7 +16,7 @@ void Kernel_Service::run()
 	//get my mailbox address, id was allocated in the constructor
 	auto mbox = global_router->validate(m_net_id);
 	auto entry = std::string{};
-	if (arg_v > 1) entry = global_router->declare(m_net_id, "KERNEL_SERVICE", "Kernel_Service v0.1");
+	if (arg_v > 1) entry = global_router->declare(m_net_id, "*Kernel", "Kernel_Service v0.1");
 
 	//current time
 	auto now = std::chrono::high_resolution_clock::now();
