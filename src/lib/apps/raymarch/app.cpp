@@ -45,7 +45,7 @@ void Raymarch_App::run()
 
 	//select and init workers
 	m_select = alloc_select(select_size);
-	m_entry = global_router->declare(m_select[select_worker], "RAYMARCH_WORKER", "Raymarch v0.01");
+	m_entry = global_router->declare(m_select[select_worker], "*Raymarch", "Raymarch v0.01");
 	reset();
 
 	//event loop
@@ -199,7 +199,7 @@ void Raymarch_App::reset()
 	m_select[select_reply] = global_router->alloc();
 
 	//create farm, will kill old one
-	m_farm = std::make_unique<Farm>("RAYMARCH_WORKER",
+	m_farm = std::make_unique<Farm>("*Raymarch",
 		JOB_LIMIT,
 		std::chrono::milliseconds(JOB_TIMEOUT),
 		[&] (auto &worker, std::shared_ptr<Msg> job)
