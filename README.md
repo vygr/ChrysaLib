@@ -106,6 +106,7 @@ eg. hub_node -t 10000 -usb -ip 192.168.0.64 192.168.0.65
 -t ms:    exit timeout, default 0, ie never
 -usb:     start the usb link manager
 -ip:      start the ip link manager server
+-shm:     start the shmem link manager server, (CLB-L1, CLB-L2)
 ```
 
 ## Usage
