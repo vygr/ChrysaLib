@@ -23,9 +23,9 @@ and go offline, things just keep on keeping on !
 ### Linux via apt-get
 
 `sudo apt-get install libasio-dev libsdl2-dev libudev-dev autoconf automake
-libtool git make`
+libtool git make g++`
 
-`libusb`
+### libusb
 
 Go get the latest source tarball download from here https://libusb.info/.
 
