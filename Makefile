@@ -58,7 +58,7 @@ endif
 
 hub_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/hub/hub.o
 ifeq ($(OS),Darwin)
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
@@ -66,7 +66,7 @@ ifeq ($(OS),Darwin)
 		$(shell sdl2-config --libs) \
 		$(shell brew --prefix libusb)/lib/libusb-1.0.a
 else
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0
@@ -74,7 +74,7 @@ endif
 
 gui_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/gui/gui.o
 ifeq ($(OS),Darwin)
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
@@ -82,7 +82,7 @@ ifeq ($(OS),Darwin)
 		$(shell sdl2-config --libs) \
 		$(shell brew --prefix libusb)/lib/libusb-1.0.a
 else
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0
@@ -90,7 +90,7 @@ endif
 
 files_node:	$(LIB_OBJ_FILES) $(OBJ_DIR)/nodes/files/files.o
 ifeq ($(OS),Darwin)
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-F/Library/Frameworks \
 		-framework CoreFoundation \
 		-framework IOKit \
@@ -98,7 +98,7 @@ ifeq ($(OS),Darwin)
 		$(shell sdl2-config --libs) \
 		$(shell brew --prefix libusb)/lib/libusb-1.0.a
 else
-	c++ -o $@ $^ \
+	c++ $(CPPFLAGS) -o $@ $^ \
 		-pthread \
 		$(shell sdl2-config --libs) \
 		-L/usr/local/lib -lusb-1.0

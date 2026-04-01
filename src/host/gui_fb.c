@@ -252,7 +252,7 @@ void host_gui_filled_box(const SDL_Rect *rect)
     if (!r) return;
     pixel_t *dst = (pixel_t *)(bb.pixels + r->y * bb.pitch + r->x * bb.bytespp);
     int span = (bb.pitch >> 2) - r->w;      /* in pixels, not bytes */
-    
+
     int h = r->h;
     if (color_a == 0xff) {  /* source copy */
         do {
@@ -744,6 +744,20 @@ void host_gui_deinit(void)
     }
 }
 
+uint64_t host_gui_clip_put(const char *text)
+{
+	return 0;
+}
+
+char *host_gui_clip_get()
+{
+	return 0;
+}
+
+void host_gui_clip_free(char *text)
+{
+}
+
 void (*host_gui_funcs[]) = {
     (void*)host_gui_init,
     (void*)host_gui_deinit,
@@ -760,6 +774,9 @@ void (*host_gui_funcs[]) = {
     (void*)host_gui_flush,
     (void*)host_gui_resize,
     (void*)host_gui_poll_event,
+    (void*)host_gui_clip_put,
+    (void*)host_gui_clip_get,
+    (void*)host_gui_clip_free,
 };
 
 /* open linux framebuffer*/
@@ -947,7 +964,7 @@ static int read_mouse(int *dx, int *dy, int *dw, int *bp)
             button |= BUTTON_SCROLLDN;
     }
     *dx = x;
-    *dy = y;       
+    *dy = y;
     *dw = w;
     *bp = button;
     return 1;
