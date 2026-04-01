@@ -108,17 +108,14 @@ void IP_Link_Manager::connect(const std::string &addr)
 	if (ec)
 	{
 		//lets try a dns resolve...
-		asio::ip::tcp::resolver::query resolver_query(addr,
-			std::string(IP_LINK_PORT_STRING), asio::ip::tcp::resolver::query::numeric_service);
 		asio::ip::tcp::resolver resolver(m_io_context);
-		asio::ip::tcp::resolver::iterator it = resolver.resolve(resolver_query, ec);
+		auto results = resolver.resolve(addr, IP_LINK_PORT_STRING, ec);
 		if (ec)
 		{
 			if (arg_v > 0) std::cout << "connect: error, " << ec.message() << std::endl;
 			return;
 		}
-		asio::ip::tcp::resolver::iterator it_end;
-		asio::ip::tcp::endpoint ep = it->endpoint();
+		asio::ip::tcp::endpoint ep = results.begin()->endpoint();
 		auto socket = std::make_shared<asio::ip::tcp::socket>(m_io_context);
 		socket->async_connect(ep, [socket, this] (const asio::error_code ec)
 		{
